@@ -1,0 +1,151 @@
+{
+  "admin": {
+    "admin_manage": "Admin Manager",
+    "field": {
+      "admin": "Admin",
+      "id": "Id",
+      "group_id": "Group Id",
+      "username": "Username",
+      "nickname": "Nickname",
+      "password": "Password",
+      "avatar": "Avatar",
+      "email": "Email",
+      "mobile": "Mobile",
+      "login_failure": "Login Failure",
+      "login_at": "Login At",
+      "login_ip": "Login Ip",
+      "token": "Token",
+      "status": "Status",
+      "created_at": "Created At",
+      "updated_at": "Updated At"
+    },
+    "rules": {
+      "group_id": {
+        "required": "Group Id is required",
+        "must_be_positive": "Group Id must be a positive integer"
+      },
+      "username": {
+        "required": "Username is required",
+        "min_length": "Username must be at least 3 characters",
+        "max_length": "Username must be at most 20 characters",
+        "invalid_chars": "Username can only contain letters, numbers and underscores"
+      },
+      "nickname": {
+        "required": "Nickname is required",
+        "max_length": "Nickname must be at most 50 characters"
+      },
+      "password": {
+        "required": "Password is required",
+        "min_length": "Password must be at least 6 characters",
+        "uppercase_required": "Password must contain at least one uppercase letter",
+        "lowercase_required": "Password must contain at least one lowercase letter",
+        "digit_required": "Password must contain at least one digit"
+      },
+      "email": {
+        "required": "Email is required",
+        "invalid_format": "Please enter a valid Email"
+      },
+      "mobile": {
+        "required": "Mobile is required",
+        "invalid_format": "Please enter a valid Mobile (11 digits)"
+      },
+      "login_failure": {
+        "required": "Login Failure is required",
+        "min_length": "Login Failure must be at least 3 characters",
+        "max_length": "Login Failure must be at most 20 characters",
+        "invalid_chars": "Login Failure can only contain letters, numbers and underscores"
+      },
+      "status": {
+        "required": "Status is required",
+        "max_length": "Status must be at most 6 characters"
+      },
+      "created_at": {
+        "required": "Created At is required"
+      },
+      "updated_at": {
+        "required": "Updated At is required"
+      }
+    }
+  },
+  "group": {
+    "group": "Admin Group",
+    "id": "ID",
+    "pid": "Parent Group",
+    "name": "Name",
+    "rules": "Rules",
+    "access": "Access",
+    "created_at": "Created At",
+    "updated_at": "Updated At",
+    "status": "Status",
+    "normal": "Normal",
+    "hidden": "Hidden",
+    "select_time": "Select Time",
+    "select_all": "Select All"
+  },
+  "rule": {
+    "rule": "Admin Rule",
+    "admin_rule_manage": "Admin Rule Manager",
+    "id": "ID",
+    "rule_type": "Rule Type (Menu or Action)",
+    "parent_id": "Parent ID",
+    "name": "Route Name",
+    "path": "Path",
+    "component": "Component",
+    "redirect": "Redirect",
+    "meta": "Meta",
+    "permission": "Permission",
+    "menu_display_type": "Menu Display Type",
+    "model_name": "Model Name",
+    "created_at": "Created At",
+    "updated_at": "Updated At",
+    "deleted_at": "Deleted At",
+    "weigh": "Weigh",
+    "status": "Status"
+  },
+  "log": {
+    "admin_log": "Admin Log",
+    "field": {
+      "admin_log_manage": "Admin Log Manager",
+      "id": "Id",
+      "admin_id": "Admin Id",
+      "username": "Username",
+      "url": "Url",
+      "title": "Title",
+      "content": "Content",
+      "ip": "Ip",
+      "useragent": "Useragent",
+      "created_at": "Created At",
+      "updated_at": "Updated At"
+    },
+    "rules": {
+      "admin_id": {
+        "required": "Admin Id is required",
+        "must_be_positive": "Admin Id must be a positive integer"
+      },
+      "username": {
+        "required": "Username is required",
+        "min_length": "Username must be at least 3 characters",
+        "max_length": "Username must be at most 20 characters",
+        "invalid_chars": "Username can only contain letters, numbers and underscores"
+      },
+      "url": {
+        "required": "Url is required",
+        "invalid_format": "Please enter a valid Url URL"
+      },
+      "content": {
+        "required": "Content is required",
+        "max_length": "Content must be at most None characters"
+      },
+      "ip": {
+        "required": "Ip is required",
+        "max_length": "Ip must be at most 50 characters"
+      },
+      "created_at": {
+        "required": "Created At is required"
+      },
+      "updated_at": {
+        "required": "Updated At is required"
+      }
+    }
+  }
+}

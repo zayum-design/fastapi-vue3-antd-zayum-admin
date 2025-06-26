@@ -1,0 +1,151 @@
+{
+  "admin": {
+    "admin_manage": "管理员管理",
+    "field": {
+      "admin": "管理员",
+      "id": "编号",
+      "group_id": "用户组ID",
+      "username": "用户名",
+      "nickname": "昵称",
+      "password": "密码",
+      "avatar": "头像",
+      "email": "邮箱",
+      "mobile": "手机号",
+      "login_failure": "登录失败次数",
+      "login_at": "最近登录时间",
+      "login_ip": "最近登录IP",
+      "token": "令牌",
+      "status": "状态",
+      "created_at": "创建时间",
+      "updated_at": "更新时间"
+    },
+    "rules": {
+      "group_id": {
+        "required": "用户组ID不能为空",
+        "must_be_positive": "用户组ID必须为正整数"
+      },
+      "username": {
+        "required": "用户名不能为空",
+        "min_length": "用户名至少为3个字符",
+        "max_length": "用户名最多为20个字符",
+        "invalid_chars": "用户名只能包含字母、数字和下划线"
+      },
+      "nickname": {
+        "required": "昵称不能为空",
+        "max_length": "昵称最多为50个字符"
+      },
+      "password": {
+        "required": "密码不能为空",
+        "min_length": "密码至少为6个字符",
+        "uppercase_required": "密码至少包含一个大写字母",
+        "lowercase_required": "密码至少包含一个小写字母",
+        "digit_required": "密码至少包含一个数字"
+      },
+      "email": {
+        "required": "邮箱不能为空",
+        "invalid_format": "请输入有效的邮箱地址"
+      },
+      "mobile": {
+        "required": "手机号不能为空",
+        "invalid_format": "请输入有效的11位手机号"
+      },
+      "login_failure": {
+        "required": "登录失败次数不能为空",
+        "min_length": "登录失败次数至少为3个字符",
+        "max_length": "登录失败次数最多为20个字符",
+        "invalid_chars": "登录失败次数只能包含字母、数字和下划线"
+      },
+      "status": {
+        "required": "状态不能为空",
+        "max_length": "状态最多为6个字符"
+      },
+      "created_at": {
+        "required": "创建时间不能为空"
+      },
+      "updated_at": {
+        "required": "更新时间不能为空"
+      }
+    }
+  },
+  "group": {
+    "group": "管理员组",
+    "id": "ID",
+    "pid": "父级ID",
+    "name": "名称",
+    "rules": "规则",
+    "access": "按钮细粒度",
+    "created_at": "创建时间",
+    "updated_at": "更新时间",
+    "status": "状态",
+    "normal": "正常",
+    "hidden": "隐藏",
+    "select_time": "选择时间",
+    "select_all": "全选"
+  },
+  "rule": {
+    "rule": "管理员规则",
+    "admin_rule_manage": "管理员规则管理",
+    "id": "ID",
+    "rule_type": "规则类型",
+    "parent_id": "父级ID",
+    "name": "路由名称",
+    "path": "路径",
+    "component": "组件",
+    "redirect": "重定向",
+    "meta": "元数据",
+    "permission": "权限",
+    "menu_display_type": "菜单显示类型",
+    "model_name": "模型名称",
+    "created_at": "创建时间",
+    "updated_at": "更新时间",
+    "deleted_at": "删除时间",
+    "weigh": "权重",
+    "status": "状态"
+  },
+  "log": {
+    "log": "管理员日志",
+    "field": {
+      "admin_log_manage": "管理员日志管理",
+      "id": "ID",
+      "admin_id": "管理员ID",
+      "username": "用户名",
+      "url": "URL地址",
+      "title": "标题",
+      "content": "内容",
+      "ip": "IP地址",
+      "useragent": "用户代理",
+      "created_at": "创建时间",
+      "updated_at": "更新时间"
+    },
+    "rules": {
+      "admin_id": {
+        "required": "管理员ID不能为空",
+        "must_be_positive": "管理员ID必须是正整数"
+      },
+      "username": {
+        "required": "用户名不能为空",
+        "min_length": "用户名长度不能少于3个字符",
+        "max_length": "用户名长度不能超过20个字符",
+        "invalid_chars": "用户名只能包含字母、数字和下划线"
+      },
+      "url": {
+        "required": "URL地址不能为空",
+        "invalid_format": "请输入有效的URL地址"
+      },
+      "content": {
+        "required": "内容不能为空",
+        "max_length": "内容长度不能超过None个字符"
+      },
+      "ip": {
+        "required": "IP地址不能为空",
+        "max_length": "IP地址长度不能超过50个字符"
+      },
+      "created_at": {
+        "required": "创建时间不能为空"
+      },
+      "updated_at": {
+        "required": "更新时间不能为空"
+      }
+    }
+  }
+}

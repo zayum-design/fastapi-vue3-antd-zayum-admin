@@ -1,0 +1,85 @@
+{
+  "attachment": "附件",
+  "attachment_manage": "附件管理",
+  "field": {
+    "attachment": "附件",
+    "id": "编号",
+    "cat_id": "分类ID",
+    "admin_id": "管理员ID",
+    "user_id": "用户ID",
+    "att_type": "附件类型",
+    "thumb": "缩略图",
+    "path_file": "文件路径",
+    "file_name": "文件名",
+    "file_size": "文件大小",
+    "mimetype": "MIME类型",
+    "ext_param": "扩展参数",
+    "storage": "存储方式",
+    "sha1": "SHA1值",
+    "general_attachment_col": "通用附件列",
+    "created_at": "创建时间",
+    "updated_at": "更新时间"
+  },
+  "rules": {
+    "admin_id": {
+      "required": "管理员ID不能为空",
+      "must_be_positive": "管理员ID必须为正整数"
+    },
+    "user_id": {
+      "required": "用户ID不能为空",
+      "must_be_positive": "用户ID必须为正整数"
+    },
+    "path_file": {
+      "required": "文件路径不能为空",
+      "max_length": "文件路径最多为255个字符"
+    },
+    "file_size": {
+      "required": "文件大小不能为空",
+      "must_be_number": "文件大小必须为数字"
+    },
+    "storage": {
+      "required": "存储方式不能为空",
+      "max_length": "存储方式最多为100个字符"
+    },
+    "created_at": {
+      "required": "创建时间不能为空"
+    },
+    "updated_at": {
+      "required": "更新时间不能为空"
+    }
+  },
+
+  "category": {
+    "category": "附件分类",
+    "field": {
+      "attachment_category": "附件分类",
+      "attachment_category_manage": "附件分类管理",
+      "id": "编号",
+      "pid": "上级分类ID",
+      "name": "分类名称",
+      "status": "状态",
+      "created_at": "创建时间",
+      "updated_at": "更新时间"
+    },
+    "rules": {
+      "pid": {
+        "required": "上级分类ID不能为空",
+        "must_be_positive": "上级分类ID必须为正整数"
+      },
+      "name": {
+        "required": "分类名称不能为空",
+        "max_length": "分类名称最多为30个字符"
+      },
+      "status": {
+        "required": "状态不能为空",
+        "max_length": "状态最多为6个字符"
+      },
+      "created_at": {
+        "required": "创建时间不能为空"
+      },
+      "updated_at": {
+        "required": "更新时间不能为空"
+      }
+    }
+  }
+}

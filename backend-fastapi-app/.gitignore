@@ -1,0 +1,45 @@
+# .gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+venv/
+ENV/
+env/
+.venv/
+
+# VSCode
+.vscode/
+
+# Alembic
+alembic/versions/*.py
+
+# MacOS
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Test coverage
+.coverage
+htmlcov/
+
+# Distribution
+build/
+dist/
+*.egg-info/
+
+# SQLite
+*.sqlite3
+
+# MyPy
+.mypy_cache/
+README_me.md
+
+* copy.*
+install.lock

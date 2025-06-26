@@ -1,0 +1,22 @@
+{
+  "plugin_store": "Plugin Store",
+  "plugin": "Plugin",
+  "plugin_manage": "Plugin Manager",
+  "id": "Id",
+  "title": "Title",
+  "author": "Author",
+  "uuid": "Uuid",
+  "description": "Description",
+  "version": "Version",
+  "downloads": "Downloads",
+  "download_url": "Download Url",
+  "md5_hash": "Md5_Hash",
+  "price": "Price",
+  "paid": "Paid",
+  "installed": "Installed",
+  "enabled": "Enabled",
+  "setting_menu": "Setting menu",
+  "created_at": "Creation Time",
+  "updated_at": "Update Time",
+  "status": "Status"
+}

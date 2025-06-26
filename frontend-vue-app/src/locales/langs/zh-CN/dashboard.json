@@ -1,0 +1,13 @@
+{
+  "dashboard": "概览",
+  "analytics": "分析页",
+  "workspace": {
+    "workspace": "工作台",
+    "todayDate": "今天是{date}，当前时间：{time}",
+    "morningGreeting": "早安, {name}",
+    "startWorkPrompt": "开始您一天的工作吧！",
+    "latestLogs": "最新管理日志",
+    "quickNav": "快捷导航",
+    "more": "更多"
+  }
+}

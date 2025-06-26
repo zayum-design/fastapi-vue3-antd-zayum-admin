@@ -1,0 +1,35 @@
+{
+  "id": "sample-payment-plugin",
+  "name": "支付插件",
+  "version": "1.0.0",
+  "description": "示例支付插件",
+  "backend": {
+    "entry": "backend/main.py",
+    "api_prefix": "/api/payment"
+  },
+  "frontend": {
+    "entry": "frontend/main.js",
+    "assets_dir": "frontend/assets"
+  },
+  "components": ["PaymentRecords", "PaymentSettings"],
+  "routes": [
+    {
+      "path": "/plugins/sample-payment-plugin/records",
+      "name": "payment-records",
+      "component": "PaymentRecords",
+      "meta": {
+        "title": "支付记录",
+        "icon": "payment"
+      }
+    },
+    {
+      "path": "/plugins/sample-payment-plugin/settings",
+      "name": "payment-settings",
+      "component": "PaymentSettings",
+      "meta": {
+        "title": "支付设置",
+        "icon": "settings"
+      }
+    }
+  ]
+}

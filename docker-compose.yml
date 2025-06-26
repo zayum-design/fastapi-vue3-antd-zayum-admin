@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: zayum_admin
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./backend-fastapi-app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://admin:admin123@db:5432/zayum_admin
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend-vue-app
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

@@ -1,0 +1,17 @@
+{
+    "code_generator": "代码生成器",
+    "select_database_table": "选择数据表",
+    "select_a_table": "选择一个表",
+    "select_fields": "选择字段",
+    "select_operations_permissions": "选择操作权限",
+    "generate_code": "生成代码",
+    "code_download": "下载代码",
+    "generated_code": "生成的代码",
+    "model_code": "模型代码",
+    "crud_code": "CRUD 代码",
+    "schemas_code": "Schemas 代码",
+    "api_code": "API 代码",
+    "vue_code": "Vue 代码",
+    "vue_i18n_json": "Vue i18n JSON"
+  }
+  

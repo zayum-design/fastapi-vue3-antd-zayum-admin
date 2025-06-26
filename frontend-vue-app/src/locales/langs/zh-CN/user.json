@@ -1,0 +1,261 @@
+{
+  "user": "用户",
+  "user_manage": "用户管理",
+  "field": {
+    "user": "用户",
+    "user_manage": "用户管理",
+    "id": "编号",
+    "user_group_id": "用户组ID",
+    "username": "用户名",
+    "nickname": "昵称",
+    "password": "密码",
+    "email": "邮箱",
+    "mobile": "手机号",
+    "avatar": "头像",
+    "level": "等级",
+    "gender": "性别",
+    "birthday": "生日",
+    "bio": "个人简介",
+    "balance": "余额",
+    "score": "积分",
+    "successions": "连续签到天数",
+    "max_successions": "最大连续签到天数",
+    "prev_time": "上次登录时间",
+    "login_time": "当前登录时间",
+    "login_ip": "登录IP",
+    "login_failure": "登录失败次数",
+    "join_ip": "注册IP",
+    "verification": "验证状态",
+    "token": "令牌",
+    "status": "状态",
+    "created_at": "创建时间",
+    "updated_at": "更新时间"
+  },
+  "rules": {
+    "user_group_id": {
+      "required": "用户组ID不能为空",
+      "must_be_positive": "用户组ID必须为正整数"
+    },
+    "username": {
+      "required": "用户名不能为空",
+      "min_length": "用户名至少为3个字符",
+      "max_length": "用户名最多为20个字符",
+      "invalid_chars": "用户名只能包含字母、数字和下划线"
+    },
+    "nickname": {
+      "required": "昵称不能为空",
+      "max_length": "昵称最多为50个字符"
+    },
+    "password": {
+      "required": "密码不能为空",
+      "min_length": "密码至少为6个字符",
+      "uppercase_required": "密码必须包含至少一个大写字母",
+      "lowercase_required": "密码必须包含至少一个小写字母",
+      "digit_required": "密码必须包含至少一个数字"
+    },
+    "email": {
+      "required": "邮箱不能为空",
+      "invalid_format": "请输入有效的邮箱地址"
+    },
+    "mobile": {
+      "required": "手机号不能为空",
+      "invalid_format": "请输入有效的11位手机号码"
+    },
+    "level": {
+      "required": "等级不能为空",
+      "must_be_number": "等级必须为数字"
+    },
+    "gender": {
+      "required": "性别不能为空",
+      "max_length": "性别最多为6个字符"
+    },
+    "score": {
+      "required": "积分不能为空",
+      "must_be_number": "积分必须为数字"
+    },
+    "created_at": {
+      "required": "创建时间不能为空"
+    },
+    "updated_at": {
+      "required": "更新时间不能为空"
+    }
+  },
+  "group": {
+    "group": "用户组",
+    "field": {
+      "user_group": "用户组",
+      "user_group_manage": "用户组管理",
+      "id": "编号",
+      "name": "用户组名称",
+      "rules": "权限规则",
+      "status": "状态",
+      "created_at": "创建时间",
+      "updated_at": "更新时间"
+    },
+    "rules": {
+      "name": {
+        "required": "用户组名称不能为空",
+        "max_length": "用户组名称不能超过50个字符"
+      },
+      "rules": {
+        "required": "权限规则不能为空",
+        "max_length": "权限规则不能超过512个字符"
+      },
+      "status": {
+        "required": "状态不能为空",
+        "max_length": "状态不能超过6个字符"
+      },
+      "created_at": {
+        "required": "创建时间不能为空"
+      },
+      "updated_at": {
+        "required": "更新时间不能为空"
+      }
+    }
+  },
+  "rule": {
+    "rule": "用户规则",
+    "field": {
+      "user_rule": "用户规则",
+      "user_rule_manage": "用户规则管理",
+      "id": "编号",
+      "type": "规则类型",
+      "pid": "上级规则",
+      "plugin": "所属插件",
+      "name": "规则名称",
+      "url_path": "路由地址",
+      "title": "标题",
+      "description": "描述",
+      "icon": "图标",
+      "menutype": "菜单显示类型",
+      "extend": "扩展配置",
+      "model_name": "模型名称",
+      "weigh": "权重",
+      "status": "状态",
+      "created_at": "创建时间",
+      "updated_at": "更新时间"
+    },
+    "rules": {
+      "type": {
+        "required": "规则类型不能为空",
+        "max_length": "规则类型不能超过6个字符"
+      },
+      "pid": {
+        "required": "上级规则不能为空",
+        "must_be_positive": "上级规则必须为正整数"
+      },
+      "plugin": {
+        "required": "所属插件不能为空",
+        "must_be_number": "所属插件必须为数字"
+      },
+      "name": {
+        "required": "规则名称不能为空",
+        "max_length": "规则名称不能超过150个字符"
+      },
+      "url_path": {
+        "required": "路由地址不能为空",
+        "invalid_format": "请输入合法的路由地址 URL"
+      },
+      "title": {
+        "required": "标题不能为空",
+        "max_length": "标题不能超过50个字符"
+      },
+      "model_name": {
+        "required": "模型名称不能为空",
+        "max_length": "模型名称不能超过50个字符"
+      },
+      "weigh": {
+        "required": "权重不能为空",
+        "must_be_number": "权重必须为数字"
+      },
+      "status": {
+        "required": "状态不能为空",
+        "max_length": "状态不能超过6个字符"
+      },
+      "created_at": {
+        "required": "创建时间不能为空"
+      },
+      "updated_at": {
+        "required": "更新时间不能为空"
+      }
+    }
+  },
+  "balance_log": {
+    "balance_log": "用户余额日志",
+    "field": {
+      "user_balance_log": "用户余额日志",
+      "user_balance_log_manage": "用户余额日志管理",
+      "id": "编号",
+      "user_id": "用户ID",
+      "balance": "变动金额",
+      "before": "变动前余额",
+      "after": "变动后余额",
+      "memo": "备注",
+      "created_at": "创建时间",
+      "updated_at": "更新时间"
+    },
+    "rules": {
+      "user_id": {
+        "required": "用户ID不能为空",
+        "must_be_positive": "用户ID必须为正整数"
+      },
+      "balance": {
+        "required": "变动金额不能为空",
+        "must_be_number": "变动金额必须为数字"
+      },
+      "before": {
+        "required": "变动前余额不能为空",
+        "must_be_number": "变动前余额必须为数字"
+      },
+      "after": {
+        "required": "变动后余额不能为空",
+        "must_be_number": "变动后余额必须为数字"
+      },
+      "created_at": {
+        "required": "创建时间不能为空"
+      },
+      "updated_at": {
+        "required": "更新时间不能为空"
+      }
+    }
+  },
+  "score_log": {
+    "score_log": "用户积分日志",
+    "field": {
+      "user_score_log": "用户积分日志",
+      "user_score_log_manage": "用户积分日志管理",
+      "id": "编号",
+      "user_id": "用户ID",
+      "score": "积分变动",
+      "before": "变更前积分",
+      "after": "变更后积分",
+      "memo": "备注",
+      "created_at": "创建时间",
+      "updated_at": "更新时间"
+    },
+    "rules": {
+      "user_id": {
+        "required": "用户ID不能为空",
+        "must_be_positive": "用户ID必须为正整数"
+      },
+      "score": {
+        "required": "积分变动不能为空",
+        "must_be_number": "积分变动必须为数字"
+      },
+      "before": {
+        "required": "变更前积分不能为空",
+        "must_be_number": "变更前积分必须为数字"
+      },
+      "after": {
+        "required": "变更后积分不能为空",
+        "must_be_number": "变更后积分必须为数字"
+      },
+      "created_at": {
+        "required": "创建时间不能为空"
+      },
+      "updated_at": {
+        "required": "更新时间不能为空"
+      }
+    }
+  }
+}

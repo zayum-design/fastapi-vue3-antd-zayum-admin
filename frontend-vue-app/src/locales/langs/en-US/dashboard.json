@@ -1,0 +1,13 @@
+{
+  "dashboard": "dashboard",
+  "analytics": "analytics",
+  "workspace": {
+    "workspace": "Workspace",
+    "todayDate": "Today is {date},current time:{time}",
+    "morningGreeting": "Good morning, {name}",
+    "startWorkPrompt": "Start your day's work!",
+    "latestLogs": "Latest admin logs",
+    "quickNav": "Quick navigation",
+    "more": "More"
+  }
+}

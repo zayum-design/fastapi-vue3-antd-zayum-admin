@@ -1,0 +1,26 @@
+{
+  "id": "data-table-plugin",
+  "name": "数据表插件",
+  "version": "1.0.0",
+  "description": "用于管理数据表的插件",
+  "backend": {
+    "entry": "backend/main.py",
+    "api_prefix": "/api/data-table-plugin"
+  },
+  "frontend": {
+    "entry": "frontend/main.js",
+    "assets_dir": "frontend/assets"
+  },
+  "components": ["DataTable"],
+  "routes": [
+    {
+      "path": "/plugins/data-table-plugin",
+      "name": "data-table",
+      "component": "DataTable",
+      "meta": {
+        "title": "数据表",
+        "icon": "table"
+      }
+    }
+  ]
+}

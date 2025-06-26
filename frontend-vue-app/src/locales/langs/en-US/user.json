@@ -1,0 +1,261 @@
+{
+  "user": "User",
+  "user_manage": "User Manager",
+  "field": {
+    "user": "User",
+    "user_manage": "User Manager",
+    "id": "Id",
+    "user_group_id": "User Group Id",
+    "username": "Username",
+    "nickname": "Nickname",
+    "password": "Password",
+    "email": "Email",
+    "mobile": "Mobile",
+    "avatar": "Avatar",
+    "level": "Level",
+    "gender": "Gender",
+    "birthday": "Birthday",
+    "bio": "Bio",
+    "balance": "Balance",
+    "score": "Score",
+    "successions": "Successions",
+    "max_successions": "Max Successions",
+    "prev_time": "Prev Time",
+    "login_time": "Login Time",
+    "login_ip": "Login Ip",
+    "login_failure": "Login Failure",
+    "join_ip": "Join Ip",
+    "verification": "Verification",
+    "token": "Token",
+    "status": "Status",
+    "created_at": "Created At",
+    "updated_at": "Updated At"
+  },
+  "rules": {
+    "user_group_id": {
+      "required": "User Group Id is required",
+      "must_be_positive": "User Group Id must be a positive integer"
+    },
+    "username": {
+      "required": "Username is required",
+      "min_length": "Username must be at least 3 characters",
+      "max_length": "Username must be at most 20 characters",
+      "invalid_chars": "Username can only contain letters, numbers and underscores"
+    },
+    "nickname": {
+      "required": "Nickname is required",
+      "max_length": "Nickname must be at most 50 characters"
+    },
+    "password": {
+      "required": "Password is required",
+      "min_length": "Password must be at least 6 characters",
+      "uppercase_required": "Password must contain at least one uppercase letter",
+      "lowercase_required": "Password must contain at least one lowercase letter",
+      "digit_required": "Password must contain at least one digit"
+    },
+    "email": {
+      "required": "Email is required",
+      "invalid_format": "Please enter a valid Email"
+    },
+    "mobile": {
+      "required": "Mobile is required",
+      "invalid_format": "Please enter a valid Mobile (11 digits)"
+    },
+    "level": {
+      "required": "Level is required",
+      "must_be_number": "Level must be a number"
+    },
+    "gender": {
+      "required": "Gender is required",
+      "max_length": "Gender must be at most 6 characters"
+    },
+    "score": {
+      "required": "Score is required",
+      "must_be_number": "Score must be a number"
+    },
+    "created_at": {
+      "required": "Created At is required"
+    },
+    "updated_at": {
+      "required": "Updated At is required"
+    }
+  },
+  "group": {
+    "group": "User Group",
+    "field": {
+      "user_group": "User Group",
+      "user_group_manage": "User Group Manager",
+      "id": "Id",
+      "name": "Name",
+      "rules": "Rules",
+      "status": "Status",
+      "created_at": "Created At",
+      "updated_at": "Updated At"
+    },
+    "rules": {
+      "name": {
+        "required": "Name is required",
+        "max_length": "Name must be at most 50 characters"
+      },
+      "rules": {
+        "required": "Rules is required",
+        "max_length": "Rules must be at most 512 characters"
+      },
+      "status": {
+        "required": "Status is required",
+        "max_length": "Status must be at most 6 characters"
+      },
+      "created_at": {
+        "required": "Created At is required"
+      },
+      "updated_at": {
+        "required": "Updated At is required"
+      }
+    }
+  },
+  "rule": {
+    "rule": "User Rule",
+    "field": {
+      "user_rule": "User Rule",
+      "user_rule_manage": "User Rule Manager",
+      "id": "Id",
+      "type": "Type",
+      "pid": "Pid",
+      "plugin": "Plugin",
+      "name": "Name",
+      "url_path": "Url Path",
+      "title": "Title",
+      "description": "Description",
+      "icon": "Icon",
+      "menutype": "Menutype",
+      "extend": "Extend",
+      "model_name": "Model Name",
+      "weigh": "Weigh",
+      "status": "Status",
+      "created_at": "Created At",
+      "updated_at": "Updated At"
+    },
+    "rules": {
+      "type": {
+        "required": "Type is required",
+        "max_length": "Type must be at most 6 characters"
+      },
+      "pid": {
+        "required": "Pid is required",
+        "must_be_positive": "Pid must be a positive integer"
+      },
+      "plugin": {
+        "required": "Plugin is required",
+        "must_be_number": "Plugin must be a number"
+      },
+      "name": {
+        "required": "Name is required",
+        "max_length": "Name must be at most 150 characters"
+      },
+      "url_path": {
+        "required": "Url Path is required",
+        "invalid_format": "Please enter a valid Url Path URL"
+      },
+      "title": {
+        "required": "Title is required",
+        "max_length": "Title must be at most 50 characters"
+      },
+      "model_name": {
+        "required": "Model Name is required",
+        "max_length": "Model Name must be at most 50 characters"
+      },
+      "weigh": {
+        "required": "Weigh is required",
+        "must_be_number": "Weigh must be a number"
+      },
+      "status": {
+        "required": "Status is required",
+        "max_length": "Status must be at most 6 characters"
+      },
+      "created_at": {
+        "required": "Created At is required"
+      },
+      "updated_at": {
+        "required": "Updated At is required"
+      }
+    }
+  },
+  "balance_log": {
+    "balance_log": "User Balance Log",
+    "field": {
+      "user_balance_log": "User Balance Log",
+      "user_balance_log_manage": "User Balance Log Manager",
+      "id": "Id",
+      "user_id": "User Id",
+      "balance": "Balance",
+      "before": "Before",
+      "after": "After",
+      "memo": "Memo",
+      "created_at": "Created At",
+      "updated_at": "Updated At"
+    },
+    "rules": {
+      "user_id": {
+        "required": "User Id is required",
+        "must_be_positive": "User Id must be a positive integer"
+      },
+      "balance": {
+        "required": "Balance is required",
+        "must_be_number": "Balance must be a number"
+      },
+      "before": {
+        "required": "Before is required",
+        "must_be_number": "Before must be a number"
+      },
+      "after": {
+        "required": "After is required",
+        "must_be_number": "After must be a number"
+      },
+      "created_at": {
+        "required": "Created At is required"
+      },
+      "updated_at": {
+        "required": "Updated At is required"
+      }
+    }
+  },
+  "score_log": {
+    "score_log": "User Score Log",
+    "field": {
+      "user_score_log": "User Score Log",
+      "user_score_log_manage": "User Score Log Manager",
+      "id": "Id",
+      "user_id": "User Id",
+      "score": "Score",
+      "before": "Before",
+      "after": "After",
+      "memo": "Memo",
+      "created_at": "Created At",
+      "updated_at": "Updated At"
+    },
+    "rules": {
+      "user_id": {
+        "required": "User Id is required",
+        "must_be_positive": "User Id must be a positive integer"
+      },
+      "score": {
+        "required": "Score is required",
+        "must_be_number": "Score must be a number"
+      },
+      "before": {
+        "required": "Before is required",
+        "must_be_number": "Before must be a number"
+      },
+      "after": {
+        "required": "After is required",
+        "must_be_number": "After must be a number"
+      },
+      "created_at": {
+        "required": "Created At is required"
+      },
+      "updated_at": {
+        "required": "Updated At is required"
+      }
+    }
+  }
+}

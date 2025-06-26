@@ -1,0 +1,22 @@
+{
+  "plugin_store": "插件商城",
+  "plugin": "插件",
+  "plugin_manage": "插件管理",
+  "id": "ID",
+  "title": "标题",
+  "author": "作者",
+  "uuid": "UUID",
+  "description": "描述",
+  "version": "版本",
+  "downloads": "下载量",
+  "download_url": "下载链接",
+  "md5_hash": "MD5哈希",
+  "price": "价格",
+  "paid": "已付费",
+  "installed": "已安装",
+  "enabled": "启用",
+  "setting_menu": "设置菜单",
+  "created_at": "创建时间",
+  "updated_at": "更新时间",
+  "status": "状态"
+}

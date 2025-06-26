@@ -1,0 +1,83 @@
+{
+  "attachment": "Attachment",
+  "attachment_manage": "Attachment Manager",
+  "field": {
+    "id": "Id",
+    "cat_id": "Cat Id",
+    "admin_id": "Admin Id",
+    "user_id": "User Id",
+    "att_type": "Att Type",
+    "thumb": "Thumb",
+    "path_file": "Path File",
+    "file_name": "File Name",
+    "file_size": "File Size",
+    "mimetype": "Mimetype",
+    "ext_param": "Ext Param",
+    "storage": "Storage",
+    "sha1": "Sha1",
+    "general_attachment_col": "General Attachment Col",
+    "created_at": "Created At",
+    "updated_at": "Updated At"
+  },
+  "rules": {
+    "admin_id": {
+      "required": "Admin Id is required",
+      "must_be_positive": "Admin Id must be a positive integer"
+    },
+    "user_id": {
+      "required": "User Id is required",
+      "must_be_positive": "User Id must be a positive integer"
+    },
+    "path_file": {
+      "required": "Path File is required",
+      "max_length": "Path File must be at most 255 characters"
+    },
+    "file_size": {
+      "required": "File Size is required",
+      "must_be_number": "File Size must be a number"
+    },
+    "storage": {
+      "required": "Storage is required",
+      "max_length": "Storage must be at most 100 characters"
+    },
+    "created_at": {
+      "required": "Created At is required"
+    },
+    "updated_at": {
+      "required": "Updated At is required"
+    }
+  },
+  "category": {
+    "category": "Attachment Category",
+    "field": {
+      "attachment_category": "Attachment Category",
+      "attachment_category_manage": "Attachment Category Manager",
+      "id": "Id",
+      "pid": "Pid",
+      "name": "Name",
+      "status": "Status",
+      "created_at": "Created At",
+      "updated_at": "Updated At"
+    },
+    "rules": {
+      "pid": {
+        "required": "Pid is required",
+        "must_be_positive": "Pid must be a positive integer"
+      },
+      "name": {
+        "required": "Name is required",
+        "max_length": "Name must be at most 30 characters"
+      },
+      "status": {
+        "required": "Status is required",
+        "max_length": "Status must be at most 6 characters"
+      },
+      "created_at": {
+        "required": "Created At is required"
+      },
+      "updated_at": {
+        "required": "Updated At is required"
+      }
+    }
+  }
+}

@@ -1,0 +1,357 @@
+@import "tailwindcss";
+/* @reference "tailwindcss"; */
+@layer base {
+
+  *,
+  ::after,
+  ::before {
+    box-sizing: border-box;
+    border-style: solid;
+    border-width: 0;
+    border-color: hsl(var(--border));
+
+    ::file-selector-button {
+      border-color: var(--color-gray-200, currentColor);
+    }
+
+    border-color: border-violet-50
+  }
+
+  html {
+    @apply text-[100%];
+    font-variation-settings: normal;
+    line-height: 1.15;
+    text-size-adjust: 100%;
+    font-synthesis-weight: none;
+    scroll-behavior: smooth;
+    text-rendering: optimizelegibility;
+    -webkit-tap-highlight-color: transparent;
+    font-size: 14px;
+    line-height: 1.5714285714285714;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  }
+
+  #app,
+  body,
+  html {
+    @apply size-full;
+  }
+
+  body {
+    min-height: 100vh;
+  }
+
+  a,
+  a:active,
+  a:hover,
+  a:link,
+  a:visited {
+    @apply no-underline;
+  }
+
+  ::view-transition-new(root),
+  ::view-transition-old(root) {
+    @apply animate-none mix-blend-normal;
+  }
+
+  ::view-transition-old(root) {
+    @apply z-[1];
+  }
+
+  ::view-transition-new(root) {
+    @apply z-[2147483646];
+  }
+
+  html.dark::view-transition-old(root) {
+    @apply z-[2147483646];
+  }
+
+  html.dark::view-transition-new(root) {
+    @apply z-[1];
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    @apply opacity-100;
+  }
+
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    @apply appearance-none;
+  }
+
+  button,
+  input:where([type='button']),
+  input:where([type='reset']),
+  input:where([type='submit']) {
+    background-color: transparent;
+    background-image: none;
+  }
+
+  .text-foreground\/80 {
+    color: hsl(var(--foreground) / 0.8);
+  }
+
+  .ring-offset-background {
+    --tw-ring-offset-color: hsl(var(--background));
+  }
+
+  .bg-background {
+    background-color: hsl(var(--background));
+  }
+
+  .border-input {
+    border-color: hsl(var(--input));
+  }
+
+  .rounded-md {
+    border-radius: calc(var(--radius) - 2px);
+  }
+
+  .border-border {
+    border-color: hsl(var(--border));
+  }
+
+  .bg-background-deep {
+    background-color: hsl(var(--background-deep));
+  }
+
+  .bg-success {
+    background-color: hsl(var(--success));
+  }
+
+  .text-primary-foreground {
+    color: hsl(var(--primary-foreground));
+  }
+
+  .bg-primary {
+    background-color: hsl(var(--primary));
+  }
+
+  .zayum-link {
+    cursor: pointer;
+    color: hsl(var(--primary));
+  }
+
+  .card-box {
+    border-radius: calc(var(--radius) + 4px);
+    border-width: 1px;
+    border-color: hsl(var(--border));
+    background-color: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+  }
+
+  .bg-card {
+    background-color: hsl(var(--card));
+  }
+  :where(.css-dev-only-do-not-override-1p3hq3p).ant-card {
+    background-color: hsl(var(--card));
+  }
+  .bg-popover {
+    background-color: hsl(var(--popover));
+  }
+
+  .border-border {
+    border-color: hsl(var(--border));
+  }
+
+  .border {
+    border-style: var(--tw-border-style);
+    border-width: 1px;
+  }
+
+  .divide-border> :not([hidden])~ :not([hidden]) {
+    border-color: hsl(var(--border));
+  }
+
+  
+
+  .group.is-active .group-\[\.is-active\]\:bg-primary\/15 {
+    background-color: hsl(var(--primary) / 0.15);
+  }
+
+  .group.is-active .group-\[\.is-active\]\:fill-primary\/15 {
+    fill: hsl(var(--primary) / 0.15);
+  }
+
+  .group.is-active .group-\[\.is-active\]\:fill-primary\/15 {
+    fill: hsl(var(--primary) / 0.15);
+  }
+
+  .rounded-tr-\[var\(--gap\)\] {
+    border-top-right-radius: var(--gap);
+  }
+
+  .text-muted-foreground {
+    color: hsl(var(--muted-foreground));
+  }
+
+  .text-foreground\/80 {
+    color: hsl(var(--foreground) / 0.8);
+  }
+
+  .rounded-md {
+    border-radius: calc(var(--radius) - 2px);
+  }
+
+  .bg-accent {
+    background-color: hsl(var(--accent));
+  }
+
+  .text-foreground {
+    color: hsl(var(--foreground));
+  }
+
+  .data-\[state\=unchecked\]\:bg-input[data-state="unchecked"] {
+    background-color: hsl(var(--input));
+  }
+
+  .data-\[state\=checked\]\:bg-primary[data-state="checked"] {
+    background-color: hsl(var(--primary));
+  }
+
+  .text-muted-foreground {
+    color: hsl(var(--muted-foreground));
+  }
+
+  .rounded-tl-\[var\(--gap\)\] {
+    border-top-left-radius: var(--gap);
+  }
+
+  .bg-header {
+    background-color: hsl(var(--header));
+  }
+
+  .bg-sidebar {
+    background-color: hsl(var(--sidebar));
+  }
+
+  .outline-box {
+    position: relative;
+    cursor: pointer;
+    border-radius: calc(var(--radius) - 2px);
+    padding: 0.25rem;
+    outline-style: solid;
+    outline-width: 1px;
+    outline-color: hsl(var(--border));
+  }
+
+  .outline-box.outline-box-active {
+    outline-style: solid;
+    outline-width: 2px;
+    outline-color: hsl(var(--primary));
+  }
+
+  html:not([data-platform='macOs']) {
+    ::-webkit-scrollbar {
+      @apply h-[10px] w-[10px];
+    }
+
+    ::-webkit-scrollbar-thumb {
+      @apply border-none;
+    }
+
+    ::-webkit-scrollbar-track {
+      @apply border-none bg-transparent shadow-none;
+    }
+
+    ::-webkit-scrollbar-button {
+      @apply hidden;
+    }
+  }
+}
+
+@layer components {
+  .flex-center {
+    @apply flex items-center justify-center;
+  }
+
+  .flex-col-center {
+    @apply flex flex-col items-center justify-center;
+  }
+
+  .outline-box {
+    @apply relative cursor-pointer outline outline-1;
+  }
+
+  .outline-box::after {
+    @apply absolute left-1/2 top-1/2 opacity-0 outline outline-2 outline-transparent transition-all duration-300 content-[""];
+  }
+
+  .outline-box.outline-box-active {
+    @apply outline outline-2;
+  }
+
+  .outline-box.outline-box-active::after {
+    display: none;
+  }
+
+  .outline-box:not(.outline-box-active):hover::after {
+    @apply h-full w-full opacity-100;
+  }
+
+  .zayum-link {
+    @apply cursor-pointer;
+  }
+
+  .card-box {
+    @apply border;
+  }
+}
+
+html.invert-mode {
+  @apply invert;
+}
+
+html.grayscale-mode {
+  @apply grayscale;
+}
+
+
+#nprogress {
+  @apply pointer-events-none;
+}
+
+#nprogress .bar {
+  @apply bg-blue-500 fixed left-0 top-0 z-[1031] h-[2px] w-full;
+}
+
+/* Fancy blur effect */
+#nprogress .peg {
+  @apply absolute right-0 block h-full w-[100px];
+
+  box-shadow: 0 0 10px hsl(var(--primary)),
+    0 0 5px hsl(var(--primary));
+  opacity: 1;
+  transform: rotate(3deg) translate(0, -4px);
+}
+
+/* Remove these to get rid of the spinner */
+#nprogress .spinner {
+  @apply fixed right-4 top-4 z-[1031] block;
+}
+
+#nprogress .spinner-icon {
+  @apply border-t-blue-500 border-l-blue-500 rounded-full border-[2px] border-solid border-transparent;
+
+  animation: nprogress-spinner 400ms linear infinite;
+}
+
+.nprogress-custom-parent {
+  @apply relative overflow-hidden;
+}
+
+.nprogress-custom-parent #nprogress .spinner,
+.nprogress-custom-parent #nprogress .bar {
+  @apply absolute;
+}
+
+@keyframes nprogress-spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}

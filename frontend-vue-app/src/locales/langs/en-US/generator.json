@@ -1,0 +1,17 @@
+{
+    "code_generator": "Code Generator",
+    "select_database_table": "Select Database Table",
+    "select_a_table": "Select a Table",
+    "select_fields": "Select Fields",
+    "select_operations_permissions": "Select Operations Permissions",
+    "generate_code": "Generate Code",
+    "generated_code": "Generated Code",
+    "code_download": "Code Download",
+    "model_code": "Model Code",
+    "crud_code": "CRUD Code",
+    "schemas_code": "Schemas Code",
+    "api_code": "Api Code",
+    "vue_code": "Vue Code",
+    "vue_i18n_json": "Vue i18n JSON"
+  }
+  
