@@ -215,7 +215,7 @@ import {
   fetchAttachmentItems,
   saveAttachment,
   deleteAttachment,
-} from "@/api/core/attachment";
+} from "@/api/admin/attachment";
 import { $t } from "@/locales";
 import {
   FileAddOutlined,

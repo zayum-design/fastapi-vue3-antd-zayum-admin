@@ -7,10 +7,10 @@ import re
 
 
 class SysAttachmentCategoryBase(BaseModel):
-    id: int = Field(...)
+    id: Optional[int] = Field(None)
     pid: int = Field(...)
-    name: str = Field(Field(...), max_length=30)
-    status: Literal['normal', 'hidden'] = Field(Field(...), max_length=6)
+    name: str = Field(..., max_length=30)
+    status: Literal['normal', 'hidden'] = Field(..., max_length=6)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -26,7 +26,6 @@ class SysAttachmentCategoryBase(BaseModel):
 
 
 class SysAttachmentCategoryCreate(SysAttachmentCategoryBase):
-    id: Optional[int] = None
     pass
 
 class SysAttachmentCategoryUpdate(BaseModel):
@@ -38,14 +37,7 @@ class SysAttachmentCategoryUpdate(BaseModel):
         orm_mode = True
 
 class SysAttachmentCategoryInDBBase(SysAttachmentCategoryBase):
-    id: int
-    pid: Optional[int] = None
-    name: Optional[str] = None
-    status: Optional[Literal['normal', 'hidden']] = None
-
-    class Config:
-        orm_mode = True
+    pass
 
 class SysAttachmentCategory(SysAttachmentCategoryInDBBase):
     pass
-

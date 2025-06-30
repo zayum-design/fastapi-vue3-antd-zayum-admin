@@ -7,16 +7,16 @@ import re
 
 
 class SysUserBase(BaseModel):
-    id: int = Field(...)
+    id: Optional[int] = Field(None)
     user_group_id: int = Field(...)
-    username: str = Field(Field(...), max_length=32)
-    nickname: str = Field(Field(...), max_length=50)
-    password: str = Field(Field(...), max_length=120)
-    email: EmailStr = Field(Field(...), max_length=100)
-    mobile: str = Field(Field(...), max_length=16)
+    username: str = Field(..., max_length=32)
+    nickname: str = Field(..., max_length=50)
+    password: str = Field(..., max_length=120)
+    email: EmailStr = Field(..., max_length=100)
+    mobile: str = Field(..., max_length=16)
     avatar: Optional[str] = None
     level: int = Field(...)
-    gender: Literal['female', 'male'] = Field(Field(...), max_length=6)
+    gender: Literal['female', 'male'] = Field(..., max_length=6)
     birthday: Optional[str] = None
     bio: Optional[str] = None
     balance: Optional[Decimal] = None
@@ -88,7 +88,6 @@ class SysUserBase(BaseModel):
 
 
 class SysUserCreate(SysUserBase):
-    id: Optional[int] = None
     pass
 
 class SysUserUpdate(BaseModel):
@@ -120,33 +119,7 @@ class SysUserUpdate(BaseModel):
         orm_mode = True
 
 class SysUserInDBBase(SysUserBase):
-    id: int
-    user_group_id: Optional[int] = None
-    username: Optional[str] = None
-    nickname: Optional[str] = None
-    email: Optional[EmailStr] = None
-    mobile: Optional[str] = None
-    avatar: Optional[str] = None
-    level: Optional[int] = None
-    gender: Optional[Literal['male', 'female']] = None
-    birthday: Optional[str] = None
-    bio: Optional[str] = None
-    balance: Optional[Decimal] = None
-    score: Optional[int] = None
-    successions: Optional[int] = None
-    max_successions: Optional[int] = None
-    prev_time: Optional[datetime] = None
-    login_time: Optional[datetime] = None
-    login_ip: Optional[str] = None
-    login_failure: Optional[int] = None
-    join_ip: Optional[str] = None
-    verification: Optional[str] = None
-    token: Optional[str] = None
-    status: Optional[Literal['normal', 'hidden', 'delete']] = None
-
-    class Config:
-        orm_mode = True
+    pass
 
 class SysUser(SysUserInDBBase):
     pass
-

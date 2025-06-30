@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict, Any, Union, TYPE_CHECKING
+from typing import List, Optional, Dict, Any, Union
 from fastapi_babel import _
 from sqlalchemy.orm import Session, Query
 from sqlalchemy import and_, or_
@@ -6,10 +6,6 @@ from app.models.sys_admin_rule import SysAdminRule
 from app.schemas.sys_admin_rule import SysAdminRuleCreate, SysAdminRuleUpdate
 from app.utils.log_utils import logger
 
-# Forward declaration for QueryBuilder to avoid circular import issues
-if TYPE_CHECKING:
-    class QueryBuilderSysAdminRule:
-        pass
 
 class CRUDSysAdminRule:
     SEARCHABLE_FIELDS = ['rule_type', 'name', 'path', 'component', 'redirect', 'menu_display_type', 'model_name', 'status']

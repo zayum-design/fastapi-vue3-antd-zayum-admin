@@ -7,18 +7,18 @@ import re
 
 
 class SysAttachmentBase(BaseModel):
-    id: int = Field(...)
+    id: Optional[int] = Field(None)
     cat_id: Optional[int] = None
     admin_id: int = Field(...)
     user_id: int = Field(...)
     att_type: Optional[Literal['image', 'file']] = None
     thumb: Optional[str] = None
-    path_file: str = Field(Field(...), max_length=255)
+    path_file: str = Field(..., max_length=255)
     file_name: Optional[str] = None
     file_size: int = Field(...)
     mimetype: Optional[str] = None
     ext_param: Optional[str] = None
-    storage: str = Field(Field(...), max_length=100)
+    storage: str = Field(..., max_length=100)
     sha1: Optional[str] = None
     general_attachment_col: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -30,7 +30,6 @@ class SysAttachmentBase(BaseModel):
 
 
 class SysAttachmentCreate(SysAttachmentBase):
-    id: Optional[int] = None
     pass
 
 class SysAttachmentUpdate(BaseModel):
@@ -52,24 +51,7 @@ class SysAttachmentUpdate(BaseModel):
         orm_mode = True
 
 class SysAttachmentInDBBase(SysAttachmentBase):
-    id: int
-    cat_id: Optional[int] = None
-    admin_id: Optional[int] = None
-    user_id: Optional[int] = None
-    att_type: Optional[Literal['image', 'file']] = None
-    thumb: Optional[str] = None
-    path_file: Optional[str] = None
-    file_name: Optional[str] = None
-    file_size: Optional[int] = None
-    mimetype: Optional[str] = None
-    ext_param: Optional[str] = None
-    storage: Optional[str] = None
-    sha1: Optional[str] = None
-    general_attachment_col: Optional[str] = None
-
-    class Config:
-        orm_mode = True
+    pass
 
 class SysAttachment(SysAttachmentInDBBase):
     pass
-

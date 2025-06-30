@@ -21,7 +21,7 @@
           </a-menu-item>
         </a-menu>
         <a-space wrap>
-          <a-button type="primary" @click="$router.push('/login')" class="h-10">登录</a-button>
+          <a-button type="primary" @click="$router.push('/user/login')" class="h-10">登录</a-button>
           <a-button @click="$router.push('/register')" class="h-10 ml-4">免费试用</a-button>
         </a-space>
       </div>

@@ -15,9 +15,9 @@ import { useAccessStore } from '@/stores';
 
 import { message } from 'ant-design-vue';
 
-import { useAuthStore } from '@/store';
+import { useAuthStore } from '@/store/admin';
 
-import { refreshTokenApi } from './core';
+import { refreshTokenApi } from './admin';
 
 const { apiURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
 

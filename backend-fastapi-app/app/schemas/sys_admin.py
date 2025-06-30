@@ -7,19 +7,19 @@ import re
 
 
 class SysAdminBase(BaseModel):
-    id: int = Field(...)
+    id: Optional[int] = Field(None)
     group_id: int = Field(...)
-    username: str = Field(Field(...), max_length=20)
-    nickname: str = Field(Field(...), max_length=50)
-    password: str = Field(Field(...), max_length=128)
+    username: str = Field(..., max_length=20)
+    nickname: str = Field(..., max_length=50)
+    password: str = Field(..., max_length=128)
     avatar: Optional[str] = None
-    email: EmailStr = Field(Field(...), max_length=100)
-    mobile: str = Field(Field(...), max_length=11)
+    email: EmailStr = Field(..., max_length=100)
+    mobile: str = Field(..., max_length=11)
     login_failure: int = Field(...)
     login_at: Optional[datetime] = None
     login_ip: Optional[str] = None
     token: Optional[str] = None
-    status: Literal['normal', 'hidden'] = Field(Field(...), max_length=6)
+    status: Literal['normal', 'hidden'] = Field(..., max_length=6)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -68,7 +68,6 @@ class SysAdminBase(BaseModel):
 
 
 class SysAdminCreate(SysAdminBase):
-    id: Optional[int] = None
     pass
 
 class SysAdminUpdate(BaseModel):
@@ -89,22 +88,7 @@ class SysAdminUpdate(BaseModel):
         orm_mode = True
 
 class SysAdminInDBBase(SysAdminBase):
-    id: int
-    group_id: Optional[int] = None
-    username: Optional[str] = None
-    nickname: Optional[str] = None
-    avatar: Optional[str] = None
-    email: Optional[EmailStr] = None
-    mobile: Optional[str] = None
-    login_failure: Optional[int] = None
-    login_at: Optional[datetime] = None
-    login_ip: Optional[str] = None
-    token: Optional[str] = None
-    status: Optional[Literal['normal', 'hidden']] = None
-
-    class Config:
-        orm_mode = True
+    pass
 
 class SysAdmin(SysAdminInDBBase):
     pass
-

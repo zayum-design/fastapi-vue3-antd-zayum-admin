@@ -1,15 +1,10 @@
-from typing import List, Optional, Dict, Any, Union, TYPE_CHECKING
+from typing import List, Optional, Dict, Any, Union
 from fastapi_babel import _
 from sqlalchemy.orm import Session, Query
 from sqlalchemy import and_, or_
 from app.models.sys_general_category import SysGeneralCategory
 from app.schemas.sys_general_category import SysGeneralCategoryCreate, SysGeneralCategoryUpdate
 from app.utils.log_utils import logger
-
-# Forward declaration for QueryBuilder to avoid circular import issues
-if TYPE_CHECKING:
-    class QueryBuilderSysGeneralCategory:
-        pass
 
 class CRUDSysGeneralCategory:
     SEARCHABLE_FIELDS = ['type', 'name', 'thumb', 'keywords', 'description', 'status']

@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict, Any, Union, TYPE_CHECKING
+from typing import List, Optional, Dict, Any, Union
 from fastapi_babel import _
 from sqlalchemy.orm import Session, Query
 from sqlalchemy import and_, or_
@@ -6,10 +6,6 @@ from app.models.sys_general_config import SysGeneralConfig
 from app.schemas.sys_general_config import SysGeneralConfigCreate, SysGeneralConfigUpdate
 from app.utils.log_utils import logger
 
-# Forward declaration for QueryBuilder to avoid circular import issues
-if TYPE_CHECKING:
-    class QueryBuilderSysGeneralConfig:
-        pass
 
 class CRUDSysGeneralConfig:
     SEARCHABLE_FIELDS = ['name', 'group', 'title', 'tip', 'type', 'visible', 'value', 'content', 'rule', 'extend', 'setting']

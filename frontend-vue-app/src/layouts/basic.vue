@@ -22,7 +22,7 @@ import { useAccessStore, useUserStore } from '@/stores';
 import { openWindow } from '@/utils';
 
 import { $t } from '@/locales';
-import { useAuthStore } from '@/store';
+import { useAuthStore } from '@/store/admin';
 import LoginForm from '@/views/_core/authentication/login.vue';
 
 const notifications = ref<NotificationItem[]>([

@@ -7,10 +7,10 @@ import re
 
 
 class SysUserGroupBase(BaseModel):
-    id: int = Field(...)
-    name: str = Field(Field(...), max_length=50)
-    rules: str = Field(Field(...), max_length=512)
-    status: Literal['normal', 'hidden'] = Field(Field(...), max_length=6)
+    id: Optional[int] = Field(None)
+    name: str = Field(..., max_length=50)
+    rules: str = Field(..., max_length=512)
+    status: Literal['normal', 'hidden'] = Field(..., max_length=6)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -26,7 +26,6 @@ class SysUserGroupBase(BaseModel):
 
 
 class SysUserGroupCreate(SysUserGroupBase):
-    id: Optional[int] = None
     pass
 
 class SysUserGroupUpdate(BaseModel):
@@ -38,14 +37,7 @@ class SysUserGroupUpdate(BaseModel):
         orm_mode = True
 
 class SysUserGroupInDBBase(SysUserGroupBase):
-    id: int
-    name: Optional[str] = None
-    rules: Optional[str] = None
-    status: Optional[Literal['normal', 'hidden']] = None
-
-    class Config:
-        orm_mode = True
+    pass
 
 class SysUserGroup(SysUserGroupInDBBase):
     pass
-

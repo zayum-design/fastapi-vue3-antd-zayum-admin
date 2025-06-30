@@ -6,11 +6,6 @@ from app.models.sys_admin import SysAdmin
 from app.schemas.sys_admin import SysAdminCreate, SysAdminUpdate
 from app.utils.log_utils import logger
 
-# Forward declaration for QueryBuilder to avoid circular import issues
-if TYPE_CHECKING:
-    class QueryBuilderSysAdmin:
-        pass
-
 class CRUDSysAdmin:
     SEARCHABLE_FIELDS = ['username', 'nickname', 'avatar', 'email', 'mobile', 'login_ip', 'token', 'status']
 

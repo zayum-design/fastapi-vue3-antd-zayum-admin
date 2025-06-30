@@ -145,7 +145,7 @@ import 'vue-advanced-cropper/dist/style.css';
 import { useAppConfig } from "@/_core/hooks";
 const { webURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
 
-import { getProfileApi, uploadApi, saveProfileApi } from "@/api";
+import { getProfileApi, uploadApi, saveProfileApi } from "@/api/admin";
 import { $t } from "@/locales";
 import { message } from "ant-design-vue";
 

@@ -6,10 +6,10 @@ import { useAccessStore, useUserStore } from "@/stores";
 import { startProgress, stopProgress } from "@/utils";
 
 import { accessRoutes, coreRouteNames } from "@/router/routes";
-import { useAuthStore } from "@/store";
+import { useAuthStore } from "@/store/admin";
 
 import { generateAccess } from "./access";
-import { installCheck } from "@/api/core/install";
+import { installCheck } from "@/api/admin/install";
 import { ref } from "vue";
 
 /**

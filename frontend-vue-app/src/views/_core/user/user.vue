@@ -283,7 +283,7 @@ import {
   fetchUserItems,
   saveUser,
   deleteUser,
-} from "@/api/core/user";
+} from "@/api/admin/user";
 import { $t } from "@/locales";
 import {
   FileAddOutlined,

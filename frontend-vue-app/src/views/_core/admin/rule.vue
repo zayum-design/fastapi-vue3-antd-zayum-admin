@@ -361,7 +361,7 @@ import {
   fetchAdminRuleItems,
   saveAdminRule,
   deleteAdminRule,
-} from "@/api/core/admin_rule";
+} from "@/api/admin/admin_rule";
 import { $t } from "@/locales";
 import {
   FileAddOutlined,

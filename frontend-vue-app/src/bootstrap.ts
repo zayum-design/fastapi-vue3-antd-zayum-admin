@@ -1,6 +1,6 @@
 import { createApp, watchEffect } from 'vue';
 import Antd from 'ant-design-vue';
-import 'ant-design-vue/dist/reset.css';
+// import 'ant-design-vue/dist/reset.css';
 
 // 引入 Monaco Editor 的样式
 import 'monaco-editor/min/vs/editor/editor.main.css';

@@ -220,7 +220,7 @@ import {
   fetchPluginItems,
   savePlugin,
   deletePlugin,
-} from "@/api/core/plugin";
+} from "@/api/admin/plugin";
 import { $t } from "@/locales";
 import {
   FileAddOutlined,

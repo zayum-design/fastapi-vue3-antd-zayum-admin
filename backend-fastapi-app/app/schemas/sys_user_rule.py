@@ -7,20 +7,20 @@ import re
 
 
 class SysUserRuleBase(BaseModel):
-    id: int = Field(...)
-    type: Literal['menu', 'action'] = Field(Field(...), max_length=6)
+    id: Optional[int] = Field(None)
+    type: Literal['menu', 'action'] = Field(..., max_length=6)
     pid: int = Field(...)
     plugin: int = Field(...)
-    name: str = Field(Field(...), max_length=150)
-    url_path: str = Field(Field(...), max_length=50)
-    title: str = Field(Field(...), max_length=50)
+    name: str = Field(..., max_length=150)
+    url_path: str = Field(..., max_length=50)
+    title: str = Field(..., max_length=50)
     description: Optional[str] = None
     icon: Optional[str] = None
     menutype: Optional[Literal['addtabs', 'blank', 'dialog', 'ajax']] = None
     extend: Optional[str] = None
-    model_name: str = Field(Field(...), max_length=50)
+    model_name: str = Field(..., max_length=50)
     weigh: int = Field(...)
-    status: Literal['normal', 'hidden'] = Field(Field(...), max_length=6)
+    status: Literal['normal', 'hidden'] = Field(..., max_length=6)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -36,7 +36,6 @@ class SysUserRuleBase(BaseModel):
 
 
 class SysUserRuleCreate(SysUserRuleBase):
-    id: Optional[int] = None
     pass
 
 class SysUserRuleUpdate(BaseModel):
@@ -58,24 +57,7 @@ class SysUserRuleUpdate(BaseModel):
         orm_mode = True
 
 class SysUserRuleInDBBase(SysUserRuleBase):
-    id: int
-    type: Optional[Literal['menu', 'action']] = None
-    pid: Optional[int] = None
-    plugin: Optional[int] = None
-    name: Optional[str] = None
-    url_path: Optional[str] = None
-    title: Optional[str] = None
-    description: Optional[str] = None
-    icon: Optional[str] = None
-    menutype: Optional[Literal['addtabs', 'blank', 'dialog', 'ajax']] = None
-    extend: Optional[str] = None
-    model_name: Optional[str] = None
-    weigh: Optional[int] = None
-    status: Optional[Literal['normal', 'hidden']] = None
-
-    class Config:
-        orm_mode = True
+    pass
 
 class SysUserRule(SysUserRuleInDBBase):
     pass
-

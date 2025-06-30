@@ -1,4 +1,4 @@
-import type { BasicUserInfo } from '@/_core/typings';
+import type { BasicAdminInfo } from '@/_core/typings';
 
 /** 用户信息 */
 interface UserInfo {

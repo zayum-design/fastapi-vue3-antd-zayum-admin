@@ -1,15 +1,10 @@
-from typing import List, Optional, Dict, Any, Union, TYPE_CHECKING
+from typing import List, Optional, Dict, Any, Union
 from fastapi_babel import _
 from sqlalchemy.orm import Session, Query
 from sqlalchemy import and_, or_
 from app.models.sys_admin_log import SysAdminLog
 from app.schemas.sys_admin_log import SysAdminLogCreate, SysAdminLogUpdate
 from app.utils.log_utils import logger
-
-# Forward declaration for QueryBuilder to avoid circular import issues
-if TYPE_CHECKING:
-    class QueryBuilderSysAdminLog:
-        pass
 
 class CRUDSysAdminLog:
     SEARCHABLE_FIELDS = ['username', 'url', 'title', 'content', 'ip', 'useragent']
@@ -56,7 +51,7 @@ class CRUDSysAdminLog:
             logger.error(_(f"Sort field does not exist on model SysAdminLog"))
             return query
 
-    def filter(self, db: Session, *criterion) -> 'QueryBuilderSysAdminLog':
+    def filter(self, db: Session, *criterion) -> "QueryBuilderSysAdminLog":
         """
         Apply custom SQLAlchemy filter criteria and return a QueryBuilder instance.
         Allows for chainable calls like .get_all(), .get_multi(), etc.

@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import type { ZayumFormSchema } from '@/_core/ui/common-ui';
-import type { BasicOption } from '@/_core/types';
 
 import { computed, markRaw } from 'vue';
 
@@ -8,59 +7,18 @@ import { SliderCaptcha, z } from '@/_core/ui/common-ui';
 import { AuthenticationLogin } from './components';
 import { $t } from '@/locales';
 
-import { useAuthStore } from '@/store';
+import { useAuthStore } from '@/store/admin';
 
 defineOptions({ name: 'Login' });
 
 const authStore = useAuthStore();
 
-const MOCK_USER_OPTIONS: BasicOption[] = [
-  {
-    label: 'Super',
-    value: 'admin',
-  },
-  {
-    label: 'User',
-    value: 'jack',
-  },
-];
-
 const formSchema = computed((): ZayumFormSchema[] => {
   return [
-    {
-      component: 'ZayumSelect',
-      componentProps: {
-        options: MOCK_USER_OPTIONS,
-        placeholder: $t('authentication.selectAccount'),
-      },
-      fieldName: 'selectAccount',
-      label: $t('authentication.selectAccount'),
-      rules: z
-        .string()
-        .min(1, { message: $t('authentication.selectAccount') })
-        .optional()
-        .default('admin'),
-    },
     {
       component: 'ZayumInput',
       componentProps: {
         placeholder: $t('authentication.usernameTip'),
-      },
-      dependencies: {
-        trigger(values, form) {
-          if (values.selectAccount) {
-            const findUser = MOCK_USER_OPTIONS.find(
-              (item) => item.value === values.selectAccount,
-            );
-            if (findUser) {
-              form.setValues({
-                password: '88888888',
-                username: findUser.value,
-              });
-            }
-          }
-        },
-        triggerFields: ['selectAccount'],
       },
       fieldName: 'username',
       label: $t('authentication.username'),

@@ -1,0 +1,177 @@
+import type { Router } from "vue-router";
+
+import { DEFAULT_ADMIN_PATH, LOGIN_PATH } from "@/constants";
+import { preferences } from "@/_core/preferences";
+import { useAccessStore, useUserStore } from "@/stores";
+import { useUserAccessStore } from "@/stores/user/access";
+import { startProgress, stopProgress } from "@/utils";
+
+import { accessRoutes, coreRouteNames } from "@/router/routes";
+import { useAuthStore } from "@/store/admin";
+
+import { generateAccess } from "./access";
+import { installCheck } from "@/api/admin/install";
+import { ref } from "vue";
+
+/**
+ * 通用守卫配置
+ * @param router
+ */
+function setupCommonGuard(router: Router) {
+  // 记录已经加载的页面
+  const loadedPaths = new Set<string>();
+
+  router.beforeEach(async (to) => {
+    to.meta.loaded = loadedPaths.has(to.path);
+
+    // 页面加载进度条
+    if (!to.meta.loaded && preferences.transition.progress) {
+      startProgress();
+    }
+    return true;
+  });
+
+  router.afterEach((to) => {
+    // 记录页面是否加载,如果已经加载，后续的页面切换动画等效果不在重复执行
+
+    loadedPaths.add(to.path);
+
+    // 关闭页面加载进度条
+    if (preferences.transition.progress) {
+      stopProgress();
+    }
+  });
+}
+
+/**
+ * 权限访问守卫配置
+ * @param router
+ */
+function setupAccessGuard(router: Router) {
+  router.beforeEach(async (to, from) => {
+    const accessStore = useAccessStore();
+    const userStore = useUserStore();
+    const authStore = useAuthStore();
+
+    // 基本路由，这些路由不需要进入权限拦截
+    if (coreRouteNames.includes(to.name as string)) {
+      if (to.path === LOGIN_PATH && accessStore.accessToken) {
+        return decodeURIComponent(
+          (to.query?.redirect as string) || DEFAULT_ADMIN_PATH
+        );
+      }
+      return true;
+    }
+
+    // 用户路由特殊处理
+    if (to.path.startsWith('/user')) {
+      const userAccessStore = useUserAccessStore();
+      // 如果是登录页面则放行
+      if (to.path === '/user/login') {
+        return true;
+      }
+      // 检查用户token有效性
+      if (!userAccessStore.isValidToken) {
+        return {
+          path: '/user/login',
+          query: { redirect: encodeURIComponent(to.fullPath) },
+          replace: true
+        };
+      }
+      return true;
+    }
+
+    // accessToken 检查
+    if (!accessStore.accessToken) {
+      // 明确声明忽略权限访问权限，则可以访问
+      if (to.meta.ignoreAccess) {
+        return true;
+      }
+
+      // 没有访问权限，跳转登录页面
+      if (to.fullPath !== LOGIN_PATH) {
+        return {
+          path: LOGIN_PATH,
+          // 如不需要，直接删除 query
+          query:
+            to.fullPath === DEFAULT_ADMIN_PATH
+              ? {}
+              : { redirect: encodeURIComponent(to.fullPath) },
+          // 携带当前跳转的页面，登录后重新跳转该页面
+          replace: true,
+        };
+      }
+      return to;
+    }
+
+    // 是否已经生成过动态路由
+    if (accessStore.isAccessChecked) {
+      return true;
+    }
+
+    // 生成路由表
+    // 当前登录用户拥有的角色标识列表
+    const userInfo = userStore.userInfo || (await authStore.fetchUserInfo());
+    const userRoles = userInfo.roles ?? [];
+
+    // 生成菜单和路由
+    const { accessibleMenus, accessibleRoutes } = await generateAccess({
+      roles: userRoles,
+      router,
+      // 则会在菜单中显示，但是访问会被重定向到403
+      routes: accessRoutes,
+    });
+
+    // 保存菜单信息和路由信息
+    accessStore.setAccessMenus(accessibleMenus);
+    accessStore.setAccessRoutes(accessibleRoutes);
+    accessStore.setIsAccessChecked(true);
+    const redirectPath = (from.query.redirect ??
+      (to.path === DEFAULT_ADMIN_PATH
+        ? DEFAULT_ADMIN_PATH
+        : to.fullPath)) as string;
+
+    return {
+      ...router.resolve(decodeURIComponent(redirectPath)),
+      replace: true,
+    };
+  });
+}
+
+/**
+ * 安装路由守卫配置
+ * @param router
+ */
+function setupInstallGuard(router: Router) {
+  console.log("安装检查");
+  router.beforeEach(async (to) => {
+    console.log("安装检查", to.path, to);
+    if (to.path === "/install/init") {
+      const isInstalled = ref(true);
+
+      const response = await installCheck();
+      if (response.installed === false) {
+        isInstalled.value = false;
+      }
+      if (isInstalled.value) {
+        return "/";
+      }
+    }
+    return true;
+  });
+}
+
+/**
+ * 项目守卫配置
+ * @param router
+ */
+function createRouterGuard(router: Router) {
+  /** 安装检查 */
+  setupInstallGuard(router);
+  /** 通用 */
+  setupCommonGuard(router);
+  /** 权限访问 */
+  setupAccessGuard(router);
+}
+
+export { createRouterGuard };

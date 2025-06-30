@@ -168,7 +168,7 @@ import {
   fetchAdminLogItems,
   saveAdminLog,
   deleteAdminLog,
-} from "@/api/core/admin_log";
+} from "@/api/admin/admin_log";
 import { $t } from "@/locales";
 import {
   FileAddOutlined,

@@ -7,22 +7,22 @@ import re
 
 
 class SysAdminRuleBase(BaseModel):
-    id: int = Field(...)
-    rule_type: Literal['menu', 'action'] = Field(Field(...), max_length=6)
+    id: Optional[int] = Field(None)
+    rule_type: Literal['menu', 'action'] = Field(..., max_length=6)
     parent_id: Optional[int] = None
-    name: str = Field(Field(...), max_length=150)
-    path: str = Field(Field(...), max_length=50)
+    name: str = Field(..., max_length=150)
+    path: str = Field(..., max_length=50)
     component: Optional[str] = None
     redirect: Optional[str] = None
     meta: Optional[dict] = None
     permission: Optional[dict] = None
     menu_display_type: Optional[Literal['ajax', 'addtabs', 'blank', 'dialog']] = None
-    model_name: str = Field(Field(...), max_length=80)
+    model_name: str = Field(..., max_length=80)
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     deleted_at: Optional[datetime] = None
     weigh: int = Field(...)
-    status: Literal['normal', 'hidden'] = Field(Field(...), max_length=7)
+    status: Literal['normal', 'hidden'] = Field(..., max_length=7)
 
     @field_validator('status')
     def validate_status(cls, v):
@@ -36,15 +36,10 @@ class SysAdminRuleBase(BaseModel):
 
 class SysAdminRuleTree(SysAdminRuleBase):
     children: List['SysAdminRuleTree'] = []
-
-    class Config:
-        orm_mode = True
-        from_attributes=True
 # 解决递归引用的问题
 SysAdminRuleTree.model_rebuild()
 
 class SysAdminRuleCreate(SysAdminRuleBase):
-    id: Optional[int] = None
     pass
 
 class SysAdminRuleUpdate(BaseModel):
@@ -66,24 +61,7 @@ class SysAdminRuleUpdate(BaseModel):
         orm_mode = True
 
 class SysAdminRuleInDBBase(SysAdminRuleBase):
-    id: int
-    rule_type: Optional[Literal['menu', 'action']] = None
-    parent_id: Optional[int] = None
-    name: Optional[str] = None
-    path: Optional[str] = None
-    component: Optional[str] = None
-    redirect: Optional[str] = None
-    meta: Optional[dict] = None
-    permission: Optional[dict] = None
-    menu_display_type: Optional[Literal['ajax', 'addtabs', 'blank', 'dialog']] = None
-    model_name: Optional[str] = None
-    deleted_at: Optional[datetime] = None
-    weigh: Optional[int] = None
-    status: Optional[Literal['normal', 'hidden', 'deleted']] = None
-
-    class Config:
-        orm_mode = True
+    pass
 
 class SysAdminRule(SysAdminRuleInDBBase):
     pass
-

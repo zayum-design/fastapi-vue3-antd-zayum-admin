@@ -14,7 +14,7 @@ import {
   completeInstallation,
   importDatabase,
   restart,
-} from "@/api/core/install";
+} from "@/api/admin/install";
 
 const router = useRouter();
 

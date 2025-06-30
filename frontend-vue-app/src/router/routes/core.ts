@@ -3,6 +3,11 @@ import type { RouteRecordRaw } from "vue-router";
 import { DEFAULT_ADMIN_PATH, LOGIN_PATH,DEFAULT_HOME_PATH } from "@/constants";
 
 import { AuthPageLayout, BasicLayout, FullLayout } from "@/layouts";
+
+import { UserPageLayout} from "@/views/user/layouts/auth";
+
+import { UserBasicLayout } from "@/views/user/layouts/basic";
+
 import { $t } from "@/locales";
 import Login from "@/views/_core/authentication/login.vue";
 import Install from "@/views/_core/install/install.vue";
@@ -79,6 +84,89 @@ const coreRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    meta: {
+      icon: "ic:baseline-view-in-ar",
+      title: $t("user.user"),
+    },
+    name: "User",
+    path: "/user",
+    component: UserPageLayout,
+    children: [
+      {
+        name: "UserLogin",
+        path: "login",
+        component: () =>
+          import("@/views/user/authentication/login.vue"),
+        meta: {
+          title: $t("page.auth.login"),
+        },
+      },
+      {
+        name: "UserCodeLogin",
+        path: "code-login",
+        component: () => import("@/views/user/authentication/code-login.vue"),
+        meta: {
+          title: $t("page.auth.codeLogin"),
+        },
+      },
+      {
+        name: "UserQrCodeLogin",
+        path: "qrcode-login",
+        component: () =>
+          import("@/views/user/authentication/qrcode-login.vue"),
+        meta: {
+          title: $t("page.auth.qrcodeLogin"),
+        },
+      },
+      {
+        name: "UserForgetPassword",
+        path: "forget-password",
+        component: () =>
+          import("@/views/user/authentication/forget-password.vue"),
+        meta: {
+          title: $t("page.auth.forgetPassword"),
+        },
+      },
+      {
+        name: "UserRegister",
+        path: "register",
+        component: () => import("@/views/user/authentication/register.vue"),
+        meta: {
+          title: $t("page.auth.register"),
+        },
+      },
+    ],
+  },
+  {
+    meta: {
+      icon: "ic:baseline-view-in-ar",
+      title: $t("user.center"),
+    },
+    name: "UserCenter",
+    path: "/user",
+    component: UserBasicLayout,
+    children: [
+      {
+        name: "UserHome",
+        path: "home",
+        component: () => import("@/views/user/home.vue"),
+        meta: {
+          icon: "lucide:area-chart",
+          title: $t("user_center.home"),
+        },
+      },
+      {
+        name: "UserProfile",
+        path: "profile",
+        component: () => import("@/views/user/profile.vue"),
+        meta: {
+          icon: "lucide:area-chart",
+          title: $t("user_center.profile"),
+        },
+      },
+    ],
+  },
+  {
     component: BasicLayout,
     meta: {
       hideInBreadcrumb: true,
@@ -96,7 +184,7 @@ const coreRoutes: RouteRecordRaw[] = [
       title: "Authentication",
     },
     name: "Authentication",
-    path: "/auth",
+    path: "/admin",
     redirect: LOGIN_PATH,
     children: [
       {
@@ -105,40 +193,6 @@ const coreRoutes: RouteRecordRaw[] = [
         component: Login,
         meta: {
           title: $t("page.auth.login"),
-        },
-      },
-      {
-        name: "CodeLogin",
-        path: "code-login",
-        component: () => import("@/views/_core/authentication/code-login.vue"),
-        meta: {
-          title: $t("page.auth.codeLogin"),
-        },
-      },
-      {
-        name: "QrCodeLogin",
-        path: "qrcode-login",
-        component: () =>
-          import("@/views/_core/authentication/qrcode-login.vue"),
-        meta: {
-          title: $t("page.auth.qrcodeLogin"),
-        },
-      },
-      {
-        name: "ForgetPassword",
-        path: "forget-password",
-        component: () =>
-          import("@/views/_core/authentication/forget-password.vue"),
-        meta: {
-          title: $t("page.auth.forgetPassword"),
-        },
-      },
-      {
-        name: "Register",
-        path: "register",
-        component: () => import("@/views/_core/authentication/register.vue"),
-        meta: {
-          title: $t("page.auth.register"),
         },
       },
     ],

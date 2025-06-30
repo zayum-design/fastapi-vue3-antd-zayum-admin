@@ -6,15 +6,13 @@ import type { ZayumFormSchema } from '@/_core/ui/common-ui/form-ui';
 import type { AuthenticationProps } from './types';
 
 import { computed, onMounted, reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
 
 import { $t } from '@/locales';
 
 import { useZayumForm } from '@/_core/ui/common-ui/form-ui';
-import { ZayumButton, ZayumCheckbox } from '@/_core/ui/common-ui/shadcn-ui';
+import { ZayumButton } from '@/_core/ui/common-ui/shadcn-ui';
 
 import Title from './auth-title.vue';
-import ThirdPartyLogin from './third-party-login.vue';
 
 interface Props extends AuthenticationProps {
   formSchema: ZayumFormSchema[];
@@ -25,12 +23,12 @@ defineOptions({
 });
 
 const props = withDefaults(defineProps<Props>(), {
-  codeLoginPath: '/auth/code-login',
-  forgetPasswordPath: '/auth/forget-password',
+  codeLoginPath: '/admin/code-login',
+  forgetPasswordPath: '/admin/forget-password',
   formSchema: () => [],
   loading: false,
-  qrCodeLoginPath: '/auth/qrcode-login',
-  registerPath: '/auth/register',
+  qrCodeLoginPath: '/admin/qrcode-login',
+  registerPath: '/admin/register',
   showCodeLogin: true,
   showForgetPassword: true,
   showQrcodeLogin: true,
@@ -56,8 +54,6 @@ const [Form, formApi] = useZayumForm(
     showDefaultActions: false,
   }),
 );
-const router = useRouter();
-
 const REMEMBER_ME_KEY = `REMEMBER_ME_USERNAME_${location.hostname}`;
 
 const localUsername = localStorage.getItem(REMEMBER_ME_KEY) || '';
@@ -74,10 +70,6 @@ async function handleSubmit() {
     );
     emit('submit', values);
   }
-}
-
-function handleGo(path: string) {
-  router.push(path);
 }
 
 onMounted(() => {
@@ -110,28 +102,6 @@ defineExpose({
 
     <Form />
 
-    <div
-      v-if="showRememberMe || showForgetPassword"
-      class="mb-6 flex justify-between"
-    >
-      <div class="flex-center">
-        <ZayumCheckbox
-          v-if="showRememberMe"
-          v-model:checked="rememberMe"
-          name="rememberMe"
-        >
-          {{ $t('authentication.rememberMe') }}
-        </ZayumCheckbox>
-      </div>
-
-      <span
-        v-if="showForgetPassword"
-        class="zayum-link text-sm font-normal"
-        @click="handleGo(forgetPasswordPath)"
-      >
-        {{ $t('authentication.forgetPassword') }}
-      </span>
-    </div>
     <ZayumButton
       :class="{
         'cursor-wait': loading,
@@ -143,44 +113,6 @@ defineExpose({
     >
       {{ submitButtonText || $t('common.login') }}
     </ZayumButton>
-
-    <div
-      v-if="showCodeLogin || showQrcodeLogin"
-      class="mb-2 mt-4 flex items-center justify-between"
-    >
-      <ZayumButton
-        v-if="showCodeLogin"
-        class="w-1/2"
-        variant="outline"
-        @click="handleGo(codeLoginPath)"
-      >
-        {{ $t('authentication.mobileLogin') }}
-      </ZayumButton>
-      <ZayumButton
-        v-if="showQrcodeLogin"
-        class="ml-4 w-1/2"
-        variant="outline"
-        @click="handleGo(qrCodeLoginPath)"
-      >
-        {{ $t('authentication.qrcodeLogin') }}
-      </ZayumButton>
-    </div>
-
-    <!-- 第三方登录 -->
-    <slot name="third-party-login">
-      <ThirdPartyLogin v-if="showThirdPartyLogin" />
-    </slot>
-
-    <slot name="to-register">
-      <div v-if="showRegister" class="mt-3 text-center text-sm">
-        {{ $t('authentication.accountTip') }}
-        <span
-          class="zayum-link text-sm font-normal"
-          @click="handleGo(registerPath)"
-        >
-          {{ $t('authentication.createAccount') }}
-        </span>
-      </div>
-    </slot>
+ 
   </div>
 </template>

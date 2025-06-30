@@ -7,7 +7,7 @@ type SelectOption = BasicOption;
 
 type TabOption = BasicOption;
 
-interface BasicUserInfo {
+interface BasicAdminInfo {
   /**
    * 头像
    */
@@ -32,4 +32,4 @@ interface BasicUserInfo {
 
 type ClassType = Array<object | string> | object | string;
 
-export type { BasicOption, BasicUserInfo, ClassType, SelectOption, TabOption };
+export type { BasicOption, BasicAdminInfo, ClassType, SelectOption, TabOption };

@@ -201,7 +201,7 @@ import {
   fetchUserBalanceLogItems,
   saveUserBalanceLog,
   deleteUserBalanceLog,
-} from "@/api/core/user_balance_log";
+} from "@/api/admin/user_balance_log";
 import { $t } from "@/locales";
 import {
   FileAddOutlined,

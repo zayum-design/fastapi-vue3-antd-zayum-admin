@@ -6,10 +6,6 @@ from app.models.sys_user_score_log import SysUserScoreLog
 from app.schemas.sys_user_score_log import SysUserScoreLogCreate, SysUserScoreLogUpdate
 from app.utils.log_utils import logger
 
-# Forward declaration for QueryBuilder to avoid circular import issues
-if TYPE_CHECKING:
-    class QueryBuilderSysUserScoreLog:
-        pass
 
 class CRUDSysUserScoreLog:
     SEARCHABLE_FIELDS = ['memo']

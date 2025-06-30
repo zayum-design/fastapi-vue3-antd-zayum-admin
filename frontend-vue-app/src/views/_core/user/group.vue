@@ -175,7 +175,7 @@ import {
   fetchUserGroupItems,
   saveUserGroup,
   deleteUserGroup,
-} from "@/api/core/user_group";
+} from "@/api/admin/user_group";
 import { $t } from "@/locales";
 import {
   FileAddOutlined,

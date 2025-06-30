@@ -7,10 +7,10 @@ import re
 
 
 class SysGeneralConfigBase(BaseModel):
-    id: int = Field(...)
-    name: str = Field(Field(...), max_length=30)
-    group: str = Field(Field(...), max_length=30)
-    title: str = Field(Field(...), max_length=100)
+    id: Optional[int] = Field(None)
+    name: str = Field(..., max_length=30)
+    group: str = Field(..., max_length=30)
+    title: str = Field(..., max_length=100)
     tip: Optional[str] = None
     type: Optional[str] = None
     visible: Optional[str] = None
@@ -28,7 +28,6 @@ class SysGeneralConfigBase(BaseModel):
 
 
 class SysGeneralConfigCreate(SysGeneralConfigBase):
-    id: Optional[int] = None
     pass
 
 class SysGeneralConfigUpdate(BaseModel):
@@ -48,22 +47,7 @@ class SysGeneralConfigUpdate(BaseModel):
         orm_mode = True
 
 class SysGeneralConfigInDBBase(SysGeneralConfigBase):
-    id: int
-    name: Optional[str] = None
-    group: Optional[str] = None
-    title: Optional[str] = None
-    tip: Optional[str] = None
-    type: Optional[str] = None
-    visible: Optional[str] = None
-    value: Optional[str] = None
-    content: Optional[str] = None
-    rule: Optional[str] = None
-    extend: Optional[str] = None
-    setting: Optional[str] = None
-
-    class Config:
-        orm_mode = True
+    pass
 
 class SysGeneralConfig(SysGeneralConfigInDBBase):
     pass
-

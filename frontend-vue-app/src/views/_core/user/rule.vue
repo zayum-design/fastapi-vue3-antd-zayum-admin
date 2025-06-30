@@ -229,7 +229,7 @@ import {
   fetchUserRuleItems,
   saveUserRule,
   deleteUserRule,
-} from "@/api/core/user_rule";
+} from "@/api/admin/user_rule";
 import { $t } from "@/locales";
 import {
   FileAddOutlined,

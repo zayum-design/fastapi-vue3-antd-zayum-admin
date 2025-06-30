@@ -175,7 +175,7 @@ import {
   fetchAttachmentCategoryItems,
   saveAttachmentCategory,
   deleteAttachmentCategory,
-} from "@/api/core/attachment_category";
+} from "@/api/admin/attachment_category";
 import { $t } from "@/locales";
 import {
   FileAddOutlined,

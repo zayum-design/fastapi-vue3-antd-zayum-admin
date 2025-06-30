@@ -244,8 +244,8 @@ import {
   fetchAdminGroupItems,
   saveAdminGroup,
   deleteAdminGroup,
-} from "@/api/core/admin_group";
-import { fetchAdminRuleItems } from "@/api/core/admin_rule";
+} from "@/api/admin/admin_group";
+import { fetchAdminRuleItems } from "@/api/admin/admin_rule";
 
 import { $t } from "@/locales";
 import {

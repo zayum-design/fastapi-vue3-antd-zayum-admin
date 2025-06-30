@@ -195,7 +195,7 @@ import {
   fetchGeneralCategoryItems,
   saveGeneralCategory,
   deleteGeneralCategory,
-} from "@/api/core/general_category";
+} from "@/api/admin/general_category";
 import { $t } from "@/locales";
 import {
   FileAddOutlined,

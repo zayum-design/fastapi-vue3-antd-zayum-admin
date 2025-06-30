@@ -161,7 +161,7 @@ import {
   fetchUserScoreLogItems,
   saveUserScoreLog,
   deleteUserScoreLog,
-} from "@/api/core/user_score_log";
+} from "@/api/admin/user_score_log";
 import { $t } from "@/locales";
 import {
   FileAddOutlined,

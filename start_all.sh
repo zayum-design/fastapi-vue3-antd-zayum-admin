@@ -11,5 +11,5 @@ cd ../frontend-vue-app
 ./start.sh
 
 echo -e "\n=== Development servers running ==="
-echo "Frontend: http://localhost:3000"
+echo "Frontend: http://localhost:5173"
 echo "Backend API: http://localhost:8000"

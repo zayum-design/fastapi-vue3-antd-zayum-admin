@@ -143,7 +143,7 @@ import {
   uninstallPlugin,
   enablePlugin,
   purchasePlugin,
-} from "@/api/core/plugin_store";
+} from "@/api/admin/plugin_store";
 import { $t } from "@/locales";
 import { FileAddOutlined, EyeOutlined } from "@ant-design/icons-vue";
 import { message, type FormInstance } from "ant-design-vue";

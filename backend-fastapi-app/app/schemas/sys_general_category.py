@@ -7,15 +7,15 @@ import re
 
 
 class SysGeneralCategoryBase(BaseModel):
-    id: int = Field(...)
+    id: Optional[int] = Field(None)
     pid: int = Field(...)
-    type: str = Field(Field(...), max_length=30)
-    name: str = Field(Field(...), max_length=30)
+    type: str = Field(..., max_length=30)
+    name: str = Field(..., max_length=30)
     thumb: Optional[str] = None
     keywords: Optional[str] = None
     description: Optional[str] = None
     weigh: int = Field(...)
-    status: Literal['normal', 'hidden'] = Field(Field(...), max_length=6)
+    status: Literal['normal', 'hidden'] = Field(..., max_length=6)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -31,7 +31,6 @@ class SysGeneralCategoryBase(BaseModel):
 
 
 class SysGeneralCategoryCreate(SysGeneralCategoryBase):
-    id: Optional[int] = None
     pass
 
 class SysGeneralCategoryUpdate(BaseModel):
@@ -48,19 +47,7 @@ class SysGeneralCategoryUpdate(BaseModel):
         orm_mode = True
 
 class SysGeneralCategoryInDBBase(SysGeneralCategoryBase):
-    id: int
-    pid: Optional[int] = None
-    type: Optional[str] = None
-    name: Optional[str] = None
-    thumb: Optional[str] = None
-    keywords: Optional[str] = None
-    description: Optional[str] = None
-    weigh: Optional[int] = None
-    status: Optional[Literal['normal', 'hidden']] = None
-
-    class Config:
-        orm_mode = True
+    pass
 
 class SysGeneralCategory(SysGeneralCategoryInDBBase):
     pass
-

@@ -7,7 +7,7 @@ import re
 
 
 class SysUserBalanceLogBase(BaseModel):
-    id: int = Field(...)
+    id: Optional[int] = Field(None)
     user_id: int = Field(...)
     balance: Decimal = Field(...)
     before: Decimal = Field(...)
@@ -25,7 +25,6 @@ class SysUserBalanceLogBase(BaseModel):
 
 
 class SysUserBalanceLogCreate(SysUserBalanceLogBase):
-    id: Optional[int] = None
     pass
 
 class SysUserBalanceLogUpdate(BaseModel):
@@ -39,16 +38,7 @@ class SysUserBalanceLogUpdate(BaseModel):
         orm_mode = True
 
 class SysUserBalanceLogInDBBase(SysUserBalanceLogBase):
-    id: int
-    user_id: Optional[int] = None
-    balance: Optional[Decimal] = None
-    before: Optional[Decimal] = None
-    after: Optional[Decimal] = None
-    memo: Optional[str] = None
-
-    class Config:
-        orm_mode = True
+    pass
 
 class SysUserBalanceLog(SysUserBalanceLogInDBBase):
     pass
-

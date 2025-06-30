@@ -7,12 +7,12 @@ import re
 
 
 class SysAdminGroupBase(BaseModel):
-    id: int = Field(...)
+    id: Optional[int] = Field(None)
     pid: int = Field(...)
-    name: str = Field(Field(...), max_length=100)
+    name: str = Field(..., max_length=100)
     rules: list = Field(...)
     access: list = Field(...)
-    status: Literal['normal', 'hidden'] = Field(Field(...), max_length=6)
+    status: Literal['normal', 'hidden'] = Field(..., max_length=6)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -28,7 +28,6 @@ class SysAdminGroupBase(BaseModel):
 
 
 class SysAdminGroupCreate(SysAdminGroupBase):
-    id: Optional[int] = None
     pass
 
 class SysAdminGroupUpdate(BaseModel):
@@ -42,15 +41,7 @@ class SysAdminGroupUpdate(BaseModel):
         orm_mode = True
 
 class SysAdminGroupInDBBase(SysAdminGroupBase):
-    id: int
-    pid: Optional[int] = None
-    name: Optional[str] = None
-    rules: Optional[list] = None
-    access: Optional[list] = None
-    status: Optional[Literal['normal', 'hidden']] = None
-
-    class Config:
-        orm_mode = True
+    pass
 
 class SysAdminGroup(SysAdminGroupInDBBase):
     pass

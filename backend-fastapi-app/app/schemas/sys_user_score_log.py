@@ -7,7 +7,7 @@ import re
 
 
 class SysUserScoreLogBase(BaseModel):
-    id: int = Field(...)
+    id: Optional[int] = Field(None)
     user_id: int = Field(...)
     score: int = Field(...)
     before: int = Field(...)
@@ -22,7 +22,6 @@ class SysUserScoreLogBase(BaseModel):
 
 
 class SysUserScoreLogCreate(SysUserScoreLogBase):
-    id: Optional[int] = None
     pass
 
 class SysUserScoreLogUpdate(BaseModel):
@@ -36,16 +35,7 @@ class SysUserScoreLogUpdate(BaseModel):
         orm_mode = True
 
 class SysUserScoreLogInDBBase(SysUserScoreLogBase):
-    id: int
-    user_id: Optional[int] = None
-    score: Optional[int] = None
-    before: Optional[int] = None
-    after: Optional[int] = None
-    memo: Optional[str] = None
-
-    class Config:
-        orm_mode = True
+    pass
 
 class SysUserScoreLog(SysUserScoreLogInDBBase):
     pass
-

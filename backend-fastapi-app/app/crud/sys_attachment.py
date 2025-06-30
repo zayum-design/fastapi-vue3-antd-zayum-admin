@@ -1,15 +1,10 @@
-from typing import List, Optional, Dict, Any, Union, TYPE_CHECKING
+from typing import List, Optional, Dict, Any, Union
 from fastapi_babel import _
 from sqlalchemy.orm import Session, Query
 from sqlalchemy import and_, or_
 from app.models.sys_attachment import SysAttachment
 from app.schemas.sys_attachment import SysAttachmentCreate, SysAttachmentUpdate
 from app.utils.log_utils import logger
-
-# Forward declaration for QueryBuilder to avoid circular import issues
-if TYPE_CHECKING:
-    class QueryBuilderSysAttachment:
-        pass
 
 class CRUDSysAttachment:
     SEARCHABLE_FIELDS = ['att_type', 'thumb', 'path_file', 'file_name', 'mimetype', 'ext_param', 'storage', 'sha1', 'general_attachment_col']

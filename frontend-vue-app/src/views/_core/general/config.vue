@@ -345,7 +345,7 @@ import {
   deleteGeneralConfig,
   fetchGeneralConfig,
   saveGeneralConfig,
-} from "@/api/core/general";
+} from "@/api/admin/general";
 import {
   FileAddOutlined,
   DeleteOutlined,

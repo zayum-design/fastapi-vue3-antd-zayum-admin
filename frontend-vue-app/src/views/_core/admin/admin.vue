@@ -284,7 +284,7 @@
 <script lang="ts" setup>
 import { ref, reactive, computed, onMounted, type UnwrapRef } from "vue";
 import { AccessControl } from "@/_core/access";
-import { fetchAdminItems, saveAdmin, deleteAdmin } from "@/api/core/admin";
+import { fetchAdminItems, saveAdmin, deleteAdmin } from "@/api/admin/admin";
 import { $t } from "@/locales";
 import {
   FileAddOutlined,

@@ -1,6 +1,6 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 
-interface BasicUserInfo {
+interface BasicAdminInfo {
   avatar: string;
   created_at: string;
   email: string;
@@ -23,7 +23,7 @@ interface AccessState {
   /**
    * 用户信息
    */
-  userInfo: BasicUserInfo | null;
+  userInfo: BasicAdminInfo | null;
   /**
    * 用户角色
    */
@@ -35,7 +35,7 @@ interface AccessState {
  */
 export const useUserStore = defineStore('core-user', {
   actions: {
-    setUserInfo(userInfo: BasicUserInfo | null) {
+    setUserInfo(userInfo: BasicAdminInfo | null) {
       // 设置用户信息
       this.userInfo = userInfo;
       // 设置角色信息
