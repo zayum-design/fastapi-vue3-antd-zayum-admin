@@ -1,7 +1,7 @@
 /**
  * 用户模块专用请求客户端
  */
-import type { RequestClientOptions } from '@/request';
+import type { RequestClientOptions } from '@/_core/request';
 
 import { useAppConfig } from '@/_core/hooks';
 import { preferences } from '@/_core/preferences';
@@ -10,7 +10,7 @@ import {
   defaultResponseInterceptor,
   errorMessageResponseInterceptor,
   RequestClient,
-} from '@/request';
+} from '@/_core/request';
 import { message } from 'ant-design-vue';
 import { useUserAccessStore } from '../../stores/user/access';
 import { useUserAuthStore } from '../../stores/user/auth';

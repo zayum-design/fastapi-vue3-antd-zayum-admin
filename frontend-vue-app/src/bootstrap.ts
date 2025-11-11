@@ -15,7 +15,7 @@ import { useTitle } from '@vueuse/core';
 
 import { $t, setupI18n } from '@/locales';
 
-import { initComponentAdapter } from '@/adapter/component';
+import { initComponentAdapter } from '@/_core/adapter/component';
 import App from './App.vue';
 import { router } from './router';
  

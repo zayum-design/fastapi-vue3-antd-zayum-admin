@@ -259,3 +259,19 @@ async def refresh_token(
     )
 
     return success_response({"access_token": access_token})
+
+
+@router.post("/logout")
+async def logout(
+    admin: SysAdmin = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    """
+    用户登出
+    """
+    # 清除用户的 token
+    admin.token = None
+    db.commit()
+    
+    logger.info(f"User {admin.username} logged out successfully")
+    return success_response({"message": "Logout successful"})

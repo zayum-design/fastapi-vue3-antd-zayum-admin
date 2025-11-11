@@ -101,7 +101,7 @@ import {
   fetch{{ class_name }}Items,
   save{{ class_name }},
   delete{{ class_name }},
-} from "@/api/core/{{ api_table_name }}";
+} from "@/api/admin/{{ api_table_name }}";
 import { $t } from "@/locales";
 import {
   FileAddOutlined,

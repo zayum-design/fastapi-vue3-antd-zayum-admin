@@ -2,7 +2,7 @@ import type { RouteRecordNormalized } from 'vue-router';
 
 import { useRouter } from 'vue-router';
 
-import { isHttpUrl, openRouteInNewWindow, openWindow } from '@/utils';
+import { isHttpUrl, openRouteInNewWindow, openWindow } from '@/_core/utils';
 
 function useNavigation() {
   const router = useRouter();

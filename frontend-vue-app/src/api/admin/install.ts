@@ -40,22 +40,21 @@ export async function restart(): Promise<Success> {
   return requestClient.post<Success>('/install/restart');
 }
 
-import request from "@/utils/request";
 
 export function startImportDb(): Promise<ApiResponse<{
   progress: string;
   next_table: string;
   skipped?: boolean;
 }>> {
-  return request.post("http://127.0.0.1:8000/api/install/import-db?action=start");
+  return requestClient.post("/install/import-db?action=start");
 }
 
-import type { ApiResponse } from "@/utils/request";
+import type { ApiResponse } from "@/request";
 
 export function getNextImportDb(): Promise<ApiResponse<{
   progress: string;
   next_table: string;
   skipped?: boolean;
 }>> {
-  return request.post("http://127.0.0.1:8000/api/install/import-db?action=next");
+  return requestClient.post("/install/import-db?action=next");
 }

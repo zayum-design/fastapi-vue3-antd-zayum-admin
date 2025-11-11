@@ -4,7 +4,7 @@ import type { Recordable } from '@/_core/types';
 
 import type { VxeGridApi } from './api';
 
-import { formatDate, formatDateTime, isFunction } from '@/utils';
+import { formatDate, formatDateTime, isFunction } from '@/_core/utils';
 
 export function extendProxyOptions(
   api: VxeGridApi,

@@ -29,7 +29,7 @@ import { usePriorityValues } from '@/_core/hooks';
 import { EmptyIcon } from '@/_core/ui/icons';
 import { $t } from '@/locales';
 import { usePreferences } from '@/_core/preferences';
-import { cloneDeep, cn, mergeWithArrayOverride } from '@/utils';
+import { cloneDeep, cn, mergeWithArrayOverride } from '@/_core/utils';
 
 import { ZayumHelpTooltip, ZayumLoading } from '@/_core/ui/common-ui/shadcn-ui';
 

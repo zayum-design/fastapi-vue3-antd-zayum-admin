@@ -7,7 +7,7 @@ import { computed, ref, watch } from 'vue';
 import { UserRoundPen } from '@/_core/ui/icons';
 import { $t } from '@/locales';
 import { BUILT_IN_THEME_PRESETS } from '@/_core/preferences';
-import { convertToHsl, TinyColor } from '@/utils';
+import { convertToHsl, TinyColor } from '@/_core/utils';
 
 defineOptions({
   name: 'PreferenceBuiltinTheme',

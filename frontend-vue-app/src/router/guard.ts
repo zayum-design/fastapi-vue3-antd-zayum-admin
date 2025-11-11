@@ -1,14 +1,9 @@
 import type { Router } from "vue-router";
 
-import { DEFAULT_ADMIN_PATH, LOGIN_PATH } from "@/constants";
 import { preferences } from "@/_core/preferences";
-import { useAccessStore, useUserStore } from "@/stores";
-import { startProgress, stopProgress } from "@/utils";
-
-import { accessRoutes, coreRouteNames } from "@/router/routes";
-import { useAuthStore } from "@/store/admin";
-
-import { generateAccess } from "./access";
+import { startProgress, stopProgress } from "@/_core/utils";
+import { setupUserGuard } from "./guard/user";
+import { setupAdminGuard } from "./guard/admin";
 import { installCheck } from "@/api/admin/install";
 import { ref } from "vue";
 
@@ -42,82 +37,6 @@ function setupCommonGuard(router: Router) {
   });
 }
 
-/**
- * 权限访问守卫配置
- * @param router
- */
-function setupAccessGuard(router: Router) {
-  router.beforeEach(async (to, from) => {
-    const accessStore = useAccessStore();
-    const userStore = useUserStore();
-    const authStore = useAuthStore();
-
-    // 基本路由，这些路由不需要进入权限拦截
-    if (coreRouteNames.includes(to.name as string)) {
-      if (to.path === LOGIN_PATH && accessStore.accessToken) {
-        return decodeURIComponent(
-          (to.query?.redirect as string) || DEFAULT_ADMIN_PATH
-        );
-      }
-      return true;
-    }
-
-    // accessToken 检查
-    if (!accessStore.accessToken) {
-      // 明确声明忽略权限访问权限，则可以访问
-      if (to.meta.ignoreAccess) {
-        return true;
-      }
-
-      // 没有访问权限，跳转登录页面
-      if (to.fullPath !== LOGIN_PATH) {
-        return {
-          path: LOGIN_PATH,
-          // 如不需要，直接删除 query
-          query:
-            to.fullPath === DEFAULT_ADMIN_PATH
-              ? {}
-              : { redirect: encodeURIComponent(to.fullPath) },
-          // 携带当前跳转的页面，登录后重新跳转该页面
-          replace: true,
-        };
-      }
-      return to;
-    }
-
-    // 是否已经生成过动态路由
-    if (accessStore.isAccessChecked) {
-      return true;
-    }
-
-    // 生成路由表
-    // 当前登录用户拥有的角色标识列表
-    const userInfo = userStore.userInfo || (await authStore.fetchUserInfo());
-    const userRoles = userInfo.roles ?? [];
-
-    // 生成菜单和路由
-    const { accessibleMenus, accessibleRoutes } = await generateAccess({
-      roles: userRoles,
-      router,
-      // 则会在菜单中显示，但是访问会被重定向到403
-      routes: accessRoutes,
-    });
-
-    // 保存菜单信息和路由信息
-    accessStore.setAccessMenus(accessibleMenus);
-    accessStore.setAccessRoutes(accessibleRoutes);
-    accessStore.setIsAccessChecked(true);
-    const redirectPath = (from.query.redirect ??
-      (to.path === DEFAULT_ADMIN_PATH
-        ? DEFAULT_ADMIN_PATH
-        : to.fullPath)) as string;
-
-    return {
-      ...router.resolve(decodeURIComponent(redirectPath)),
-      replace: true,
-    };
-  });
-}
 
 /**
  * 安装路由守卫配置
@@ -151,8 +70,10 @@ function createRouterGuard(router: Router) {
   setupInstallGuard(router);
   /** 通用 */
   setupCommonGuard(router);
-  /** 权限访问 */
-  setupAccessGuard(router);
+  /** 管理员路由 */
+  setupAdminGuard(router);
+  /** 用户路由 */
+  setupUserGuard(router);
 }
 
 export { createRouterGuard };

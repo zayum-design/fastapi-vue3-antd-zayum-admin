@@ -28,6 +28,7 @@
     "verification": "Verification",
     "token": "Token",
     "status": "Status",
+    "platform": "Platform",
     "created_at": "Created At",
     "updated_at": "Updated At"
   },

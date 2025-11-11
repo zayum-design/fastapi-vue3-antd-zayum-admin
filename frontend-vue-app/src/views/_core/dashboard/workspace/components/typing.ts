@@ -1,6 +1,7 @@
 import type { Component } from 'vue';
 
 interface AnalysisOverviewItem {
+  description: string;
   icon: Component | string;
   title: string;
   totalTitle: string;

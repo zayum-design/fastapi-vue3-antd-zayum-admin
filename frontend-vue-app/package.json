@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --skipLibCheck && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
@@ -70,11 +74,15 @@
     "@types/sortablejs": "^1.15.8",
     "@types/vue-router": "^2.0.0",
     "@vitejs/plugin-vue": "^5.2.1",
+    "@vitest/ui": "^4.0.8",
+    "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.7.0",
+    "jsdom": "^27.1.0",
     "sass-embedded": "^1.85.0",
     "terser": "^5.41.0",
     "typescript": "~5.7.2",
     "vite": "^6.1.0",
+    "vitest": "^4.0.8",
     "vue-tsc": "^2.2.0",
     "vxe-table": "^4.13.33"
   },

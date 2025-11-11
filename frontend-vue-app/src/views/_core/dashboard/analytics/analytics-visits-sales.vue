@@ -20,14 +20,14 @@ onMounted(() => {
         center: ['50%', '50%'],
         color: ['#5ab1ef', '#b6a2de', '#67e0e3', '#2ec7c9'],
         data: [
-          { name: '外包', value: 500 },
-          { name: '定制', value: 310 },
-          { name: '技术支持', value: 274 },
-          { name: '远程', value: 400 },
+          { name: '广州', value: 500 },
+          { name: '上海', value: 310 },
+          { name: '福建', value: 274 },
+          { name: '北京', value: 400 },
         ].sort((a, b) => {
           return a.value - b.value;
         }),
-        name: '商业占比',
+        name: '用户地区分步',
         radius: '80%',
         roseType: 'radius',
         type: 'pie',

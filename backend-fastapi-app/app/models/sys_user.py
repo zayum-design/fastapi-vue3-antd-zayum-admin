@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 # ENUM definitions
 GenderEnum = Enum('male', 'female', name="gender_enum", create_constraint=True)
 StatusEnum = Enum('normal', 'hidden', 'delete', name="status_enum", create_constraint=True)
+PlatformEnum = Enum('ios', 'mac', 'android', 'web', 'pc', 'other', name="platform_enum", create_constraint=True)
 
 class SysUser(TimestampMixin, Base):
     __tablename__ = 'sys_user'
@@ -102,13 +103,14 @@ class SysUser(TimestampMixin, Base):
     verification: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     token: Mapped[Optional[str]] = mapped_column(String(250), nullable=True)
     status: Mapped[str] = mapped_column(StatusEnum, server_default=text("'normal'"))
+    platform: Mapped[str] = mapped_column(PlatformEnum, server_default=text("'other'"))
 
     def __repr__(self):
         return f'<SysUser(id={self.id})>'
 
     @classmethod
     def from_dict(cls, data: dict) -> 'SysUser':
-        valid_keys = {'verification', 'login_failure', 'score', 'user_group_id', 'level', 'login_ip', 'gender', 'status', 'nickname', 'prev_time', 'balance', 'id', 'password', 'max_successions', 'login_time', 'token', 'username', 'successions', 'birthday', 'join_ip', 'avatar', 'mobile', 'bio', 'email'}
+        valid_keys = {'verification', 'login_failure', 'score', 'user_group_id', 'level', 'login_ip', 'gender', 'status', 'nickname', 'prev_time', 'balance', 'id', 'password', 'max_successions', 'login_time', 'token', 'username', 'successions', 'birthday', 'join_ip', 'avatar', 'mobile', 'bio', 'email', 'platform'}
         filtered_data = {key: value for key, value in data.items() if key in valid_keys}
         return cls(**filtered_data)
     
@@ -132,6 +134,9 @@ class SysUser(TimestampMixin, Base):
     @password.setter
     def password(self, pw: str):
         '''设置用户密码，并进行加密'''
+        # 如果密码为空字符串，则不更新密码（保持原密码不变）
+        if pw == "":
+            return
         if not pw:
             raise ValueError(_("Password cannot be empty"))
         if len(pw) < 8:

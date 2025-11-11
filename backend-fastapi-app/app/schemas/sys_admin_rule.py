@@ -31,7 +31,7 @@ class SysAdminRuleBase(BaseModel):
         return v
 
     class Config:
-        orm_mode = True
+        from_attributes = True
         arbitrary_types_allowed = True
 
 class SysAdminRuleTree(SysAdminRuleBase):
@@ -58,7 +58,7 @@ class SysAdminRuleUpdate(BaseModel):
     status: Optional[Literal['normal', 'hidden']] = Field(None, max_length=7)
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class SysAdminRuleInDBBase(SysAdminRuleBase):
     pass

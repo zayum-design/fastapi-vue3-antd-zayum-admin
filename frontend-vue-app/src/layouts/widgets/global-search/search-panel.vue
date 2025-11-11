@@ -6,7 +6,7 @@ import { useRouter } from 'vue-router';
 
 import { SearchX, X } from '@/_core/ui/icons';
 import { $t } from '@/locales';
-import { mapTree, traverseTreeValues, uniqueByField } from '@/utils';
+import { mapTree, traverseTreeValues, uniqueByField } from '@/_core/utils';
 
 import { ZayumIcon, ZayumScrollbar } from '@/_core/ui/common-ui/shadcn-ui';
 import { isHttpUrl } from '@/_core/shared/utils';

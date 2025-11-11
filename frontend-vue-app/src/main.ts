@@ -1,6 +1,6 @@
 
 import { initPreferences } from '@/_core/preferences';
-import { unmountGlobalLoading } from '@/utils';
+import { unmountGlobalLoading } from '@/_core/utils';
 import { overridesPreferences } from '@/m-preferences';
 
 /**

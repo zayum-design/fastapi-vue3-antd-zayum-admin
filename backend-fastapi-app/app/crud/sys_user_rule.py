@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict, Any, Union
+from typing import List, Optional, Dict, Any, Union, TYPE_CHECKING
 from fastapi_babel import _
 from sqlalchemy.orm import Session, Query
 from sqlalchemy import and_, or_
@@ -6,8 +6,13 @@ from app.models.sys_user_rule import SysUserRule
 from app.schemas.sys_user_rule import SysUserRuleCreate, SysUserRuleUpdate
 from app.utils.log_utils import logger
 
+# Forward declaration for QueryBuilder to avoid circular import issues
+if TYPE_CHECKING:
+    class _QueryBuilderSysUserRule:
+        pass
+
 class CRUDSysUserRule:
-    SEARCHABLE_FIELDS = ['type', 'name', 'url_path', 'title', 'description', 'icon', 'menutype', 'extend', 'model_name', 'status']
+    SEARCHABLE_FIELDS = ['rule_type', 'name', 'path', 'component', 'redirect', 'menu_display_type', 'model_name', 'status']
 
     def get(self, db: Session, id: int) -> Optional[SysUserRule]:
         """Get SysUserRule by ID"""

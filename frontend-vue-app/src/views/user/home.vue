@@ -8,7 +8,7 @@
       <p>用户名: {{ userInfo.username }}</p>
       <p>邮箱: {{ userInfo.email || '未设置' }}</p>
       <p>手机号: {{ userInfo.mobile || '未设置' }}</p>
-      <p>注册时间: {{ userInfo.created_at }}</p>
+      <p>注册时间: {{ userInfo.createdAt }}</p>
     </div>
   <div v-else>
     <p class="text-red-500">未获取到用户信息</p>

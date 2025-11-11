@@ -12,10 +12,10 @@ import {
   WorkbenchTrends,
 } from './components';
 import { preferences } from '@/_core/preferences';
-import { useUserStore } from '@/stores';
-import { openWindow } from '@/utils';
+import { useAdminStore } from '@/stores';
+import { openWindow } from '@/_core/utils';
 
-const userStore = useUserStore();
+const adminStore = useAdminStore();
 
 // 同样，这里的 url 也可以使用以 http 开头的外部链接
 const quickNavItems: WorkbenchQuickNavItem[] = [
@@ -57,7 +57,7 @@ const quickNavItems: WorkbenchQuickNavItem[] = [
   },
 ];
  
-const trendItems: WorkbenchTrendItem[] = userStore.userInfo?.logs?.map(log => ({
+const trendItems: WorkbenchTrendItem[] = adminStore.adminInfo?.logs?.map(log => ({
   avatar: 'svg:avatar-1',
   content: `${log.title} ${log.url}`,
   date: new Date(log.created_at).toLocaleString(),
@@ -86,16 +86,16 @@ function navTo(nav: WorkbenchProjectItem | WorkbenchQuickNavItem) {
     console.warn(`Unknown URL for navigation item: ${nav.title} -> ${nav.url}`);
   }
 }
-console.log(userStore.userInfo?.logs)
+console.log(adminStore.adminInfo?.logs)
 </script>
 
 <template>
   <div class="">
     <WorkbenchHeader
-      :avatar="userStore.userInfo?.avatar || preferences.app.defaultAvatar"
+      :avatar="adminStore.adminInfo?.avatar || preferences.app.defaultAvatar"
     >
       <template #title>
-        {{ $t('dashboard.workspace.morningGreeting', { name: userStore.userInfo?.nickname }) }} {{ $t('dashboard.workspace.startWorkPrompt') }}
+        {{ $t('dashboard.workspace.morningGreeting', { name: adminStore.adminInfo?.nickname }) }} {{ $t('dashboard.workspace.startWorkPrompt') }}
       </template>
       <template #description>
         {{ $t('dashboard.workspace.todayDate', { 

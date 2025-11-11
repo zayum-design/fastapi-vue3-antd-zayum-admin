@@ -187,28 +187,7 @@ const handleSubmit = async (formData: any) => {
         console.log('登录成功，获取到token:', res.access_token);
         accessStore.setUserAccessToken(res.access_token);
         accessStore.setIsAccessChecked(true);
-        // 设置虚拟菜单数据
-        accessStore.setMenus([
-          {
-            label: '首页',
-            value: 'home',
-            icon: 'home',
-            path: '/user/home'
-          },
-          {
-            label: '个人中心',
-            value: 'profile',
-            icon: 'user',
-            path: '/user/profile'
-          },
-          {
-            label: '设置',
-            value: 'settings',
-            icon: 'setting',
-            path: '/user/settings'
-          }
-        ]);
-        console.log('已存储user token和虚拟菜单到accessStore');
+        console.log('已存储user token到accessStore');
         
         // 打印localStorage中的token验证存储
         console.log('localStorage token:', localStorage.getItem('userAccessToken'));

@@ -18,47 +18,28 @@ import {
 } from '@/layouts/widgets';
 
 import { preferences } from '@/_core/preferences';
-import { useAccessStore, useUserStore } from '@/stores';
-import { openWindow } from '@/utils';
+import { useUserStore } from '@/stores/modules/user';
+
+import { useUserAccessStore } from '@/stores/user/access';
+import { useUserAuthStore } from '@/stores/user/auth';
+
+import { openWindow } from '@/_core/utils';
 
 import { $t } from '@/locales';
-import { useAuthStore } from '@/store/admin';
 import LoginForm from '@/views/_core/authentication/login.vue';
 
 const notifications = ref<NotificationItem[]>([
-  {
-    avatar: 'https://avatar.vercel.sh/vercel.svg?text=VB',
-    date: '3小时前',
-    isRead: true,
-    message: '描述信息描述信息描述信息',
-    title: '收到了 14 份新周报',
-  },
-  {
-    avatar: 'https://avatar.vercel.sh/1',
-    date: '刚刚',
-    isRead: false,
-    message: '描述信息描述信息描述信息',
-    title: '朱偏右 回复了你',
-  },
-  {
-    avatar: 'https://avatar.vercel.sh/1',
-    date: '2024-01-01',
-    isRead: false,
-    message: '描述信息描述信息描述信息',
-    title: '曲丽丽 评论了你',
-  },
-  {
-    avatar: 'https://avatar.vercel.sh/satori',
-    date: '1天前',
-    isRead: false,
-    message: '描述信息描述信息描述信息',
-    title: '代办提醒',
-  },
+  // {
+  //   avatar: 'https://avatar.vercel.sh/vercel.svg?text=VB',
+  //   date: '3小时前',
+  //   isRead: true,
+  //   message: '描述信息描述信息描述信息',
+  //   title: '收到了 14 份新周报',
+  // },
 ]);
 
 const userStore = useUserStore();
-const authStore = useAuthStore();
-const accessStore = useAccessStore();
+const accessStore = useUserAccessStore();
 const { destroyWatermark, updateWatermark } = useWatermark();
 const showDot = computed(() =>
   notifications.value.some((item) => !item.isRead),
@@ -99,7 +80,39 @@ const avatar = computed(() => {
 });
 
 async function handleLogout() {
-  await authStore.logout(false);
+  try {
+    console.log('开始退出登录...');
+    
+    // 调用用户认证store的logout方法
+    const authStore = useUserAuthStore();
+    await authStore.logout();
+    
+    // 清除用户store中的用户信息 - 使用更可靠的方式
+    userStore.userInfo = null;
+    userStore.userRoles = [];
+    
+    // 清除水印
+    destroyWatermark();
+    
+    // 清除通知
+    notifications.value = [];
+    
+    console.log('退出登录完成，准备跳转到登录页面');
+    
+    // 跳转到登录页面
+    window.location.href = '/user/login';
+  } catch (error) {
+    console.error('退出登录过程中发生错误:', error);
+    // 即使出错也要清除本地状态并跳转
+    const authStore = useUserAuthStore();
+    authStore.userInfo = null;
+    userStore.userInfo = null;
+    userStore.userRoles = [];
+    localStorage.removeItem('userProfile');
+    localStorage.removeItem('userAccessToken');
+    localStorage.removeItem('tokenExpireTime');
+    window.location.href = '/user/login';
+  }
 }
 
 function handleNoticeClear() {
@@ -127,8 +140,6 @@ watch(
 </script>
 
 <template>
-
-<div>safdds</div>
   <UserBasicLayout @clear-preferences-and-logout="handleLogout">
     <div>dsafd</div>
     <template #user-dropdown>

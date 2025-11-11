@@ -31,6 +31,7 @@ class SysUserBase(BaseModel):
     verification: Optional[str] = None
     token: Optional[str] = None
     status: Optional[Literal['normal', 'hidden']] = None
+    platform: Literal['ios', 'mac', 'android', 'web', 'pc', 'other'] = Field(default='other', max_length=10)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -79,6 +80,12 @@ class SysUserBase(BaseModel):
             raise ValueError(_('STATUS should be either normal or hidden'))
         return v
 
+    @field_validator('platform')
+    def validate_platform(cls, v):
+        if v not in ['ios', 'mac', 'android', 'web', 'pc', 'other']:
+            raise ValueError(_('PLATFORM should be one of: ios, mac, android, web, pc, other'))
+        return v
+
     class Config:
         orm_mode = True
         arbitrary_types_allowed = True
@@ -114,6 +121,22 @@ class SysUserUpdate(BaseModel):
     verification: Optional[str] = Field(None, max_length=255)
     token: Optional[str] = Field(None, max_length=250)
     status: Optional[Literal['normal', 'hidden']] = Field(None, max_length=6)
+    platform: Optional[Literal['ios', 'mac', 'android', 'web', 'pc', 'other']] = Field(None, max_length=10)
+
+    @field_validator('password')
+    def validate_password(cls, v):
+        # 在更新时，密码可以为空（表示不修改密码）
+        if v is None or v == "":
+            return v
+        if len(v) < 6:
+            raise ValueError(_('Password must be at least 6 characters long.'))
+        if not re.search(r'[A-Z]', v):
+            raise ValueError(_('Password must contain at least one uppercase letter.'))
+        if not re.search(r'[a-z]', v):
+            raise ValueError(_('Password must contain at least one lowercase letter.'))
+        if not re.search(r'\d', v):
+            raise ValueError(_('Password must contain at least one digit.'))
+        return v
 
     class Config:
         orm_mode = True

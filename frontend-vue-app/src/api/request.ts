@@ -1,7 +1,7 @@
 /**
  * 该文件可自行根据业务逻辑进行调整
  */
-import type { RequestClientOptions } from '@/request';
+import type { RequestClientOptions } from '@/_core/request';
 
 import { useAppConfig } from '@/_core/hooks';
 import { preferences } from '@/_core/preferences';
@@ -10,8 +10,8 @@ import {
   defaultResponseInterceptor,
   errorMessageResponseInterceptor,
   RequestClient,
-} from '@/request';
-import { useAccessStore } from '@/stores';
+} from '@/_core/request';
+import { useAdminAccessStore } from '@/stores';
 
 import { message } from 'ant-design-vue';
 
@@ -34,7 +34,7 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
    */
   async function doReAuthenticate() {
     console.warn('访问令牌或刷新令牌无效或已过期。');
-    const accessStore = useAccessStore();
+    const accessStore = useAdminAccessStore();
     const authStore = useAuthStore();
     accessStore.setAccessToken(null);  // 清空 token
     if (
@@ -52,7 +52,7 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
    * 用于刷新过期的 token，获取新的 access token
    */
   async function doRefreshToken() {
-    const accessStore = useAccessStore();
+    const accessStore = useAdminAccessStore();
     const resp = await refreshTokenApi();  // 调用刷新 token 接口
     const newToken = resp.data;  // 获取新的 token
     accessStore.setAccessToken(newToken);  // 更新 token
@@ -70,10 +70,10 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
   // 请求头处理
   client.addRequestInterceptor({
     fulfilled: async (config) => {
-      const accessStore = useAccessStore();
+      const accessStore = useAdminAccessStore();
 
       // 在请求头中添加 Authorization 和 Accept-Language 字段
-      config.headers.Authorization = formatToken(accessStore.accessToken);
+      config.headers.Authorization = formatToken(accessStore.adminAccessToken);
       config.headers['Accept-Language'] = preferences.app.locale;
       return config;
     },

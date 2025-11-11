@@ -22,13 +22,13 @@ import {
   X,
 } from '@/_core/ui/icons';
 import { $t, useI18n } from '@/locales';
-import { useAccessStore, useTabbarStore } from '@/stores';
-import { filterTree } from '@/utils';
+import { useAdminAccessStore, useTabbarStore } from '@/stores';
+import { filterTree } from '@/_core/utils';
 
 export function useTabbar() {
   const router = useRouter();
   const route = useRoute();
-  const accessStore = useAccessStore();
+  const accessStore = useAdminAccessStore();
   const tabbarStore = useTabbarStore();
   const { contentIsMaximize, toggleMaximize } = useContentMaximize();
   const {

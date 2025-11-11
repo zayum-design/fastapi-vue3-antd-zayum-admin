@@ -7,20 +7,20 @@ import re
 
 
 class SysUserRuleBase(BaseModel):
-    id: Optional[int] = Field(None)
-    type: Literal['menu', 'action'] = Field(..., max_length=6)
-    pid: int = Field(...)
-    plugin: int = Field(...)
-    name: str = Field(..., max_length=150)
-    url_path: str = Field(..., max_length=50)
-    title: str = Field(..., max_length=50)
-    description: Optional[str] = None
-    icon: Optional[str] = None
-    menutype: Optional[Literal['addtabs', 'blank', 'dialog', 'ajax']] = None
-    extend: Optional[str] = None
-    model_name: str = Field(..., max_length=50)
+    id: int = Field(...)
+    rule_type: Literal['menu', 'action'] = Field(Field(...), max_length=6)
+    parent_id: int = Field(...)
+    name: str = Field(Field(...), max_length=150)
+    path: str = Field(Field(...), max_length=50)
+    component: Optional[str] = None
+    redirect: Optional[str] = None
+    meta: Optional[dict] = None
+    permission: Optional[dict] = None
+    menu_display_type: Optional[Literal['ajax', 'addtabs', 'blank', 'dialog']] = None
+    model_name: str = Field(Field(...), max_length=80)
+    deleted_at: Optional[datetime] = None
     weigh: int = Field(...)
-    status: Literal['normal', 'hidden'] = Field(..., max_length=6)
+    status: Literal['normal', 'hidden'] = Field(Field(...), max_length=7)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -39,19 +39,19 @@ class SysUserRuleCreate(SysUserRuleBase):
     pass
 
 class SysUserRuleUpdate(BaseModel):
-    type: Optional[Literal['menu', 'action']] = Field(None, max_length=6)
-    pid: Optional[int] = None
-    plugin: Optional[int] = None
+    rule_type: Optional[Literal['menu', 'action']] = Field(None, max_length=6)
+    parent_id: Optional[int] = None
     name: Optional[str] = Field(None, max_length=150)
-    url_path: Optional[str] = Field(None, max_length=50)
-    title: Optional[str] = Field(None, max_length=50)
-    description: Optional[str] = Field(None, max_length=500)
-    icon: Optional[str] = Field(None, max_length=50)
-    menutype: Optional[Literal['addtabs', 'blank', 'dialog', 'ajax']] = Field(None, max_length=7)
-    extend: Optional[str] = Field(None, max_length=255)
-    model_name: Optional[str] = Field(None, max_length=50)
+    path: Optional[str] = Field(None, max_length=50)
+    component: Optional[str] = Field(None, max_length=200)
+    redirect: Optional[str] = Field(None, max_length=100)
+    meta: Optional[dict] = None
+    permission: Optional[dict] = None
+    menu_display_type: Optional[Literal['ajax', 'addtabs', 'blank', 'dialog']] = Field(None, max_length=7)
+    model_name: Optional[str] = Field(None, max_length=80)
+    deleted_at: Optional[datetime] = None
     weigh: Optional[int] = None
-    status: Optional[Literal['normal', 'hidden']] = Field(None, max_length=6)
+    status: Optional[Literal['normal', 'hidden']] = Field(None, max_length=7)
 
     class Config:
         orm_mode = True
@@ -61,3 +61,4 @@ class SysUserRuleInDBBase(SysUserRuleBase):
 
 class SysUserRule(SysUserRuleInDBBase):
     pass
+

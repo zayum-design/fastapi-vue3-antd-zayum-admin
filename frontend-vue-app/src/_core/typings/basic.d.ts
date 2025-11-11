@@ -19,7 +19,7 @@ interface BasicAdminInfo {
   /**
    * 用户角色
    */
-  roles?: string[];
+  groupId?: number;
   /**
    * 用户id
    */

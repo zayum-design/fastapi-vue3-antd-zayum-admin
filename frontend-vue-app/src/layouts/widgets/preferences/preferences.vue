@@ -4,7 +4,7 @@ import { computed } from 'vue';
 import { Settings } from '@/_core/ui/icons';
 import { $t, loadLocaleMessages } from '@/locales';
 import { preferences, updatePreferences } from '@/_core/preferences';
-import { capitalizeFirstLetter } from '@/utils';
+import { capitalizeFirstLetter } from '@/_core/utils';
 
 import { useZayumDrawer } from '@/_core/ui/common-ui/popup-ui';
 import { ZayumButton } from '@/_core/ui/common-ui/shadcn-ui';

@@ -18,8 +18,8 @@ import {
 } from '@/layouts/widgets';
 
 import { preferences } from '@/_core/preferences';
-import { useAccessStore, useUserStore } from '@/stores';
-import { openWindow } from '@/utils';
+import { useAdminAccessStore, useAdminStore } from '@/stores';
+import { openWindow } from '@/_core/utils';
 
 import { $t } from '@/locales';
 import { useAuthStore } from '@/store/admin';
@@ -56,9 +56,9 @@ const notifications = ref<NotificationItem[]>([
   },
 ]);
 
-const userStore = useUserStore();
+const adminStore = useAdminStore();
 const authStore = useAuthStore();
-const accessStore = useAccessStore();
+const accessStore = useAdminAccessStore();
 const { destroyWatermark, updateWatermark } = useWatermark();
 const showDot = computed(() =>
   notifications.value.some((item) => !item.isRead),
@@ -95,7 +95,7 @@ const menus = computed(() => [
 ]);
 
 const avatar = computed(() => {
-  return userStore.userInfo?.avatar ?? preferences.app.defaultAvatar;
+  return adminStore.adminInfo?.avatar ?? preferences.app.defaultAvatar;
 });
 
 async function handleLogout() {
@@ -114,7 +114,7 @@ watch(
   async (enable) => {
     if (enable) {
       await updateWatermark({
-        content: `${userStore.userInfo?.username}`,
+        content: `${adminStore.adminInfo?.username}`,
       });
     } else {
       destroyWatermark();
@@ -132,8 +132,8 @@ watch(
       <UserDropdown
         :avatar
         :menus
-        :text="userStore.userInfo?.nickname"
-        :description="userStore.userInfo?.email"
+        :text="adminStore.adminInfo?.nickname"
+        :description="adminStore.adminInfo?.email"
         tag-text="Pro"
         @logout="handleLogout"
       />

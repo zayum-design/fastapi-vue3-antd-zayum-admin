@@ -7,6 +7,7 @@ import { computed, ref, useTemplateRef } from 'vue';
 const props = defineProps<{
   barStyle: CSSProperties; // 传入的自定义样式
   toLeft: boolean; // 是否向左收缩
+  isPassing?: boolean; // 是否验证通过（显示打勾动画）
 }>();
 
 // 通过 useTemplateRef 获取 DOM 引用
@@ -14,6 +15,13 @@ const barRef = useTemplateRef<HTMLDivElement>('barRef');
 
 // 记录滑块的宽度
 const width = ref('0');
+
+// 计算属性：判断是否到达最右侧并验证通过
+const isFullWidth = computed(() => {
+  const currentWidth = Number.parseInt(width.value);
+  // 当验证通过且宽度接近容器宽度时添加w-full类
+  return props.isPassing && currentWidth > 200;
+});
 
 // 计算属性：动态合并样式
 const style = computed(() => {
@@ -38,7 +46,10 @@ defineExpose({
 <template>
   <div
     ref="barRef"
-    :class="toLeft && 'transition-width !w-0 duration-300'"
+    :class="{
+      'transition-width !w-0 duration-300': toLeft,
+      'w-full': isFullWidth,
+    }"
     class="bg-success absolute h-full"
   ></div>
 </template>

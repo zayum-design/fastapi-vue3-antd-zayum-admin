@@ -1,10 +1,10 @@
-import type { Recordable, UserInfo } from "@/_core/types";
+import type { Recordable, AdminInfo } from "@/_core/types";
 
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
-import { DEFAULT_ADMIN_PATH, LOGIN_PATH } from "@/constants";
-import { resetAllStores, useAccessStore, useUserStore } from "@/stores";
+import { DEFAULT_ADMIN_PATH, ADMIN_LOGIN_PATH } from "@/constants";
+import { resetAllStores, useAdminAccessStore, useAdminStore } from "@/stores";
 
 import { notification } from "ant-design-vue";
 import { defineStore } from "pinia";
@@ -13,8 +13,8 @@ import { getAccessCodesApi, getProfileApi, loginApi, logoutApi } from "@/api/adm
 import { $t } from "@/locales";
 
 export const useAuthStore = defineStore("auth", () => {
-  const accessStore = useAccessStore();
-  const userStore = useUserStore();
+  const accessStore = useAdminAccessStore();
+  const adminStore = useAdminStore();
   const router = useRouter();
 
   const loginLoading = ref(false);
@@ -28,8 +28,8 @@ export const useAuthStore = defineStore("auth", () => {
     params: Recordable<any>,
     onSuccess?: () => Promise<void> | void
   ) {
-    // 异步处理用户登录操作并获取 accessToken
-    let userInfo: null | UserInfo = null;
+    // 异步处理用户登录操作并获取 adminAccessToken
+    let adminInfo: null | AdminInfo = null;
     try {
       loginLoading.value = true;
       console.log("开始登录..."); // 中文测试输出
@@ -40,16 +40,19 @@ export const useAuthStore = defineStore("auth", () => {
       // 存储 access_token 到 accessStore
       accessStore.setAccessToken(access_token);
 
+      // 设置登录时间并启动过期检查
+      accessStore.setLoginTime();
+
       // 获取用户信息并存储到 accessStore 中
       console.log("开始获取用户信息和权限码..."); // 中文测试输出
-      const [fetchUserInfoResult, accessCodes] = await Promise.all([
-        fetchUserInfo(),
+      const [fetchAdminInfoResult, accessCodes] = await Promise.all([
+        fetchAdminInfo(),
         getAccessCodesApi(),
       ]);
 
-      userInfo = fetchUserInfoResult;
+      adminInfo = fetchAdminInfoResult;
       
-      userStore.setUserInfo(userInfo);
+      adminStore.setAdminInfo(adminInfo);
       accessStore.setAccessCodes(accessCodes);
 
       if (accessStore.loginExpired) {
@@ -62,11 +65,11 @@ export const useAuthStore = defineStore("auth", () => {
           : await router.push(DEFAULT_ADMIN_PATH);
       }
 
-      if (userInfo?.nickname) {
+      if (adminInfo?.nickname) {
         console.log("用户信息获取成功，显示通知..."); // 中文测试输出
         notification.success({
           description: `${$t("authentication.loginSuccessDesc")}:${
-            userInfo?.nickname
+            adminInfo?.nickname
           }`,
           duration: 3,
           message: $t("authentication.loginSuccess"),
@@ -78,7 +81,7 @@ export const useAuthStore = defineStore("auth", () => {
     }
 
     return {
-      userInfo,
+      adminInfo,
     };
   }
 
@@ -93,11 +96,13 @@ export const useAuthStore = defineStore("auth", () => {
     console.log("重置所有存储状态..."); // 中文测试输出
     resetAllStores();
     accessStore.setLoginExpired(false);
+    // 清除登录过期检查定时器
+    accessStore.clearExpiryCheck();
 
     // 回登录页带上当前路由地址
     console.log("跳转到登录页..."); // 中文测试输出
     await router.replace({
-      path: LOGIN_PATH,
+      path: ADMIN_LOGIN_PATH,
       query: redirect
         ? {
             redirect: encodeURIComponent(router.currentRoute.value.fullPath),
@@ -106,13 +111,13 @@ export const useAuthStore = defineStore("auth", () => {
     });
   }
 
-  async function fetchUserInfo() {
-    let userInfo: null | UserInfo = null;
+  async function fetchAdminInfo() {
+    let adminInfo: null | AdminInfo = null;
     console.log("开始获取用户信息..."); // 中文测试输出
-    userInfo = await getProfileApi();
-    console.log("用户信息获取成功:", userInfo); // 中文测试输出
-    userStore.setUserInfo(userInfo);
-    return userInfo;
+    adminInfo = await getProfileApi();
+    console.log("用户信息获取成功:", adminInfo); // 中文测试输出
+    adminStore.setAdminInfo(adminInfo);
+    return adminInfo;
   }
 
   function $reset() {
@@ -123,7 +128,7 @@ export const useAuthStore = defineStore("auth", () => {
   return {
     $reset,
     authLogin,
-    fetchUserInfo,
+    fetchAdminInfo,
     loginLoading,
     logout,
   };

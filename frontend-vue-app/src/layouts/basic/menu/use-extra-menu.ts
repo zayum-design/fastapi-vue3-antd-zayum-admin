@@ -6,13 +6,13 @@ import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { preferences } from '@/_core/preferences';
-import { useAccessStore } from '@/stores';
-import { findRootMenuByPath } from '@/utils';
+import { useAdminAccessStore } from '@/stores';
+import { findRootMenuByPath } from '@/_core/utils';
 
 import { useNavigation } from './use-navigation';
 
 function useExtraMenu(useRootMenus?: ComputedRef<MenuRecordRaw[]>) {
-  const accessStore = useAccessStore();
+  const accessStore = useAdminAccessStore();
   const { navigation } = useNavigation();
 
   const menus = computed(() => useRootMenus?.value ?? accessStore.accessMenus);

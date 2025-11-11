@@ -14,3 +14,8 @@ export const MdiGoogle = createIconifyIcon('mdi:google');
 
 export const MdiQqchat = createIconifyIcon('mdi:qqchat');
 
+// Analytics dashboard icons
+export const UsersIcon = createIconifyIcon('mdi:account-multiple');
+export const UserPlusIcon = createIconifyIcon('mdi:account-plus');
+export const LoginIcon = createIconifyIcon('mdi:login');
+export const ActivityIcon = createIconifyIcon('mdi:chart-line');

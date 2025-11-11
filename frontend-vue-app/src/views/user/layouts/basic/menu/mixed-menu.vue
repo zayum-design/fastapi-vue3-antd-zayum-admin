@@ -6,7 +6,7 @@ import type { NormalMenuProps } from '@/_core/ui/common-ui/menu-ui';
 import { onBeforeMount } from 'vue';
 import { useRoute } from 'vue-router';
 
-import { findMenuByPath } from '@/utils';
+import { findMenuByPath } from '@/_core/utils';
 
 import { NormalMenu } from '@/_core/ui/common-ui/menu-ui';
 

@@ -35,19 +35,14 @@ withDefaults(defineProps<Props>(), {
         <CardContent class="flex items-center justify-between">
           <ZayumCountToAnimator
             :end-val="item.value"
-            :start-val="1"
+            :start-val="0"
             class="text-xl"
             prefix=""
           />
-          <ZayumIcon :icon="item.icon" class="size-8 flex-shrink-0" />
+          <ZayumIcon type="primary" :icon="item.icon" class="size-8 flex-shrink-0" />
         </CardContent>
         <CardFooter class="justify-between">
-          <span>{{ item.totalTitle }}</span>
-          <ZayumCountToAnimator
-            :end-val="item.totalValue"
-            :start-val="1"
-            prefix=""
-          />
+          <span class="text-gray-400">{{ item.description }}</span>
         </CardFooter>
       </Card>
     </template>

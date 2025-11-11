@@ -5,16 +5,16 @@
         <a-card bordered>
           <a-card-header class="flex items-center justify-between">
             <a-space wrap>
-              <AccessControl :codes="['user_group.add','all']" type="code">
-              <a-button
-                type="primary"
-                @click="openDialog(currentItem, 'add')"
-              >
-                <FileAddOutlined />
-                {{ $t("common.add_item") }}
-              </a-button>
-            </AccessControl>
-              <AccessControl :codes="['user_group.delete','all']" type="code">
+              <AccessControl :codes="['user_group.add', 'all']" type="code">
+                <a-button
+                  type="primary"
+                  @click="openDialog(currentItem, 'add')"
+                >
+                  <FileAddOutlined />
+                  {{ $t("common.add_item") }}
+                </a-button>
+              </AccessControl>
+              <AccessControl :codes="['user_group.delete', 'all']" type="code">
                 <a-popconfirm
                   :title="$t('common.confirm_delete')"
                   :ok-text="$t('common.yes')"
@@ -57,7 +57,7 @@
             :row-selection="{
               selectedRowIds: state.selectedRowIds,
               onChange: onSelectChange,
-            }" 
+            }"
             :scroll="{ x: true }"
           >
             <template #bodyCell="{ column, record }">
@@ -70,7 +70,10 @@
                   >
                     <EyeOutlined />
                   </a-button>
-                  <AccessControl :codes="['user_group.edit','all']" type="code">
+                  <AccessControl
+                    :codes="['user_group.edit', 'all']"
+                    type="code"
+                  >
                     <a-button
                       size="small"
                       type="primary"
@@ -78,8 +81,8 @@
                     >
                       <EditOutlined /> </a-button
                   ></AccessControl>
-<AccessControl
-                    :codes="['user_group.delete','all']"
+                  <AccessControl
+                    :codes="['user_group.delete', 'all']"
                     type="code"
                   >
                     <a-popconfirm
@@ -120,49 +123,97 @@
         ref="form"
         :rules="formRules"
       >
-        
         <a-form-item :label="$t('user.group.field.id')" v-if="mode !== 'add'">
-        <a-input v-model:value="currentItem.id" :disabled="true" />
+          <a-input v-model:value="currentItem.id" :disabled="true" />
         </a-form-item>
-            
-        <a-form-item :label="$t('user.group.field.name')" name="name" :rules="formRules.name">
-        <a-input v-model:value="currentItem.name" :disabled="mode === 'view'" />
+
+        <a-form-item
+          :label="$t('user.group.field.pid')"
+          name="pid"
+          :rules="formRules.pid"
+        >
+          <a-input
+            v-model:value="currentItem.pid"
+            :disabled="mode === 'view'"
+          />
         </a-form-item>
-            
-        <a-form-item :label="$t('user.group.field.rules')" name="rules" :rules="formRules.rules">
-        <a-input v-model:value="currentItem.rules" :disabled="mode === 'view'" />
+
+        <a-form-item
+          :label="$t('user.group.field.name')"
+          name="name"
+          :rules="formRules.name"
+        >
+          <a-input
+            v-model:value="currentItem.name"
+            :disabled="mode === 'view'"
+          />
         </a-form-item>
-            
-        <a-form-item :label="$t('user.group.field.status')" name="status" :rules="formRules.status">
-        <a-select
+
+        <a-form-item
+          :label="$t('user.group.field.rules')"
+          name="rules"
+          :rules="formRules.rules"
+        >
+          <a-input
+            v-model:value="currentItem.rules"
+            :disabled="mode === 'view'"
+          />
+        </a-form-item>
+
+        <a-form-item
+          :label="$t('user.group.field.access')"
+          name="access"
+          :rules="formRules.access"
+        >
+          <a-input
+            v-model:value="currentItem.access"
+            :disabled="mode === 'view'"
+          />
+        </a-form-item>
+
+        <a-form-item
+          :label="$t('user.group.field.status')"
+          name="status"
+          :rules="formRules.status"
+        >
+          <a-select
             v-model:value="currentItem.status"
             :disabled="mode === 'view'"
-        >
-            <a-select-option value="normal">{{ $t("common.normal") }}</a-select-option>
-<a-select-option value="hidden">{{ $t("common.hidden") }}</a-select-option>
-        </a-select>
+          >
+            <a-select-option value="normal">{{
+              $t("common.normal")
+            }}</a-select-option>
+            <a-select-option value="hidden">{{
+              $t("common.hidden")
+            }}</a-select-option>
+          </a-select>
         </a-form-item>
-                
-        <a-form-item :label="$t('user.group.field.created_at')" name="created_at">
-        <a-date-picker
+
+        <a-form-item
+          :label="$t('user.group.field.created_at')"
+          name="created_at"
+        >
+          <a-date-picker
             v-model:value="currentItem.created_at"
             show-time
             :disabled="mode === 'view'"
             format="YYYY-MM-DD HH:mm:ss"
             value-format="YYYY-MM-DD HH:mm:ss"
-        />
+          />
         </a-form-item>
-            
-        <a-form-item :label="$t('user.group.field.updated_at')" name="updated_at">
-        <a-date-picker
+
+        <a-form-item
+          :label="$t('user.group.field.updated_at')"
+          name="updated_at"
+        >
+          <a-date-picker
             v-model:value="currentItem.updated_at"
             show-time
             :disabled="mode === 'view'"
             format="YYYY-MM-DD HH:mm:ss"
             value-format="YYYY-MM-DD HH:mm:ss"
-        />
+          />
         </a-form-item>
-            
       </a-form>
     </a-modal>
   </div>
@@ -170,7 +221,7 @@
 
 <script lang="ts" setup>
 import { ref, reactive, computed, onMounted, type UnwrapRef } from "vue";
-import { AccessControl } from '@/_core/access';
+import { AccessControl } from "@/_core/access";
 import {
   fetchUserGroupItems,
   saveUserGroup,
@@ -185,9 +236,9 @@ import {
 } from "@ant-design/icons-vue";
 import { message, type FormInstance } from "ant-design-vue";
 
-import dayjs from 'dayjs';
-import timezone from 'dayjs/plugin/timezone';
-import utc from 'dayjs/plugin/utc';
+import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
 
 // Setup dayjs plugins
 dayjs.extend(utc);
@@ -198,22 +249,24 @@ const form = ref<FormInstance | null>(null);
 
 interface UserGroup {
   id: number;
+  pid: number;
   name: string;
-  rules: string;
+  rules: any;
+  access: any;
   status: string;
   created_at: string;
   updated_at: string;
-  
 }
 
 const currentItem: UnwrapRef<UserGroup> = reactive({
   id: 0,
-      name: '',
-      rules: '',
-      status: 'normal',
-      created_at: dayjs().tz(TIME_ZONE).format('YYYY-MM-DD HH:mm:ss'),
-      updated_at: dayjs().tz(TIME_ZONE).format('YYYY-MM-DD HH:mm:ss'),
-      
+  pid: 0,
+  name: "",
+  rules: "",
+  access: "",
+  status: "normal",
+  created_at: dayjs().tz(TIME_ZONE).format("YYYY-MM-DD HH:mm:ss"),
+  updated_at: dayjs().tz(TIME_ZONE).format("YYYY-MM-DD HH:mm:ss"),
 });
 
 const isDialogVisible = ref(false);
@@ -254,36 +307,55 @@ const wrapperCol = { span: 14 };
 
 // Validation rules
 const formRules = reactive({
-    name: [
-    { required: true, message: $t('user.group.rules.nickname.required') },
-    { min: 2, message: $t('user.group.rules.nickname.min_length') },
-    { max: 30, message: $t('user.group.rules.nickname.max_length') }
+  pid: [
+    { required: true, message: $t("user.group.rules.pid.required") },
+    {
+      validator: (_: any, value: number) => {
+        if (isNaN(value))
+          return Promise.reject($t("user.group.rules.pid.must_be_number"));
+        return Promise.resolve();
+      },
+    },
   ],
-  rules: [
-    { required: true, message: $t('user.group.rules.rules.required') },
-    { max: 255, message: $t('user.group.rules.rules.max_length') }
+  name: [
+    { required: true, message: $t("user.group.rules.nickname.required") },
+    { min: 2, message: $t("user.group.rules.nickname.min_length") },
+    { max: 30, message: $t("user.group.rules.nickname.max_length") },
   ],
-  status: [
-    { required: true, message: $t('user.group.rules.status.required') }
-  ],
+  rules: [{ required: true, message: $t("user.group.rules.rules.required") }],
+  access: [{ required: true, message: $t("user.group.rules.access.required") }],
+  status: [{ required: true, message: $t("user.group.rules.status.required") }],
   created_at: [
-    { required: true, message: $t('user.group.rules.created_at.required') }
+    { required: true, message: $t("user.group.rules.created_at.required") },
   ],
   updated_at: [
-    { required: true, message: $t('user.group.rules.updated_at.required') }
+    { required: true, message: $t("user.group.rules.updated_at.required") },
   ],
-
 });
 
 const columns = computed(() => [
-  { title: $t('user.group.field.id'), dataIndex: 'id', key: 'id' },
-{ title: $t('user.group.field.name'), dataIndex: 'name', key: 'name' },
-{ title: $t('user.group.field.rules'), dataIndex: 'rules', key: 'rules' },
-{ title: $t('user.group.field.status'), dataIndex: 'status', key: 'status' },
-{ title: $t('user.group.field.created_at'), dataIndex: 'created_at', key: 'created_at' },
-{ title: $t('user.group.field.updated_at'), dataIndex: 'updated_at', key: 'updated_at' },
-{ title: $t('common.actions'), key: 'actions', fixed: 'right', align: "center" },
-
+  { title: $t("user.group.field.id"), dataIndex: "id", key: "id" },
+  { title: $t("user.group.field.pid"), dataIndex: "pid", key: "pid" },
+  { title: $t("user.group.field.name"), dataIndex: "name", key: "name" },
+  { title: $t("user.group.field.rules"), dataIndex: "rules", key: "rules" },
+  { title: $t("user.group.field.access"), dataIndex: "access", key: "access" },
+  { title: $t("user.group.field.status"), dataIndex: "status", key: "status" },
+  {
+    title: $t("user.group.field.created_at"),
+    dataIndex: "created_at",
+    key: "created_at",
+  },
+  {
+    title: $t("user.group.field.updated_at"),
+    dataIndex: "updated_at",
+    key: "updated_at",
+  },
+  {
+    title: $t("common.actions"),
+    key: "actions",
+    fixed: "right",
+    align: "center",
+  },
 ]);
 
 const onSelectChange = (selectedRowIds: Key[]) => {
@@ -303,15 +375,14 @@ const openDialog = (item: any, modeText: "add" | "edit" | "view") => {
     resetCurrentItem();
   } else {
     Object.assign(currentItem, item);
-    
+
     if (currentItem.created_at) {
-        item.created_at = dayjs(currentItem.created_at).tz(TIME_ZONE);
+      item.created_at = dayjs(currentItem.created_at).tz(TIME_ZONE);
     }
-            
+
     if (currentItem.updated_at) {
-        item.updated_at = dayjs(currentItem.updated_at).tz(TIME_ZONE);
+      item.updated_at = dayjs(currentItem.updated_at).tz(TIME_ZONE);
     }
-            
   }
   isDialogVisible.value = true;
 };
@@ -319,12 +390,13 @@ const openDialog = (item: any, modeText: "add" | "edit" | "view") => {
 const resetCurrentItem = () => {
   Object.assign(currentItem, {
     id: 0,
-      name: '',
-      rules: '',
-      status: 'normal',
-      created_at: dayjs().tz(TIME_ZONE).format('YYYY-MM-DD HH:mm:ss'),
-      updated_at: dayjs().tz(TIME_ZONE).format('YYYY-MM-DD HH:mm:ss'),
-      
+    pid: "0",
+    name: "",
+    rules: "",
+    access: "",
+    status: "normal",
+    created_at: dayjs().tz(TIME_ZONE).format("YYYY-MM-DD HH:mm:ss"),
+    updated_at: dayjs().tz(TIME_ZONE).format("YYYY-MM-DD HH:mm:ss"),
   });
 };
 
@@ -333,7 +405,6 @@ const closeDialog = () => {
 };
 
 const onSubmit = async () => {
-  
   try {
     // Validate the form before submission
     await form.value?.validate();
@@ -343,24 +414,27 @@ const onSubmit = async () => {
     } else if (mode.value === "edit") {
       await updateItem();
     }
-
   } catch (error) {
     console.log($t("common.error"), error);
   } finally {
     confirmLoading.value = false;
-    
   }
 };
 
 const saveItem = async () => {
   try {
     await saveUserGroup({
+      pid: currentItem.pid,
       name: currentItem.name,
       rules: currentItem.rules,
+      access: currentItem.access,
       status: currentItem.status,
-      created_at: currentItem.created_at ? dayjs(currentItem.created_at).format('YYYY-MM-DD HH:mm:ss') : null,
-      updated_at: currentItem.updated_at ? dayjs(currentItem.updated_at).format('YYYY-MM-DD HH:mm:ss') : null,
-      
+      created_at: currentItem.created_at
+        ? dayjs(currentItem.created_at).format("YYYY-MM-DD HH:mm:ss")
+        : null,
+      updated_at: currentItem.updated_at
+        ? dayjs(currentItem.updated_at).format("YYYY-MM-DD HH:mm:ss")
+        : null,
     });
     resetCurrentItem();
     fetchItems();
@@ -375,12 +449,17 @@ const updateItem = async () => {
   try {
     await saveUserGroup({
       id: currentItem.id,
+      pid: currentItem.pid,
       name: currentItem.name,
       rules: currentItem.rules,
+      access: currentItem.access,
       status: currentItem.status,
-      created_at: currentItem.created_at ? dayjs(currentItem.created_at).format('YYYY-MM-DD HH:mm:ss') : null,
-      updated_at: currentItem.updated_at ? dayjs(currentItem.updated_at).format('YYYY-MM-DD HH:mm:ss') : null,
-      
+      created_at: currentItem.created_at
+        ? dayjs(currentItem.created_at).format("YYYY-MM-DD HH:mm:ss")
+        : null,
+      updated_at: currentItem.updated_at
+        ? dayjs(currentItem.updated_at).format("YYYY-MM-DD HH:mm:ss")
+        : null,
     });
     fetchItems();
     closeDialog();

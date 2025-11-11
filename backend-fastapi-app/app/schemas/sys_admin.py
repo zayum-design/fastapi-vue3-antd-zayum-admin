@@ -63,7 +63,7 @@ class SysAdminBase(BaseModel):
         return v
 
     class Config:
-        orm_mode = True
+        from_attributes = True
         arbitrary_types_allowed = True
 
 
@@ -85,7 +85,7 @@ class SysAdminUpdate(BaseModel):
     status: Optional[Literal['normal', 'hidden']] = Field(None, max_length=6)
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class SysAdminInDBBase(SysAdminBase):
     pass

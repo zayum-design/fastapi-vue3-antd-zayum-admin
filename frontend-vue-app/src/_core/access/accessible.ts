@@ -10,7 +10,7 @@ import {
   generateRoutesByBackend,
   generateRoutesByFrontend,
  
-} from '@/utils';
+} from '@/_core/utils';
 
 import {
   cloneDeep,

@@ -1,11 +1,11 @@
 import { computed } from 'vue';
 
 import { preferences, updatePreferences } from '@/_core/preferences';
-import { useAccessStore, useUserStore } from '@/stores';
+import { useAdminAccessStore, useAdminStore } from '@/stores';
 
 function useAccess() {
-  const accessStore = useAccessStore();
-  const userStore = useUserStore();
+  const accessStore = useAdminAccessStore();
+  const adminStore = useAdminStore();
   const accessMode = computed(() => {
     return preferences.app.accessMode;
   });
@@ -16,7 +16,7 @@ function useAccess() {
    * @param roles
    */
   function hasAccessByRoles(roles: string[]) {
-    const userRoleSet = new Set(userStore.userRoles);
+    const userRoleSet = new Set(adminStore.adminRoles);
     const intersection = roles.filter((item) => userRoleSet.has(item));
     return intersection.length > 0;
   }

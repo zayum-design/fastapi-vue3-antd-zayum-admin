@@ -8,7 +8,7 @@ from app.utils.log_utils import logger
 
 
 class CRUDSysUser:
-    SEARCHABLE_FIELDS = ['username', 'nickname', 'email', 'mobile', 'avatar', 'gender', 'bio', 'login_ip', 'join_ip', 'verification', 'token', 'status']
+    SEARCHABLE_FIELDS = ['username', 'nickname', 'email', 'mobile', 'avatar', 'gender', 'bio', 'login_ip', 'join_ip', 'verification', 'token', 'status', 'platform']
 
     def get(self, db: Session, id: int) -> Optional[SysUser]:
         """Get SysUser by ID"""
@@ -151,6 +151,11 @@ class CRUDSysUser:
         """Update existing SysUser record with uniqueness validation"""
         try:
             update_data = obj_in if isinstance(obj_in, dict) else obj_in.model_dump(exclude_unset=True)
+            
+            # 特殊处理密码字段：如果密码为空字符串，表示不修改密码，从更新数据中移除
+            if 'password' in update_data and update_data['password'] == "":
+                del update_data['password']
+            
             # Check username uniqueness if being changed
             if 'username' in update_data and update_data['username'] is not None:
                 new_username = update_data['username']

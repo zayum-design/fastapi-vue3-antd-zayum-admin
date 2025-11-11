@@ -11,7 +11,11 @@ from app.utils.responses import error_response
 from app.utils.response_handlers import ErrorCode
 from app.utils.log_utils import logger
 
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
+async def validation_exception_handler(request: Request, exc: Exception):
+    if not isinstance(exc, RequestValidationError):
+        # 如果不是RequestValidationError，让其他处理器处理
+        raise exc
+    
     errors = exc.errors()
     logger.error(f"Request validation error: {errors}")
     
@@ -30,15 +34,19 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     
     return error_response(
         ErrorCode.BAD_REQUEST,
-        message=_("Validation error"),
+        message="Validation error",
         data={"errors": formatted_errors}
     )
 
-async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+async def http_exception_handler(request: Request, exc: Exception):
+    if not isinstance(exc, StarletteHTTPException):
+        # 如果不是HTTPException，让其他处理器处理
+        raise exc
+    
     if exc.status_code == 404:
         return error_response(
             ErrorCode.NOT_FOUND,
-            message=_("Resource not found"),
+            message="Resource not found",
             data={"errors": [f"Route {request.url.path} does not exist"]}
         )
     
@@ -51,13 +59,17 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     
     return error_response(
         error_code,
-        message=_("HTTP Error Occurred"),
+        message="HTTP Error Occurred",
         data={"errors": [exc.detail] if isinstance(exc.detail, str) else exc.detail}
     )
 
-async def value_error_exception_handler(request: Request, exc: ValueError):
+async def value_error_exception_handler(request: Request, exc: Exception):
+    if not isinstance(exc, ValueError):
+        # 如果不是ValueError，让其他处理器处理
+        raise exc
+    
     logger.error(f"ValueError: {str(exc)}", exc_info=True)
-    return error_response(ErrorCode.BAD_REQUEST, message=_("Value error"), data={"errors": [str(exc)]})
+    return error_response(ErrorCode.BAD_REQUEST, message="Value error", data={"errors": [str(exc)]})
 
 async def generic_exception_handler(request: Request, exc: Exception):
     if isinstance(exc, StarletteHTTPException):
@@ -67,40 +79,44 @@ async def generic_exception_handler(request: Request, exc: Exception):
     if isinstance(exc, AttributeError):
         return error_response(
             ErrorCode.BAD_REQUEST,
-            message=_("Invalid attribute access"),
-            data={"errors": [str(exc)]},
-            e=None
+            message="Invalid attribute access",
+            data={"errors": [str(exc)]}
         )
     return error_response(
         ErrorCode.INTERNAL_SERVER_ERROR,
-        message=_("Internal Server Error"),
-        data={"errors": [str(exc)]},
-        e=None
+        message="Internal Server Error",
+        data={"errors": [str(exc)]}
     )
 
-async def integrity_error_handler(request: Request, exc: IntegrityError):
+async def integrity_error_handler(request: Request, exc: Exception):
+    if not isinstance(exc, IntegrityError):
+        # 如果不是IntegrityError，让其他处理器处理
+        raise exc
+    
     if isinstance(exc.orig, pymysql.MySQLError):
-        error_msg = str(exc.orig.args[1]) if exc.orig.args else _('Database integrity error')
+        error_msg = str(exc.orig.args[1]) if exc.orig.args else 'Database integrity error'
         error_code = exc.orig.args[0] if exc.orig.args else 500
     else:
-        error_msg = _('Database integrity error')
+        error_msg = 'Database integrity error'
         error_code = 500
         
     return error_response(
         ErrorCode.DATABASE_ERROR,
-        message=_("Data conflict"),
+        message="Data conflict",
         data={
             "errors": [error_msg],
             "code": error_code
-        },
-        e=None
+        }
     )
 
-async def operational_error_handler(request: Request, exc: OperationalError):
+async def operational_error_handler(request: Request, exc: Exception):
+    if not isinstance(exc, OperationalError):
+        # 如果不是OperationalError，让其他处理器处理
+        raise exc
+    
     error_detail = str(exc.orig) if isinstance(exc.orig, pymysql.MySQLError) else 'Database Error'
     return error_response(
         ErrorCode.DATABASE_ERROR,
-        message=_("Database Error"),
-        data={"errors": [error_detail]},
-        e=None
+        message="Database Error",
+        data={"errors": [error_detail]}
     )

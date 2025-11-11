@@ -28,6 +28,7 @@
     "verification": "验证状态",
     "token": "令牌",
     "status": "状态",
+    "platform": "注册平台",
     "created_at": "创建时间",
     "updated_at": "更新时间"
   },

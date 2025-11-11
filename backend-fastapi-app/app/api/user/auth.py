@@ -1,6 +1,6 @@
 # Standard library imports
 from datetime import datetime, timedelta, timezone
-from typing import Annotated, Dict, List
+from typing import Annotated, Dict, List, Literal
 
 # Third-party imports
 from fastapi import APIRouter, HTTPException, status, Request, Depends
@@ -33,30 +33,37 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login_form")
 
 class LoginInput(BaseModel):
     username: str
-    password: str 
-    captcha: bool 
+    password: str
+    captcha: bool
+
 
 class SmsLoginInput(BaseModel):
     phone: str
     code: str
 
+
 class QrLoginInput(BaseModel):
     qr_code: str
+
 
 class RegisterInput(BaseModel):
     username: str
     password: str
     phone: str | None = None
     email: str | None = None
+    platform: Literal['ios', 'mac', 'android', 'web', 'pc', 'other'] = "web"
+
 
 class ForgotPasswordInput(BaseModel):
     username: str
     new_password: str
     code: str
 
+
 class SocialLoginInput(BaseModel):
     type: str  # wechat/qq/weibo
     code: str  # 授权码
+
 
 class TokenData(BaseModel):
     access_token: str
@@ -82,19 +89,20 @@ async def login(
     db: Session = Depends(get_db),
 ):
     """用户账号密码登录接口
-    
+
     Args:
         login_data: 包含用户名、密码的登录数据
         request: FastAPI请求对象
         db: 数据库会话
-        
+
     Returns:
         TokenResponse: 包含access_token的响应
-        
+
     Raises:
         HTTPException: 用户名或密码错误时抛出401异常
     """
-    client_ip = str(getattr(request.client, "host", "127.0.0.1"))  # type: ignore
+    client_ip = str(getattr(request.client, "host",
+                    "127.0.0.1"))  # type: ignore
     user = crud_sys_auth_user.get_by_name(db, username=login_data.username)
 
     if not user or not user.check_password(login_data.password):
@@ -110,7 +118,7 @@ async def login(
             logger.warning(
                 f"Failed login attempt for non-existent user: {login_data.username} from IP: {client_ip}"
             )
-        
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="用户名或密码错误",
@@ -122,7 +130,8 @@ async def login(
     user.login_time = datetime.now(timezone.utc)
     user.login_ip = client_ip
 
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(
+        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.id}, expires_delta=access_token_expires
     )
@@ -143,20 +152,21 @@ async def login_form(
     db: Session = Depends(get_db),
 ):
     """OAuth2标准表单登录接口
-    
+
     Args:
         request: FastAPI请求对象
         form_data: OAuth2标准表单数据
         db: 数据库会话
-        
+
     Returns:
         TokenForm: 包含access_token和token_type的响应
-        
+
     Raises:
         HTTPException: 用户名或密码错误时抛出401异常
     """
     client_ip = request.client.host
-    logger.info(f"Login attempt from IP: {client_ip} with username: {form_data.username}")
+    logger.info(
+        f"Login attempt from IP: {client_ip} with username: {form_data.username}")
 
     user = crud_sys_auth_user.get_by_name(db, username=form_data.username)
 
@@ -173,7 +183,7 @@ async def login_form(
             logger.warning(
                 f"Failed login attempt for non-existent user: {form_data.username} from IP: {client_ip}"
             )
-        
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="用户名或密码错误",
@@ -185,7 +195,8 @@ async def login_form(
     user.login_time = datetime.now(timezone.utc)
     user.login_ip = client_ip
 
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(
+        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.id}, expires_delta=access_token_expires
     )
@@ -221,11 +232,12 @@ async def sms_login(
             detail="用户不存在"
         )
 
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(
+        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.id}, expires_delta=access_token_expires
     )
-    
+
     return success_response({
         "access_token": access_token,
         "user_info": {
@@ -234,6 +246,7 @@ async def sms_login(
         }
     })
 
+
 @router.get("/sms_code")
 async def get_sms_code(phone: str):
     # 模拟发送短信验证码
@@ -241,6 +254,7 @@ async def get_sms_code(phone: str):
         "message": f"验证码已发送到手机{phone}",
         "code": "123456"  # 测试用固定验证码
     })
+
 
 @router.post("/qr_login", response_model=TokenResponse)
 async def qr_login(
@@ -263,12 +277,13 @@ async def qr_login(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="用户不存在"
         )
-    
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+
+    access_token_expires = timedelta(
+        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.id}, expires_delta=access_token_expires
     )
-    
+
     return success_response({
         "access_token": access_token,
         "user_info": {
@@ -277,6 +292,7 @@ async def qr_login(
         }
     })
 
+
 @router.get("/qr_code")
 async def get_qr_code():
     # 模拟生成二维码
@@ -284,6 +300,7 @@ async def get_qr_code():
         "qr_code": "test_qr_code",
         "expire_time": 0
     })
+
 
 @router.post("/register", response_model=TokenResponse)
 async def register(
@@ -310,16 +327,18 @@ async def register(
         level=1,
         gender="male",
         score=0,
+        platform=register_data.platform,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
     user = crud_sys_auth_user.create(db, user_data)
 
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(
+        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.id}, expires_delta=access_token_expires
     )
-    
+
     return success_response({
         "access_token": access_token,
         "user_info": {
@@ -327,6 +346,7 @@ async def register(
             "phone": "13800000000"
         }
     })
+
 
 @router.post("/forgot_password")
 async def forgot_password(
@@ -350,8 +370,9 @@ async def forgot_password(
 
     user.set_password(forgot_data.new_password)
     db.commit()
-    
+
     return success_response({"message": "密码重置成功"})
+
 
 @router.post("/social_login", response_model=TokenResponse)
 async def social_login(
@@ -367,7 +388,8 @@ async def social_login(
         )
 
     # 模拟查找或创建用户
-    user = crud_sys_auth_user.get_by_name(db, username=f"{login_data.type}_user")
+    user = crud_sys_auth_user.get_by_name(
+        db, username=f"{login_data.type}_user")
     if not user:
         user_data = SysUserCreate(
             id=None,
@@ -386,11 +408,12 @@ async def social_login(
         )
         user = crud_sys_auth_user.create(db, user_data)
 
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(
+        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.id}, expires_delta=access_token_expires
     )
-    
+
     return success_response({
         "access_token": access_token,
         "user_info": {
@@ -398,12 +421,14 @@ async def social_login(
             "phone": "13800000000"
         }
     })
- 
+
+
 class ProfileInput(BaseModel):
     nickname: str | None = None
     email: str | None = None
     mobile: str | None = None
     avatar: str | None = None
+
 
 @router.get("/profile")
 async def get_profile(
@@ -419,7 +444,7 @@ async def get_profile(
         "phone": current_user.mobile,
         "avatar": current_user.avatar
     })
-    
+
 
 @router.post("/profile")
 async def update_profile(
@@ -433,6 +458,51 @@ async def update_profile(
     db.refresh(current_user)
     return success_response({})
 
+
+@router.get("/all_router")
+async def get_all_router(
+    current_user: SysUser = Depends(get_current_user), 
+    db: Session = Depends(get_db)
+):
+    group = db.query(SysUserGroup).filter(
+        SysUserGroup.id == current_user.user_group_id).first()
+    items = crud_sys_user_rule.get_all(db)
+    return success_response(transform_items(items))
+
+
+
+def transform_items(items: List[SysUserRule]) -> List[Dict]:
+    def build_tree(parent_id: int) -> List[Dict]:
+        children = []
+        for item in items:
+            if item.parent_id == parent_id:
+                child = {
+                    "id": item.id,
+                    "name": item.name,
+                    "path": f"/admin{item.path}",
+                    "component": item.component,
+                    "meta": item.meta,
+                }
+                child_children = build_tree(item.id)
+                if child_children:
+                    child["children"] = child_children
+                children.append(child)
+        return children
+
+    result = []
+    for item in (item for item in items if item.parent_id == 0):
+        layout = {
+            "id": item.id,
+            "meta": item.meta,
+            "name": item.name,
+            "path": f"/admin{item.path}",
+            "redirect": item.redirect if item.redirect else None,
+            "children": build_tree(item.id),
+        }
+        result.append(layout)
+    return result
+
+
 @router.post("/logout")
 async def logout(
     request: Request,
@@ -440,15 +510,15 @@ async def logout(
     db: Session = Depends(get_db)
 ):
     """用户登出接口
-    
+
     Args:
         request: FastAPI请求对象
         token: 从请求头获取的JWT令牌
         db: 数据库会话
-        
+
     Returns:
         成功或失败响应
-        
+
     Raises:
         HTTPException: 当令牌无效或登出失败时抛出异常
     """
@@ -460,14 +530,14 @@ async def logout(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="无效的访问令牌"
             )
-            
+
         user_id = payload.get("sub")
         if not user_id:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="无效的用户ID"
             )
-            
+
         # 获取用户并清除令牌
         user = crud_sys_auth_user.get(db, id=user_id)
         if user and user.token:
@@ -475,9 +545,9 @@ async def logout(
             db.commit()
             logger.info(f"User {user.username} logged out successfully")
             return success_response({"message": "登出成功"})
-            
+
         return success_response({"message": "用户未登录或已登出"})
-        
+
     except HTTPException:
         raise
     except Exception as e:

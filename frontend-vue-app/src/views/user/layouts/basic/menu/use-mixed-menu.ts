@@ -4,14 +4,14 @@ import { computed, onBeforeMount, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { preferences, usePreferences } from '@/_core/preferences';
-import { useAccessStore } from '@/stores';
-import { findRootMenuByPath } from '@/utils';
+import { useAdminAccessStore } from '@/stores';
+import { findRootMenuByPath } from '@/_core/utils';
 
 import { useNavigation } from './use-navigation';
 
 function useMixedMenu() {
   const { navigation } = useNavigation();
-  const accessStore = useAccessStore();
+  const accessStore = useAdminAccessStore();
   const route = useRoute();
   const splitSideMenus = ref<MenuRecordRaw[]>([]);
   const rootMenuPath = ref<string>('');

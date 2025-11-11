@@ -13,7 +13,7 @@ import {
   usePreferences,
 } from '@/_core/preferences';
 import { useLockStore } from '@/stores';
-import { cloneDeep, mapTree } from '@/utils';
+import { cloneDeep, mapTree } from '@/_core/utils';
 
 import { ZayumLayout } from '@/_core/ui/common-ui/layout-ui';
 import { ZayumBackTop, ZayumLogo } from '@/_core/ui/common-ui/shadcn-ui';

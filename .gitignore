@@ -253,3 +253,5 @@ logs/*
 
 # 可选：保留一个空文件防止 logs 目录被 Git 忽略
 !logs/.gitkeep
+
+tests

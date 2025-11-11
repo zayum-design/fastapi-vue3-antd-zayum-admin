@@ -23,7 +23,7 @@ class SysAdminGroupBase(BaseModel):
         return v
 
     class Config:
-        orm_mode = True
+        from_attributes = True
         arbitrary_types_allowed = True
 
 
@@ -38,7 +38,7 @@ class SysAdminGroupUpdate(BaseModel):
     status: Optional[Literal['normal', 'hidden']] = Field(None, max_length=6)
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class SysAdminGroupInDBBase(SysAdminGroupBase):
     pass

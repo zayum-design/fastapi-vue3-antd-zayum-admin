@@ -18,8 +18,14 @@ def create_db_engine():
             settings.DATABASE_URL,
             pool_pre_ping=True,
             echo=False,
+            pool_size=3,  # 减少连接池大小
+            max_overflow=5,  # 减少最大溢出连接数
+            pool_recycle=1800,  # 30分钟回收连接
+            pool_timeout=15,
             connect_args={
-                'connect_timeout': 5
+                'connect_timeout': 10,
+                'charset': 'utf8mb4',
+                'autocommit': True  # 启用自动提交
             }
         )
         return engine
@@ -63,7 +69,13 @@ def get_db():
     
     db = SessionLocal()
     try:
+        # 测试连接是否有效
+        db.execute(text("SELECT 1"))
         yield db
+    except Exception as e:
+        # 如果连接无效，关闭并重新创建
+        db.close()
+        raise DatabaseConnectionError(f"数据库会话无效: {str(e)}")
     finally:
         db.close()
 

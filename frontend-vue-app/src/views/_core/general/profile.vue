@@ -72,6 +72,7 @@
                     :placeholder="
                       $t('general.profile.leave_empty_to_keep_current_password')
                     "
+                    autocomplete="new-password"
                   />
                 </a-form-item>
               </a-tab-pane>
@@ -304,7 +305,10 @@ async function saveProfile() {
       payload.email = profile.value.email;
       payload.mobile = profile.value.mobile;
     } else if (tab.value === "password") {
-      payload.password = profile.value.password || undefined;
+      // 只有当用户输入了新密码时才更新密码
+      if (profile.value.password && profile.value.password.trim() !== "") {
+        payload.password = profile.value.password;
+      }
     } else if (tab.value === "avatar") {
       payload.avatar = profile.value.avatar.startsWith(webURL)
         ? profile.value.avatar.replace(webURL, "")
@@ -313,6 +317,11 @@ async function saveProfile() {
 
     await saveProfileApi(payload);
     message.success($t("general.profile.profile_updated_successfully"));
+    
+    // 保存成功后清空密码字段
+    if (tab.value === "password") {
+      profile.value.password = "";
+    }
   } catch (error: any) {
     console.error($t("general.profile.error_saving_profile"), error);
   } finally {

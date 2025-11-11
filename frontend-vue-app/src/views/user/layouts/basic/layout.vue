@@ -9,7 +9,7 @@ import { useRefresh } from '@/_core/hooks';
 import { $t, i18n } from '@/locales';
 import { layoutConfig } from '../layout-config';
 import { useLockStore } from '@/stores';
-import { cloneDeep, mapTree } from '@/utils';
+import { cloneDeep, mapTree } from '@/_core/utils';
 
 import { ZayumLayout } from '@/_core/ui/common-ui/layout-ui';
 import { ZayumBackTop, ZayumLogo } from '@/_core/ui/common-ui/shadcn-ui';

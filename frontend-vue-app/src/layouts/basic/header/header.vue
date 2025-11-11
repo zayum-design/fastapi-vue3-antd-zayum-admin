@@ -4,7 +4,7 @@ import { computed, useSlots } from 'vue';
 import { useRefresh } from '@/_core/hooks';
 import { RotateCw,Home } from '@/_core/ui/icons';
 import { preferences, usePreferences } from '@/_core/preferences';
-import { useAccessStore } from '@/stores';
+import { useAdminAccessStore } from '@/stores';
 
 import { ZayumFullScreen, ZayumIconButton } from '@/_core/ui/common-ui/shadcn-ui';
 
@@ -34,7 +34,7 @@ const emit = defineEmits<{ clearPreferencesAndLogout: [] }>();
 
 const REFERENCE_VALUE = 50;
 
-const accessStore = useAccessStore();
+const accessStore = useAdminAccessStore();
 const { globalSearchShortcutKey, preferencesButtonPosition } = usePreferences();
 const slots = useSlots();
 const { refresh } = useRefresh();

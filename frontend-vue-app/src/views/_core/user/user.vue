@@ -137,11 +137,18 @@
         <a-input v-model:value="currentItem.nickname" :disabled="mode === 'view'" />
         </a-form-item>
             
-        <a-form-item :label="$t('user.field.password')" name="password" :rules="formRules.password">
+        <a-form-item :label="$t('user.field.password')" name="password" :rules="formRules.password" v-if="mode === 'add'">
         <a-input-password
             v-model:value="currentItem.password"
             :disabled="mode === 'view'"
             placeholder="请输入密码"
+        />
+        </a-form-item>
+        <a-form-item :label="$t('user.field.password')" name="password" :rules="formRules.password" v-else>
+        <a-input-password
+            v-model:value="currentItem.password"
+            :disabled="mode === 'view'"
+            placeholder="留空表示不修改密码"
         />
         </a-form-item>
             
@@ -251,6 +258,20 @@
         </a-select>
         </a-form-item>
                 
+        <a-form-item :label="$t('user.field.platform')" name="platform">
+        <a-select
+            v-model:value="currentItem.platform"
+            :disabled="mode === 'view'"
+        >
+            <a-select-option value="ios">iOS</a-select-option>
+            <a-select-option value="mac">macOS</a-select-option>
+            <a-select-option value="android">Android</a-select-option>
+            <a-select-option value="web">Web</a-select-option>
+            <a-select-option value="pc">PC</a-select-option>
+            <a-select-option value="other">其他</a-select-option>
+        </a-select>
+        </a-form-item>
+                
         <a-form-item :label="$t('user.field.created_at')" name="created_at">
         <a-date-picker
             v-model:value="currentItem.created_at"
@@ -329,6 +350,7 @@ interface User {
   verification: string | null;
   token: string | null;
   status: string | null;
+  platform: string;
   created_at: string;
   updated_at: string;
   
@@ -359,6 +381,7 @@ const currentItem: UnwrapRef<User> = reactive({
       verification: '',
       token: '',
       status: 'normal',
+      platform: 'web',
       created_at: dayjs().tz(TIME_ZONE).format('YYYY-MM-DD HH:mm:ss'),
       updated_at: dayjs().tz(TIME_ZONE).format('YYYY-MM-DD HH:mm:ss'),
       
@@ -418,8 +441,17 @@ const formRules = reactive({
     { max: 30, message: $t('user.rules.nickname.max_length') }
   ],
   password: [
-    { required: mode.value === 'add', message: $t('user.rules.required') },
-    { validator: (_: any, value: string) => {  const errors = [];  if (mode.value === 'edit' && !value) return Promise.resolve();  if (value && value.length < 6) errors.push($t('user.rules.password.password_min_length'));  if (value && !/[A-Z]/.test(value)) errors.push($t('user.rules.password.password_uppercase_required'));  if (value && !/[a-z]/.test(value)) errors.push($t('user.rules.password.password_lowercase_required'));  if (value && !/\d/.test(value)) errors.push($t('user.rules.password.password_digit_required'));  return errors.length > 0 ? Promise.reject(errors.join('，')) : Promise.resolve();}}
+    { required: false, message: $t('user.rules.required') },
+    { validator: (_: any, value: string) => {  
+      const errors = [];  
+      if (mode.value === 'edit' && !value) return Promise.resolve();  
+      if (mode.value === 'add' && !value) errors.push($t('user.rules.password.required'));
+      if (value && value.length < 6) errors.push($t('user.rules.password.password_min_length'));  
+      if (value && !/[A-Z]/.test(value)) errors.push($t('user.rules.password.password_uppercase_required'));  
+      if (value && !/[a-z]/.test(value)) errors.push($t('user.rules.password.password_lowercase_required'));  
+      if (value && !/\d/.test(value)) errors.push($t('user.rules.password.password_digit_required'));  
+      return errors.length > 0 ? Promise.reject(errors.join('，')) : Promise.resolve();
+    }}
   ],
   email: [
     { required: true, message: $t('user.rules.email.required') },
@@ -478,6 +510,7 @@ const columns = computed(() => [
 { title: $t('user.field.login_failure'), dataIndex: 'login_failure', key: 'login_failure' },
 { title: $t('user.field.join_ip'), dataIndex: 'join_ip', key: 'join_ip' },
 { title: $t('user.field.status'), dataIndex: 'status', key: 'status' },
+{ title: $t('user.field.platform'), dataIndex: 'platform', key: 'platform' },
 { title: $t('user.field.created_at'), dataIndex: 'created_at', key: 'created_at' },
 { title: $t('user.field.updated_at'), dataIndex: 'updated_at', key: 'updated_at' },
 { title: $t('common.actions'), key: 'actions', fixed: 'right', align: "center" },
@@ -548,6 +581,7 @@ const resetCurrentItem = () => {
       verification: '',
       token: '',
       status: 'normal',
+      platform: 'web',
       created_at: dayjs().tz(TIME_ZONE).format('YYYY-MM-DD HH:mm:ss'),
       updated_at: dayjs().tz(TIME_ZONE).format('YYYY-MM-DD HH:mm:ss'),
       
@@ -604,6 +638,7 @@ const saveItem = async () => {
       verification: currentItem.verification,
       token: currentItem.token,
       status: currentItem.status,
+      platform: currentItem.platform,
       created_at: currentItem.created_at ? dayjs(currentItem.created_at).format('YYYY-MM-DD HH:mm:ss') : null,
       updated_at: currentItem.updated_at ? dayjs(currentItem.updated_at).format('YYYY-MM-DD HH:mm:ss') : null,
       
@@ -644,6 +679,7 @@ const updateItem = async () => {
       verification: currentItem.verification,
       token: currentItem.token,
       status: currentItem.status,
+      platform: currentItem.platform,
       created_at: currentItem.created_at ? dayjs(currentItem.created_at).format('YYYY-MM-DD HH:mm:ss') : null,
       updated_at: currentItem.updated_at ? dayjs(currentItem.updated_at).format('YYYY-MM-DD HH:mm:ss') : null,
       

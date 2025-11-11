@@ -233,6 +233,7 @@ function resume() {
       ref="barRef"
       :bar-style="barStyle"
       :to-left="state.toLeft"
+      :is-passing="state.isPassing"
     />
     <SliderCaptchaContent
       ref="contentRef"

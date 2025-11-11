@@ -125,9 +125,9 @@
         <a-input v-model:value="currentItem.id" :disabled="true" />
         </a-form-item>
             
-        <a-form-item :label="$t('user.rule.field.type')" name="type" :rules="formRules.type">
+        <a-form-item :label="$t('user.rule.field.rule_type')" name="rule_type" :rules="formRules.rule_type">
         <a-select
-            v-model:value="currentItem.type"
+            v-model:value="currentItem.rule_type"
             :disabled="mode === 'view'"
         >
             <a-select-option value="menu">{{ $t("common.menu") }}</a-select-option>
@@ -135,52 +135,58 @@
         </a-select>
         </a-form-item>
                 
-        <a-form-item :label="$t('user.rule.field.pid')" name="pid" :rules="formRules.pid">
-        <a-input v-model:value="currentItem.pid" :disabled="mode === 'view'" />
-        </a-form-item>
-            
-        <a-form-item :label="$t('user.rule.field.plugin')" name="plugin" :rules="formRules.plugin">
-        <a-input v-model:value="currentItem.plugin" :disabled="mode === 'view'" />
+        <a-form-item :label="$t('user.rule.field.parent_id')" name="parent_id" :rules="formRules.parent_id">
+        <a-input v-model:value="currentItem.parent_id" :disabled="mode === 'view'" />
         </a-form-item>
             
         <a-form-item :label="$t('user.rule.field.name')" name="name" :rules="formRules.name">
         <a-input v-model:value="currentItem.name" :disabled="mode === 'view'" />
         </a-form-item>
             
-        <a-form-item :label="$t('user.rule.field.url_path')" name="url_path" :rules="formRules.url_path">
-        <a-input v-model:value="currentItem.url_path" :disabled="mode === 'view'" />
+        <a-form-item :label="$t('user.rule.field.path')" name="path" :rules="formRules.path">
+        <a-input v-model:value="currentItem.path" :disabled="mode === 'view'" />
         </a-form-item>
             
-        <a-form-item :label="$t('user.rule.field.title')" name="title" :rules="formRules.title">
-        <a-input v-model:value="currentItem.title" :disabled="mode === 'view'" />
+        <a-form-item :label="$t('user.rule.field.component')" >
+        <a-input v-model:value="currentItem.component" :disabled="mode === 'view'" />
         </a-form-item>
             
-        <a-form-item :label="$t('user.rule.field.description')" >
-        <a-input v-model:value="currentItem.description" :disabled="mode === 'view'" />
+        <a-form-item :label="$t('user.rule.field.redirect')" >
+        <a-input v-model:value="currentItem.redirect" :disabled="mode === 'view'" />
         </a-form-item>
             
-        <a-form-item :label="$t('user.rule.field.icon')" >
-        <a-input v-model:value="currentItem.icon" :disabled="mode === 'view'" />
+        <a-form-item :label="$t('user.rule.field.meta')" >
+        <a-input v-model:value="currentItem.meta" :disabled="mode === 'view'" />
         </a-form-item>
             
-        <a-form-item :label="$t('user.rule.field.menutype')" >
+        <a-form-item :label="$t('user.rule.field.permission')" >
+        <a-input v-model:value="currentItem.permission" :disabled="mode === 'view'" />
+        </a-form-item>
+            
+        <a-form-item :label="$t('user.rule.field.menu_display_type')" >
         <a-select
-            v-model:value="currentItem.menutype"
+            v-model:value="currentItem.menu_display_type"
             :disabled="mode === 'view'"
         >
-            <a-select-option value="addtabs">{{ $t("common.addtabs") }}</a-select-option>
+            <a-select-option value="ajax">{{ $t("common.ajax") }}</a-select-option>
+<a-select-option value="addtabs">{{ $t("common.addtabs") }}</a-select-option>
 <a-select-option value="blank">{{ $t("common.blank") }}</a-select-option>
 <a-select-option value="dialog">{{ $t("common.dialog") }}</a-select-option>
-<a-select-option value="ajax">{{ $t("common.ajax") }}</a-select-option>
         </a-select>
         </a-form-item>
                 
-        <a-form-item :label="$t('user.rule.field.extend')" >
-        <a-input v-model:value="currentItem.extend" :disabled="mode === 'view'" />
-        </a-form-item>
-            
         <a-form-item :label="$t('user.rule.field.model_name')" name="model_name" :rules="formRules.model_name">
         <a-input v-model:value="currentItem.model_name" :disabled="mode === 'view'" />
+        </a-form-item>
+            
+        <a-form-item :label="$t('user.rule.field.deleted_at')" name="deleted_at">
+        <a-date-picker
+            v-model:value="currentItem.deleted_at"
+            show-time
+            :disabled="mode === 'view'"
+            format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
+        />
         </a-form-item>
             
         <a-form-item :label="$t('user.rule.field.weigh')" name="weigh" :rules="formRules.weigh">
@@ -194,6 +200,7 @@
         >
             <a-select-option value="normal">{{ $t("common.normal") }}</a-select-option>
 <a-select-option value="hidden">{{ $t("common.hidden") }}</a-select-option>
+<a-select-option value="deleted">{{ $t("common.deleted") }}</a-select-option>
         </a-select>
         </a-form-item>
                 
@@ -252,17 +259,17 @@ const form = ref<FormInstance | null>(null);
 
 interface UserRule {
   id: number;
-  type: string;
-  pid: number;
-  plugin: number;
+  rule_type: string;
+  parent_id: number;
   name: string;
-  url_path: string;
-  title: string;
-  description: string | null;
-  icon: string | null;
-  menutype: string | null;
-  extend: string | null;
+  path: string;
+  component: string | null;
+  redirect: string | null;
+  meta: any | null;
+  permission: any | null;
+  menu_display_type: string | null;
   model_name: string;
+  deleted_at: string | null;
   weigh: number;
   status: string;
   created_at: string;
@@ -272,17 +279,17 @@ interface UserRule {
 
 const currentItem: UnwrapRef<UserRule> = reactive({
   id: 0,
-      type: 'menu',
-      pid: 0,
-      plugin: 0,
+      rule_type: 'menu',
+      parent_id: 0,
       name: '',
-      url_path: '',
-      title: '',
-      description: '',
-      icon: '',
-      menutype: 'addtabs',
-      extend: '',
+      path: '',
+      component: '',
+      redirect: '',
+      meta: '',
+      permission: '',
+      menu_display_type: 'addtabs',
       model_name: '',
+      deleted_at: null,
       weigh: 0,
       status: 'normal',
       created_at: dayjs().tz(TIME_ZONE).format('YYYY-MM-DD HH:mm:ss'),
@@ -328,20 +335,13 @@ const wrapperCol = { span: 14 };
 
 // Validation rules
 const formRules = reactive({
-    type: [
-    { required: true, message: $t('user.rule.rules.type.required') }
+    rule_type: [
+    { required: true, message: $t('user.rule.rules.rule_type.required') }
   ],
-  pid: [
-    { required: true, message: $t('user.rule.rules.pid.required') },
+  parent_id: [
+    { required: true, message: $t('user.rule.rules.parent_id.required') },
     { validator: (_: any, value: number) => {
-    if (isNaN(value)) return Promise.reject($t('user.rule.rules.pid.must_be_number'));
-    return Promise.resolve();
-    }}
-  ],
-  plugin: [
-    { required: true, message: $t('user.rule.rules.plugin.required') },
-    { validator: (_: any, value: number) => {
-    if (isNaN(value)) return Promise.reject($t('user.rule.rules.plugin.must_be_number'));
+    if (isNaN(value)) return Promise.reject($t('user.rule.rules.parent_id.must_be_number'));
     return Promise.resolve();
     }}
   ],
@@ -350,13 +350,9 @@ const formRules = reactive({
     { min: 2, message: $t('user.rule.rules.nickname.min_length') },
     { max: 30, message: $t('user.rule.rules.nickname.max_length') }
   ],
-  url_path: [
-    { pattern: /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/, message: $t('user.rule.rules.url.invalid_format') }
-  ],
-  title: [
-    { required: true, message: $t('user.rule.rules.nickname.required') },
-    { min: 2, message: $t('user.rule.rules.nickname.min_length') },
-    { max: 30, message: $t('user.rule.rules.nickname.max_length') }
+  path: [
+    { required: true, message: $t('user.rule.rules.path.required') },
+    { max: 255, message: $t('user.rule.rules.path.max_length') }
   ],
   model_name: [
     { required: true, message: $t('user.rule.rules.nickname.required') },
@@ -384,17 +380,17 @@ const formRules = reactive({
 
 const columns = computed(() => [
   { title: $t('user.rule.field.id'), dataIndex: 'id', key: 'id' },
-{ title: $t('user.rule.field.type'), dataIndex: 'type', key: 'type' },
-{ title: $t('user.rule.field.pid'), dataIndex: 'pid', key: 'pid' },
-{ title: $t('user.rule.field.plugin'), dataIndex: 'plugin', key: 'plugin' },
+{ title: $t('user.rule.field.rule_type'), dataIndex: 'rule_type', key: 'rule_type' },
+{ title: $t('user.rule.field.parent_id'), dataIndex: 'parent_id', key: 'parent_id' },
 { title: $t('user.rule.field.name'), dataIndex: 'name', key: 'name' },
-{ title: $t('user.rule.field.url_path'), dataIndex: 'url_path', key: 'url_path' },
-{ title: $t('user.rule.field.title'), dataIndex: 'title', key: 'title' },
-{ title: $t('user.rule.field.description'), dataIndex: 'description', key: 'description' },
-{ title: $t('user.rule.field.icon'), dataIndex: 'icon', key: 'icon' },
-{ title: $t('user.rule.field.menutype'), dataIndex: 'menutype', key: 'menutype' },
-{ title: $t('user.rule.field.extend'), dataIndex: 'extend', key: 'extend' },
+{ title: $t('user.rule.field.path'), dataIndex: 'path', key: 'path' },
+{ title: $t('user.rule.field.component'), dataIndex: 'component', key: 'component' },
+{ title: $t('user.rule.field.redirect'), dataIndex: 'redirect', key: 'redirect' },
+{ title: $t('user.rule.field.meta'), dataIndex: 'meta', key: 'meta' },
+{ title: $t('user.rule.field.permission'), dataIndex: 'permission', key: 'permission' },
+{ title: $t('user.rule.field.menu_display_type'), dataIndex: 'menu_display_type', key: 'menu_display_type' },
 { title: $t('user.rule.field.model_name'), dataIndex: 'model_name', key: 'model_name' },
+{ title: $t('user.rule.field.deleted_at'), dataIndex: 'deleted_at', key: 'deleted_at' },
 { title: $t('user.rule.field.weigh'), dataIndex: 'weigh', key: 'weigh' },
 { title: $t('user.rule.field.status'), dataIndex: 'status', key: 'status' },
 { title: $t('user.rule.field.created_at'), dataIndex: 'created_at', key: 'created_at' },
@@ -421,6 +417,10 @@ const openDialog = (item: any, modeText: "add" | "edit" | "view") => {
   } else {
     Object.assign(currentItem, item);
     
+    if (currentItem.deleted_at) {
+        item.deleted_at = dayjs(currentItem.deleted_at).tz(TIME_ZONE);
+    }
+            
     if (currentItem.created_at) {
         item.created_at = dayjs(currentItem.created_at).tz(TIME_ZONE);
     }
@@ -436,17 +436,17 @@ const openDialog = (item: any, modeText: "add" | "edit" | "view") => {
 const resetCurrentItem = () => {
   Object.assign(currentItem, {
     id: 0,
-      type: 'menu',
-      pid: 0,
-      plugin: 0,
+      rule_type: 'menu',
+      parent_id: 0,
       name: '',
-      url_path: '',
-      title: '',
-      description: '',
-      icon: '',
-      menutype: 'addtabs',
-      extend: '',
+      path: '',
+      component: '',
+      redirect: '',
+      meta: '',
+      permission: '',
+      menu_display_type: 'addtabs',
       model_name: '',
+      deleted_at: dayjs().tz(TIME_ZONE).format('YYYY-MM-DD HH:mm:ss'),
       weigh: 0,
       status: 'normal',
       created_at: dayjs().tz(TIME_ZONE).format('YYYY-MM-DD HH:mm:ss'),
@@ -482,17 +482,17 @@ const onSubmit = async () => {
 const saveItem = async () => {
   try {
     await saveUserRule({
-      type: currentItem.type,
-      pid: currentItem.pid,
-      plugin: currentItem.plugin,
+      rule_type: currentItem.rule_type,
+      parent_id: currentItem.parent_id,
       name: currentItem.name,
-      url_path: currentItem.url_path,
-      title: currentItem.title,
-      description: currentItem.description,
-      icon: currentItem.icon,
-      menutype: currentItem.menutype,
-      extend: currentItem.extend,
+      path: currentItem.path,
+      component: currentItem.component,
+      redirect: currentItem.redirect,
+      meta: currentItem.meta,
+      permission: currentItem.permission,
+      menu_display_type: currentItem.menu_display_type,
       model_name: currentItem.model_name,
+      deleted_at: currentItem.deleted_at ? dayjs(currentItem.deleted_at).format('YYYY-MM-DD HH:mm:ss') : null,
       weigh: currentItem.weigh,
       status: currentItem.status,
       created_at: currentItem.created_at ? dayjs(currentItem.created_at).format('YYYY-MM-DD HH:mm:ss') : null,
@@ -512,17 +512,17 @@ const updateItem = async () => {
   try {
     await saveUserRule({
       id: currentItem.id,
-      type: currentItem.type,
-      pid: currentItem.pid,
-      plugin: currentItem.plugin,
+      rule_type: currentItem.rule_type,
+      parent_id: currentItem.parent_id,
       name: currentItem.name,
-      url_path: currentItem.url_path,
-      title: currentItem.title,
-      description: currentItem.description,
-      icon: currentItem.icon,
-      menutype: currentItem.menutype,
-      extend: currentItem.extend,
+      path: currentItem.path,
+      component: currentItem.component,
+      redirect: currentItem.redirect,
+      meta: currentItem.meta,
+      permission: currentItem.permission,
+      menu_display_type: currentItem.menu_display_type,
       model_name: currentItem.model_name,
+      deleted_at: currentItem.deleted_at ? dayjs(currentItem.deleted_at).format('YYYY-MM-DD HH:mm:ss') : null,
       weigh: currentItem.weigh,
       status: currentItem.status,
       created_at: currentItem.created_at ? dayjs(currentItem.created_at).format('YYYY-MM-DD HH:mm:ss') : null,

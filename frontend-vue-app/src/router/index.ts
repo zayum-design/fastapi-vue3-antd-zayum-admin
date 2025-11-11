@@ -4,7 +4,7 @@ import {
   createWebHistory,
 } from 'vue-router';
 
-import { resetStaticRoutes } from '@/utils';
+import { resetStaticRoutes } from '@/_core/utils';
 
 import { createRouterGuard } from './guard';
 import { routes } from './routes';

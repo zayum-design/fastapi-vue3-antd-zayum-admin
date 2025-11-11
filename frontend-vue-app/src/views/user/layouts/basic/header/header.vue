@@ -4,14 +4,13 @@ import { computed, useSlots } from 'vue';
 import { useRefresh } from '@/_core/hooks';
 import { RotateCw,Home } from '@/_core/ui/icons';
 import { preferences, usePreferences } from '@/_core/preferences';
-import { useAccessStore } from '@/stores';
+import { useAdminAccessStore } from '@/stores';
 
 import { ZayumFullScreen, ZayumIconButton } from '@/_core/ui/common-ui/shadcn-ui';
 
 import {
   GlobalSearch,
   LanguageToggle,
-  PreferencesButton,
   ThemeToggle,
 } from '@/layouts/widgets';
 
@@ -34,8 +33,8 @@ const emit = defineEmits<{ clearPreferencesAndLogout: [] }>();
 
 const REFERENCE_VALUE = 50;
 
-const accessStore = useAccessStore();
-const { globalSearchShortcutKey, preferencesButtonPosition } = usePreferences();
+const accessStore = useAdminAccessStore();
+const { globalSearchShortcutKey } = usePreferences();
 const slots = useSlots();
 const { refresh } = useRefresh();
 
@@ -48,12 +47,6 @@ const rightSlots = computed(() => {
     });
   }
 
-  if (preferencesButtonPosition.value.header) {
-    list.push({
-      index: REFERENCE_VALUE + 10,
-      name: 'preferences',
-    });
-  }
   if (preferences.widget.themeToggle) {
     list.push({
       index: REFERENCE_VALUE + 20,
@@ -112,9 +105,6 @@ const leftSlots = computed(() => {
   return list.sort((a, b) => a.index - b.index);
 });
 
-function clearPreferencesAndLogout() {
-  emit('clearPreferencesAndLogout');
-}
 
 function openHomepage() {
   window.open('/web/home', '_blank'); // Opens the homepage in a new window
@@ -160,12 +150,6 @@ function openHomepage() {
           />
         </template>
 
-        <template v-else-if="slot.name === 'preferences'">
-          <PreferencesButton
-            class="mr-1"
-            @clear-preferences-and-logout="clearPreferencesAndLogout"
-          />
-        </template>
         <template v-else-if="slot.name === 'theme-toggle'">
           <ThemeToggle class="mr-1 mt-[2px]" />
         </template>

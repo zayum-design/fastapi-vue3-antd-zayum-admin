@@ -11,7 +11,7 @@ import {
   Search,
 } from '@/_core/ui/icons';
 import { $t } from '@/locales';
-import { isWindowsOs } from '@/utils';
+import { isWindowsOs } from '@/_core/utils';
 
 import { useZayumModal } from '@/_core/ui/common-ui/popup-ui';
 

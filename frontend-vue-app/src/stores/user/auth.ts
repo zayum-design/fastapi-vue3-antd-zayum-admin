@@ -54,11 +54,19 @@ export const useUserAuthStore = defineStore('userAuth', () => {
     console.log("已清除用户信息和token");
   }
 
+  function $reset() {
+    console.log("重置用户认证状态...");
+    loginLoading.value = false;
+    userInfo.value = null;
+    localStorage.removeItem('userProfile');
+  }
+
   // 初始化时从存储加载用户信息
   initFromStorage();
   console.log('AuthStore初始化完成，当前用户信息:', userInfo.value);
 
   return {
+    $reset,
     fetchUserInfo,
     loginLoading,
     logout,

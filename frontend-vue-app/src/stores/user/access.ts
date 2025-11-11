@@ -3,25 +3,30 @@ import { defineStore } from 'pinia';
 interface MenuItem {
   label: string;
   value: string;
+  name?: string; // 兼容路由name
   icon?: any; // 使用any类型兼容Component和string
   path?: string;
+  meta?: Record<string, any>; // 兼容路由meta
+  children?: MenuItem[]; // 支持子菜单
 }
 
-interface AccessState {
+interface UserAccessState {
   userAccessToken: string | null;
   tokenExpireTime: number | null; // 存储token过期时间戳
   isAccessChecked: boolean;
   loginExpired: boolean;
   menus: MenuItem[];
+  routes: any[];
 }
 
 export const useUserAccessStore = defineStore('userAccess', {
-  state: (): AccessState => ({
+  state: (): UserAccessState => ({
     userAccessToken: null,
     tokenExpireTime: null,
     isAccessChecked: false,
     loginExpired: false,
     menus: [],
+    routes: [],
   }),
 
   getters: {
@@ -116,6 +121,10 @@ export const useUserAccessStore = defineStore('userAccess', {
       this.menus = menus;
       // 持久化存储到localStorage
       localStorage.setItem('userMenus', JSON.stringify(menus));
+    },
+    setRoutes(routes: any[]) {
+      // 用户路由暂不需要持久化存储
+      this.routes = routes;
     },
   },
 });

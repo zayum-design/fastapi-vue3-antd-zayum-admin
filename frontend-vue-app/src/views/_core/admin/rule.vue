@@ -609,8 +609,7 @@ const resetCurrentItem = () => {
   });
   metaItems.value = [
     { key: "title", value: "" },
-    { key: "icon", value: "" },
-    { key: "menuVisibleWithForbidden", value: "false" },
+    { key: "icon", value: "" }
   ]; // 默认添加 title 和 icon
   permissionItems.value = [];
   otherPermissionItems.value = [];

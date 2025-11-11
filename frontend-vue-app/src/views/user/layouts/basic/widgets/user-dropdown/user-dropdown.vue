@@ -15,7 +15,7 @@ import { LockKeyhole, LogOut } from '@/_core/ui/icons';
 import { $t } from '@/locales';
 import { preferences, usePreferences } from '@/_core/preferences';
 import { useLockStore } from '@/stores';
-import { isWindowsOs } from '@/utils';
+import { isWindowsOs } from '@/_core/utils';
 
 import { useZayumModal } from '@/_core/ui/common-ui/popup-ui';
 import {

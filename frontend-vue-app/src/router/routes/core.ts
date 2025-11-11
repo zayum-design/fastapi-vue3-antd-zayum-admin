@@ -1,12 +1,12 @@
 import type { RouteRecordRaw } from "vue-router";
 
-import { DEFAULT_ADMIN_PATH, LOGIN_PATH,DEFAULT_HOME_PATH } from "@/constants";
+import { DEFAULT_ADMIN_PATH, ADMIN_LOGIN_PATH,DEFAULT_HOME_PATH } from "@/constants";
 
 import { AuthPageLayout, BasicLayout, FullLayout } from "@/layouts";
 
 import { UserPageLayout} from "@/views/user/layouts/auth";
 
-import { UserBasicLayout } from "@/views/user/layouts/basic";
+import { UserBasicLayout } from "@/views/user/layouts";
 
 import { $t } from "@/locales";
 import Login from "@/views/_core/authentication/login.vue";
@@ -185,7 +185,7 @@ const coreRoutes: RouteRecordRaw[] = [
     },
     name: "Authentication",
     path: "/admin",
-    redirect: LOGIN_PATH,
+    redirect: ADMIN_LOGIN_PATH,
     children: [
       {
         name: "Login",

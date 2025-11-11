@@ -23,13 +23,14 @@ export interface Success {
   code: number;
 }
 
+
 export interface ErrorData {
   errors: { message: string }[];
 }
 
 export interface SuccessResponse extends ApiResponseBase {
   code: 0;
-  data: SuccessItemsData;
+  data: any;
 }
 
 export interface ErrorResponse extends ApiResponseBase {
@@ -38,6 +39,52 @@ export interface ErrorResponse extends ApiResponseBase {
 }
 
 export type ApiResponse = SuccessResponse | ErrorResponse;
+
+// Analytics related interfaces
+export interface MonthlyLoginData {
+  month: string;
+  count: number;
+}
+
+export interface AnalyticsOverviewData {
+  totalUsers: number;
+  activeUsers: number;
+  newUsers: number;
+  totalVisits: number;
+  bounceRate: number;
+  avgSessionDuration: number;
+}
+
+export interface AnalyticsTrendsData {
+  userTrends: Array<{
+    date: string;
+    count: number;
+  }>;
+  visitTrends: Array<{
+    date: string;
+    count: number;
+  }>;
+}
+
+export interface AnalyticsVisitsData {
+  period: string;
+  visits: number;
+  uniqueVisitors: number;
+  pageViews: number;
+  avgDuration: number;
+}
+
+export interface AnalyticsSourcesData {
+  source: string;
+  visits: number;
+  percentage: number;
+}
+
+export interface AnalyticsRegionsData {
+  region: string;
+  visits: number;
+  percentage: number;
+}
 
 /**
  * 类型守卫：判断是否为 SuccessResponse
