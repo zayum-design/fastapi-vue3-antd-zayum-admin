@@ -20,44 +20,52 @@ class Settings(BaseSettings):
     
     REDIS_URL: RedisURL = "redis://localhost:6379/0"
     
-    ARROW_ROUTES: List[str] = Field(default=[], env="ARROW_ROUTES")
+    ARROW_ROUTES: List[str] = []
     BABEL_DEFAULT_LOCALE: str = "ch"  # 默认值 'en'
     BABEL_DOMAIN: str = "messages"
-    TIMEZONE: str = Field("UTC", env="TIMEZONE")
+    TIMEZONE: str = "UTC"
 
     # MySQL 配置
-    MYSQL_USER: str = Field(..., env="MYSQL_USER")
-    MYSQL_PASSWORD: str = Field(..., env="MYSQL_PASSWORD")
-    MYSQL_DB: str = Field(..., env="MYSQL_DB")
-    MYSQL_HOST: str = Field(..., env="MYSQL_HOST")
-    MYSQL_PORT: int = Field(..., env="MYSQL_PORT")
+    MYSQL_USER: str
+    MYSQL_PASSWORD: str
+    MYSQL_DB: str
+    MYSQL_HOST: str
+    MYSQL_PORT: int
 
-    GENERATOR_ENABLED: bool = Field(False, env="GENERATOR_ENABLED")
+    GENERATOR_ENABLED: bool = False
 
     # ----------------------------------------
     # 上传相关配置
     # ----------------------------------------
-    MAX_FILE_SIZE: int = Field(
-        10 * 1024 * 1024,  # 默认 10MB
-        env="MAX_FILE_SIZE",
-        description="文件上传的最大大小（字节）"
-    )
-    ALLOWED_EXTENSIONS: List[str] = Field(
-        default=["jpg", "png", "gif", "txt", "pdf"],
-        env="ALLOWED_EXTENSIONS",
-        description="允许的文件扩展名"
-    )
-    UPLOAD_DIR: str = Field(
-        "./uploads",
-        env="UPLOAD_DIR",
-        description="文件上传的存储目录"
-    )
-    
-    PLUGINS_DIR: str = Field(
-        "./plugins",
-        env="PLUGINS_DIR",
-        description="插件目录"
-    )
+    MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 默认 10MB
+    ALLOWED_EXTENSIONS: List[str] = ["jpg", "png", "gif", "txt", "pdf"]
+    UPLOAD_DIR: str = "./uploads"
+    PLUGINS_DIR: str = "./plugins"
+
+    # ----------------------------------------
+    # CORS 配置
+    # ----------------------------------------
+    ALLOW_ORIGINS: List[str] = ["http://localhost:5173", "http://127.0.0.1:5173", "http://demo.zayumadmin.com", "http://zayumadmin.com"]
+    ALLOW_CREDENTIALS: bool = True
+    ALLOW_METHODS: List[str] = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
+    ALLOW_HEADERS: List[str] = ["*", "X-Captcha-Id"]
+    EXPOSE_HEADERS: List[str] = ["X-Captcha-Id"]
+
+    # ----------------------------------------
+    # Swagger UI 配置
+    # ----------------------------------------
+    SWAGGER_CSS_URL: str = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.9.0/swagger-ui.css"
+    SWAGGER_FAVICON_URL: str = "https://fastapi.tiangolo.com/img/favicon.png"
+    SWAGGER_BUNDLE_JS_URLS: List[str] = [
+        "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.9.0/swagger-ui-bundle.js",
+        "https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"
+    ]
+    SWAGGER_PRESET_JS_URLS: List[str] = [
+        "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.9.0/swagger-ui-standalone-preset.js",
+        "https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"
+    ]
+    SWAGGER_LOADING_TEXT: str = "正在加载 API 文档..."
+    SWAGGER_ERROR_MESSAGE: str = "无法加载 API 文档资源。请检查网络连接或使用 OpenAPI JSON 文件"
 
     # 计算属性，用于生成数据库连接字符串
     @property
