@@ -213,8 +213,51 @@
           name="meta"
           :rules="formRules.meta"
         >
+          <!-- Title field as hidden input with label display -->
+          <div v-if="getMetaItem('title')" class="meta-field-display">
+            <div class="field-row">
+              <span class="field-label">{{ $t("admin.rule.meta_title") }}</span>
+              <a-input
+                :value="getMetaItem('title')?.value"
+                @update:value="updateMetaItem('title', $event)"
+                :placeholder="$t('admin.rule.meta_title_placeholder')"
+                :disabled="mode === 'view'"
+                style="flex: 1;"
+              />
+            </div>
+          </div>
+
+          <!-- Icon field as hidden input with label display -->
+          <div v-if="getMetaItem('icon')" class="meta-field-display">
+            <div class="field-row">
+              <span class="field-label">{{ $t("admin.rule.meta_icon") }}</span>
+              <div class="icon-field-wrapper">
+                <a-input
+                  :value="getMetaItem('icon')?.value"
+                  @update:value="updateMetaItem('icon', $event)"
+                  :placeholder="$t('admin.rule.meta_icon_placeholder')"
+                  :disabled="mode === 'view'"
+                  style="margin-right: 8px; flex: 1;"
+                />
+                <div class="icon-preview-wrapper" v-if="getMetaItem('icon')?.value">
+                  <div class="selected-icon-preview">
+                    <Icon :icon="getMetaItem('icon')?.value || ''" width="20" height="20" />
+                  </div>
+                </div>
+                <a-button
+                  type="primary"
+                  @click="openIconDialog(metaItems.findIndex(item => item.key === 'icon'))"
+                  :disabled="mode === 'view'"
+                >
+                  {{ $t("common.select") }}
+                </a-button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Other meta fields -->
           <div
-            v-for="(item, index) in metaItems"
+            v-for="(item, index) in metaItems.filter(item => item.key !== 'title' && item.key !== 'icon')"
             :key="index"
             class="meta-item"
           >
@@ -227,6 +270,7 @@
               v-model:value="item.value"
               placeholder="Value"
               :disabled="mode === 'view'"
+              style="margin-right: 8px;"
             />
             <a-button
               type="link"
@@ -351,6 +395,43 @@
         </a-form-item>
       </a-form>
     </a-modal>
+
+    <!-- Icon Selector Dialog -->
+    <a-modal
+      v-model:open="isIconDialogVisible"
+      title="选择图标"
+      @cancel="closeIconDialog"
+      :maskClosable="false"
+      :width="600"
+      :zIndex="2000"
+    >
+      <div class="icon-selector">
+        <a-input-search
+          v-model:value="iconSearch"
+          placeholder="搜索图标..."
+          @search="filterIcons"
+          style="margin-bottom: 16px;"
+        />
+        <div class="icon-grid">
+          <div
+            v-for="icon in filteredIcons"
+            :key="icon"
+            class="icon-item"
+            :class="{ selected: selectedIcon === icon }"
+            @click="selectIcon(icon)"
+          >
+            <div class="icon-preview">
+              <Icon :icon="icon" width="24" height="24" />
+            </div>
+            <div class="icon-name">{{ icon }}</div>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <a-button @click="closeIconDialog">取消</a-button>
+        <a-button type="primary" @click="confirmIconSelection">确定</a-button>
+      </template>
+    </a-modal>
   </div>
 </template>
 
@@ -370,6 +451,7 @@ import {
   EditOutlined,
   CloseOutlined,
 } from "@ant-design/icons-vue";
+import { Icon } from "@iconify/vue";
 import { message, type FormInstance } from "ant-design-vue";
 const form = ref<FormInstance | null>(null);
 
@@ -434,27 +516,548 @@ const state = reactive<{
 const size = ref("middle");
 const loading = ref(false);
 const rowKey = ref("id");
-const items = ref([]);
+const items = ref<any[]>([]);
 const pagination = ref({ current: 1, pageSize: 1000, total: 0 });
 const search = ref("");
 
 const labelCol = { style: { width: "150px" } };
 const wrapperCol = { span: 14 };
 
+// Icon selector related variables
+const isIconDialogVisible = ref(false);
+const iconSearch = ref("");
+const selectedIcon = ref("");
+const currentIconIndex = ref(-1);
+
+// Common MDI icons
+const mdiIcons = [
+  "mdi:account",
+  "mdi:account-group",
+  "mdi:account-group-outline",
+  "mdi:home",
+  "mdi:home-outline",
+  "mdi:cog",
+  "mdi:cog-outline",
+  "mdi:settings",
+  "mdi:settings-outline",
+  "mdi:menu",
+  "mdi:menu-open",
+  "mdi:view-dashboard",
+  "mdi:view-dashboard-outline",
+  "mdi:chart-bar",
+  "mdi:chart-bar-stacked",
+  "mdi:chart-line",
+  "mdi:chart-pie",
+  "mdi:file",
+  "mdi:file-outline",
+  "mdi:folder",
+  "mdi:folder-outline",
+  "mdi:plus",
+  "mdi:plus-box",
+  "mdi:minus",
+  "mdi:close",
+  "mdi:check",
+  "mdi:edit",
+  "mdi:delete",
+  "mdi:eye",
+  "mdi:eye-outline",
+  "mdi:lock",
+  "mdi:lock-outline",
+  "mdi:key",
+  "mdi:key-outline",
+  "mdi:bell",
+  "mdi:bell-outline",
+  "mdi:message",
+  "mdi:message-outline",
+  "mdi:email",
+  "mdi:email-outline",
+  "mdi:phone",
+  "mdi:phone-outline",
+  "mdi:calendar",
+  "mdi:calendar-outline",
+  "mdi:clock",
+  "mdi:clock-outline",
+  "mdi:star",
+  "mdi:star-outline",
+  "mdi:heart",
+  "mdi:heart-outline",
+  "mdi:thumb-up",
+  "mdi:thumb-up-outline",
+  "mdi:thumb-down",
+  "mdi:thumb-down-outline",
+  "mdi:share",
+  "mdi:share-outline",
+  "mdi:download",
+  "mdi:upload",
+  "mdi:refresh",
+  "mdi:sync",
+  "mdi:search",
+  "mdi:filter",
+  "mdi:sort",
+  "mdi:arrow-up",
+  "mdi:arrow-down",
+  "mdi:arrow-left",
+  "mdi:arrow-right",
+  "mdi:chevron-up",
+  "mdi:chevron-down",
+  "mdi:chevron-left",
+  "mdi:chevron-right",
+  "mdi:information",
+  "mdi:information-outline",
+  "mdi:alert",
+  "mdi:alert-outline",
+  "mdi:warning",
+  "mdi:warning-outline",
+  "mdi:error",
+  "mdi:error-outline",
+  "mdi:success",
+  "mdi:success-outline",
+  "mdi:help",
+  "mdi:help-outline",
+  "mdi:question-mark",
+  "mdi:question-mark-outline",
+  "mdi:play",
+  "mdi:pause",
+  "mdi:stop",
+  "mdi:skip-next",
+  "mdi:skip-previous",
+  "mdi:volume-high",
+  "mdi:volume-medium",
+  "mdi:volume-low",
+  "mdi:volume-off",
+  "mdi:image",
+  "mdi:image-outline",
+  "mdi:video",
+  "mdi:video-outline",
+  "mdi:music",
+  "mdi:music-outline",
+  "mdi:book",
+  "mdi:book-outline",
+  "mdi:bookmark",
+  "mdi:bookmark-outline",
+  "mdi:tag",
+  "mdi:tag-outline",
+  "mdi:link",
+  "mdi:link-off",
+  "mdi:attachment",
+  "mdi:cloud",
+  "mdi:cloud-outline",
+  "mdi:cloud-upload",
+  "mdi:cloud-download",
+  "mdi:database",
+  "mdi:database-outline",
+  "mdi:server",
+  "mdi:server-outline",
+  "mdi:network",
+  "mdi:network-outline",
+  "mdi:wifi",
+  "mdi:wifi-off",
+  "mdi:bluetooth",
+  "mdi:bluetooth-off",
+  "mdi:battery",
+  "mdi:battery-outline",
+  "mdi:power",
+  "mdi:power-off",
+  "mdi:flash",
+  "mdi:flash-outline",
+  "mdi:lightbulb",
+  "mdi:lightbulb-outline",
+  "mdi:weather-sunny",
+  "mdi:weather-night",
+  "mdi:weather-rainy",
+  "mdi:weather-snowy",
+  "mdi:weather-windy",
+  "mdi:weather-cloudy",
+  "mdi:map",
+  "mdi:map-outline",
+  "mdi:location",
+  "mdi:location-outline",
+  "mdi:navigation",
+  "mdi:compass",
+  "mdi:compass-outline",
+  "mdi:car",
+  "mdi:car-outline",
+  "mdi:bus",
+  "mdi:bus-outline",
+  "mdi:train",
+  "mdi:train-outline",
+  "mdi:airplane",
+  "mdi:airplane-outline",
+  "mdi:ship",
+  "mdi:ship-outline",
+  "mdi:bicycle",
+  "mdi:bicycle-outline",
+  "mdi:walk",
+  "mdi:run",
+  "mdi:swim",
+  "mdi:golf",
+  "mdi:ski",
+  "mdi:snowboard",
+  "mdi:gamepad",
+  "mdi:gamepad-outline",
+  "mdi:controller",
+  "mdi:controller-outline",
+  "mdi:headphones",
+  "mdi:headphones-outline",
+  "mdi:microphone",
+  "mdi:microphone-outline",
+  "mdi:speaker",
+  "mdi:speaker-outline",
+  "mdi:tv",
+  "mdi:tv-outline",
+  "mdi:monitor",
+  "mdi:monitor-outline",
+  "mdi:laptop",
+  "mdi:laptop-outline",
+  "mdi:tablet",
+  "mdi:tablet-outline",
+  "mdi:cellphone",
+  "mdi:cellphone-outline",
+  "mdi:desktop-mac",
+  "mdi:desktop-mac-outline",
+  "mdi:desktop-windows",
+  "mdi:desktop-windows-outline",
+  "mdi:apple",
+  "mdi:microsoft",
+  "mdi:google",
+  "mdi:facebook",
+  "mdi:twitter",
+  "mdi:instagram",
+  "mdi:linkedin",
+  "mdi:youtube",
+  "mdi:github",
+  "mdi:git",
+  "mdi:bitbucket",
+  "mdi:docker",
+  "mdi:kubernetes",
+  "mdi:aws",
+  "mdi:azure",
+  "mdi:google-cloud",
+  "mdi:digital-ocean",
+  "mdi:heroku",
+  "mdi:linux",
+  "mdi:windows",
+  "mdi:apple-ios",
+  "mdi:android",
+  "mdi:web",
+  "mdi:web-outline",
+  "mdi:language",
+  "mdi:language-outline",
+  "mdi:translate",
+  "mdi:translate-outline",
+  "mdi:code",
+  "mdi:code-outline",
+  "mdi:xml",
+  "mdi:json",
+  "mdi:markdown",
+  "mdi:html",
+  "mdi:css",
+  "mdi:javascript",
+  "mdi:typescript",
+  "mdi:python",
+  "mdi:java",
+  "mdi:php",
+  "mdi:ruby",
+  "mdi:go",
+  "mdi:rust",
+  "mdi:swift",
+  "mdi:kotlin",
+  "mdi:scala",
+  "mdi:c",
+  "mdi:c-plus-plus",
+  "mdi:c-sharp",
+  "mdi:vue",
+  "mdi:vue-outline",
+  "mdi:react",
+  "mdi:angular",
+  "mdi:svelte",
+  "mdi:ember",
+  "mdi:backbone",
+  "mdi:jquery",
+  "mdi:bootstrap",
+  "mdi:tailwind",
+  "mdi:material-design",
+  "mdi:ant-design",
+  "mdi:element",
+  "mdi:vuetify",
+  "mdi:quasar",
+  "mdi:nuxt",
+  "mdi:next",
+  "mdi:gatsby",
+  "mdi:grid",
+  "mdi:grid-outline",
+  "mdi:list",
+  "mdi:list-outline",
+  "mdi:table",
+  "mdi:table-outline",
+  "mdi:card",
+  "mdi:card-outline",
+  "mdi:form",
+  "mdi:form-outline",
+  "mdi:input",
+  "mdi:input-outline",
+  "mdi:button",
+  "mdi:button-outline",
+  "mdi:select",
+  "mdi:select-outline",
+  "mdi:checkbox",
+  "mdi:checkbox-outline",
+  "mdi:radio",
+  "mdi:radio-outline",
+  "mdi:switch",
+  "mdi:switch-outline",
+  "mdi:slider",
+  "mdi:slider-outline",
+  "mdi:progress",
+  "mdi:progress-outline",
+  "mdi:spinner",
+  "mdi:loading",
+  "mdi:loading-outline",
+  "mdi:refresh",
+  "mdi:refresh-outline",
+  "mdi:reload",
+  "mdi:reload-outline",
+  "mdi:undo",
+  "mdi:redo",
+  "mdi:save",
+  "mdi:save-outline",
+  "mdi:download",
+  "mdi:download-outline",
+  "mdi:upload",
+  "mdi:upload-outline",
+  "mdi:print",
+  "mdi:print-outline",
+  "mdi:scan",
+  "mdi:scan-outline",
+  "mdi:qrcode",
+  "mdi:qrcode-outline",
+  "mdi:barcode",
+  "mdi:barcode-outline",
+  "mdi:camera",
+  "mdi:camera-outline",
+  "mdi:image",
+  "mdi:image-outline",
+  "mdi:video",
+  "mdi:video-outline",
+  "mdi:music",
+  "mdi:music-outline",
+  "mdi:file",
+  "mdi:file-outline",
+  "mdi:folder",
+  "mdi:folder-outline",
+  "mdi:archive",
+  "mdi:archive-outline",
+  "mdi:zip",
+  "mdi:zip-outline",
+  "mdi:pdf",
+  "mdi:pdf-outline",
+  "mdi:word",
+  "mdi:word-outline",
+  "mdi:excel",
+  "mdi:excel-outline",
+  "mdi:powerpoint",
+  "mdi:powerpoint-outline",
+  "mdi:text",
+  "mdi:text-outline",
+  "mdi:document",
+  "mdi:document-outline",
+  "mdi:note",
+  "mdi:note-outline",
+  "mdi:sticky-note",
+  "mdi:sticky-note-outline",
+  "mdi:clipboard",
+  "mdi:clipboard-outline",
+  "mdi:cut",
+  "mdi:copy",
+  "mdi:paste",
+  "mdi:scissors",
+  "mdi:scissors-outline",
+  "mdi:brush",
+  "mdi:brush-outline",
+  "mdi:pen",
+  "mdi:pen-outline",
+  "mdi:pencil",
+  "mdi:pencil-outline",
+  "mdi:eraser",
+  "mdi:eraser-outline",
+  "mdi:highlighter",
+  "mdi:highlighter-outline",
+  "mdi:marker",
+  "mdi:marker-outline",
+  "mdi:paint",
+  "mdi:paint-outline",
+  "mdi:palette",
+  "mdi:palette-outline",
+  "mdi:color",
+  "mdi:color-outline",
+  "mdi:gradient",
+  "mdi:gradient-outline",
+  "mdi:shadow",
+  "mdi:shadow-outline",
+  "mdi:opacity",
+  "mdi:opacity-outline",
+  "mdi:blur",
+  "mdi:blur-outline",
+  "mdi:filter",
+  "mdi:filter-outline",
+  "mdi:crop",
+  "mdi:crop-outline",
+  "mdi:rotate",
+  "mdi:rotate-outline",
+  "mdi:flip",
+  "mdi:flip-outline",
+  "mdi:scale",
+  "mdi:scale-outline",
+  "mdi:transform",
+  "mdi:transform-outline",
+  "mdi:layers",
+  "mdi:layers-outline",
+  "mdi:stack",
+  "mdi:stack-outline",
+  "mdi:group",
+  "mdi:group-outline",
+  "mdi:ungroup",
+  "mdi:ungroup-outline",
+  "mdi:align",
+  "mdi:align-outline",
+  "mdi:distribute",
+  "mdi:distribute-outline",
+  "mdi:arrange",
+  "mdi:arrange-outline",
+  "mdi:order",
+  "mdi:order-outline",
+  "mdi:sort",
+  "mdi:sort-outline",
+  "mdi:filter",
+  "mdi:filter-outline",
+  "mdi:search",
+  "mdi:search-outline",
+  "mdi:find",
+  "mdi:find-outline",
+  "mdi:replace",
+  "mdi:replace-outline",
+  "mdi:zoom-in",
+  "mdi:zoom-out",
+  "mdi:fit",
+  "mdi:fit-outline",
+  "mdi:fullscreen",
+  "mdi:fullscreen-outline",
+  "mdi:minimize",
+  "mdi:minimize-outline",
+  "mdi:maximize",
+  "mdi:maximize-outline",
+  "mdi:close",
+  "mdi:close-outline",
+  "mdi:check",
+  "mdi:check-outline",
+  "mdi:plus",
+  "mdi:plus-outline",
+  "mdi:minus",
+  "mdi:minus-outline",
+  "mdi:multiply",
+  "mdi:multiply-outline",
+  "mdi:divide",
+  "mdi:divide-outline",
+  "mdi:equal",
+  "mdi:equal-outline",
+  "mdi:not-equal",
+  "mdi:not-equal-outline",
+  "mdi:greater-than",
+  "mdi:greater-than-outline",
+  "mdi:less-than",
+  "mdi:less-than-outline",
+  "mdi:greater-than-or-equal",
+  "mdi:greater-than-or-equal-outline",
+  "mdi:less-than-or-equal",
+  "mdi:less-than-or-equal-outline",
+  "mdi:and",
+  "mdi:and-outline",
+  "mdi:or",
+  "mdi:or-outline",
+  "mdi:not",
+  "mdi:not-outline",
+  "mdi:xor",
+  "mdi:xor-outline",
+  "mdi:if",
+  "mdi:if-outline",
+  "mdi:else",
+  "mdi:else-outline",
+  "mdi:switch",
+  "mdi:switch-outline",
+  "mdi:case",
+  "mdi:case-outline",
+  "mdi:default",
+  "mdi:default-outline",
+  "mdi:break",
+  "mdi:break-outline",
+  "mdi:continue",
+  "mdi:continue-outline",
+  "mdi:return",
+  "mdi:return-outline",
+  "mdi:throw",
+  "mdi:throw-outline",
+  "mdi:try",
+  "mdi:try-outline",
+];
+
+// Icon selector functions
+const filteredIcons = computed(() => {
+  if (!iconSearch.value) {
+    return mdiIcons;
+  }
+  return mdiIcons.filter(icon => 
+    icon.toLowerCase().includes(iconSearch.value.toLowerCase())
+  );
+});
+
+const openIconDialog = (index: number) => {
+  currentIconIndex.value = index;
+  selectedIcon.value = metaItems.value[index]?.value || "";
+  isIconDialogVisible.value = true;
+};
+
+const closeIconDialog = () => {
+  isIconDialogVisible.value = false;
+  selectedIcon.value = "";
+  currentIconIndex.value = -1;
+};
+
+const selectIcon = (icon: string) => {
+  selectedIcon.value = icon;
+};
+
+const confirmIconSelection = () => {
+  if (currentIconIndex.value >= 0 && selectedIcon.value) {
+    metaItems.value[currentIconIndex.value].value = selectedIcon.value;
+  }
+  closeIconDialog();
+};
+
+const filterIcons = () => {
+  // Search is handled by computed property
+};
+
+const getIconPreview = (icon: string) => {
+  // Return a simple text representation for the icon
+  const iconName = icon.replace('mdi:', '');
+  return iconName.split('-').map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ).join(' ');
+};
+
 // Validation rules
 const formRules = reactive({
   rule_type: [{ required: true, message: $t("common.field_required") }],
-
+  parent_id: [{ required: false }],
   name: [{ required: true, message: $t("common.field_required") }],
-
   path: [{ required: true, message: $t("common.field_required") }],
-
   component: [{ required: true, message: $t("common.field_required") }],
-
+  redirect: [{ required: false }],
+  meta: [{ required: false }],
+  permission: [{ required: false }],
+  menu_display_type: [{ required: false }],
   model_name: [{ required: true, message: $t("common.field_required") }],
-
   weigh: [{ required: true, message: $t("common.field_required") }],
-
   status: [{ required: true, message: $t("common.field_required") }],
 });
 
@@ -786,6 +1389,18 @@ const removeOtherPermissionItem = (index: number) => {
   otherPermissionItems.value.splice(index, 1);
 };
 
+// Helper functions for meta items
+const getMetaItem = (key: string) => {
+  return metaItems.value.find(item => item.key === key);
+};
+
+const updateMetaItem = (key: string, value: string) => {
+  const item = metaItems.value.find(item => item.key === key);
+  if (item) {
+    item.value = value;
+  }
+};
+
 onMounted(() => {
   fetchItems();
 });
@@ -802,5 +1417,125 @@ onMounted(() => {
 .meta-item .ant-input,
 .permission-item .ant-input {
   margin-right: 8px;
+}
+
+/* Meta field display styles */
+.meta-field-display {
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+  background: #fafafa;
+}
+
+.field-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.field-label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+  min-width: 60px;
+  text-align: right;
+}
+
+.icon-field-wrapper {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 8px;
+}
+
+/* Icon selector styles */
+.icon-selector {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  padding: 8px;
+}
+
+.icon-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #fff;
+}
+
+.icon-item:hover {
+  border-color: #1890ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);
+}
+
+.icon-item.selected {
+  border-color: #1890ff;
+  background-color: #f0f8ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+}
+
+.icon-preview {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  border: 1px solid #f0f0f0;
+  border-radius: 4px;
+  background: #fafafa;
+}
+
+.icon-text {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.icon-name {
+  font-size: 11px;
+  color: #999;
+  text-align: center;
+  word-break: break-all;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Selected icon preview styles */
+.icon-preview-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.selected-icon-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  background: #fafafa;
+  margin-right: 8px;
+  transition: all 0.2s ease;
+}
+
+.selected-icon-preview:hover {
+  border-color: #1890ff;
+  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.1);
 }
 </style>

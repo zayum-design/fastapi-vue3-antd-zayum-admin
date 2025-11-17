@@ -202,12 +202,13 @@ def generate_crud_code(
             crud_class += f"                # Depending on DB, NULLs might not be considered equal for unique constraints.\n"
             crud_class += f"                # For now, if any part is None, we assume it won't cause a unique violation by itself.\n"
             crud_class += f"                # If your DB treats NULLs as equal in unique constraints, this logic needs adjustment.\n"
-            crud_class += f"                break\n" # Break inner loop if a field is missing/None
+            crud_class += f"                # Skip this constraint check if any field is None\n"
+            crud_class += f"                continue_check = False\n"
         crud_class += f"            if all_fields_present and len(filters) == {len(columns)}:\n"
         crud_class += f"                existing = db.query({class_name}).filter(and_(*filters)).first()\n"
         crud_class += f"                if existing:\n"
         crud_class += f"                    values_str = ', '.join([f\"{{getattr(obj_in, '{c}')}}\" for c in {columns}])\n"
-        crud_class += f"                    raise ValueError(_(f\"Duplicate combination of values for fields: {columns_str}. Values: [{values_str}]\"))\n\n"
+        crud_class += f"                    raise ValueError(_(f\"Duplicate combination of values for fields: {columns_str}. Values: []\"))\n\n"
     crud_class += f"            db_obj = {class_name}(**obj_in.model_dump(exclude_unset=True))\n"
     crud_class += f"            db.add(db_obj)\n"
     crud_class += f"            db.commit()\n"
@@ -254,7 +255,7 @@ def generate_crud_code(
         crud_class += f"                existing = db.query({class_name}).filter(and_(*filters)).first()\n"
         crud_class += f"                if existing:\n"
         crud_class += f"                    values_str = ', '.join([f\"{{fields_to_check['{c}']}}\" for c in {columns}])\n"
-        crud_class += f"                    raise ValueError(_(f\"Duplicate combination of values for fields: {columns_str}. Values: [{values_str}]\"))\n\n"
+        crud_class += f"                    raise ValueError(_(f\"Duplicate combination of values for fields: {columns_str}. Values: []\"))\n\n"
 
     crud_class += f"            for field, value in update_data.items():\n"
     crud_class += f"                if hasattr(db_obj, field):\n" # Ensure field exists before setting
@@ -355,5 +356,3 @@ def generate_crud_code(
     # Combine all parts
     full_code = imports + crud_class + query_builder_class + instantiation
     return full_code
-
- 

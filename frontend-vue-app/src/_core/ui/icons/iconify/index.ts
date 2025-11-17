@@ -19,3 +19,7 @@ export const UsersIcon = createIconifyIcon('mdi:account-multiple');
 export const UserPlusIcon = createIconifyIcon('mdi:account-plus');
 export const LoginIcon = createIconifyIcon('mdi:login');
 export const ActivityIcon = createIconifyIcon('mdi:chart-line');
+
+// Cache management icons
+export const RefreshIcon = createIconifyIcon('mdi:refresh');
+export const TrashIcon = createIconifyIcon('mdi:trash-can-outline');

@@ -52,6 +52,12 @@ class Settings(BaseSettings):
     EXPOSE_HEADERS: List[str] = ["X-Captcha-Id"]
 
     # ----------------------------------------
+    # 缓存配置
+    # ----------------------------------------
+    CACHE_TYPE: str = "simple"  # "simple" 或 "redis"
+    REDIS_URL: RedisURL = "redis://localhost:6379/0"
+    
+    # ----------------------------------------
     # Swagger UI 配置
     # ----------------------------------------
     SWAGGER_CSS_URL: str = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.9.0/swagger-ui.css"

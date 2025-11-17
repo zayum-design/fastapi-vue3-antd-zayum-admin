@@ -76,6 +76,13 @@
       "errorPasswordTip": "Password error, please re-enter",
       "backToLogin": "Back to login",
       "entry": "Enter the system"
+    },
+    "cache": {
+      "clean": "Clear Cache",
+      "confirmTitle": "Cache Clear",
+      "confirmMessage": "Are you sure you want to clear all cache?",
+      "success": "Cache cleared successfully",
+      "error": "Failed to clear cache"
     }
   }
 }

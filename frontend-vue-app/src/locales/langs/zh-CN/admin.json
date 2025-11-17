@@ -100,7 +100,17 @@
     "updated_at": "更新时间",
     "deleted_at": "删除时间",
     "weigh": "权重",
-    "status": "状态"
+    "status": "状态",
+    "menu": "菜单",
+    "action": "操作",
+    "ajax": "Ajax",
+    "addtabs": "新增标签页",
+    "blank": "新窗口",
+    "dialog": "对话框",
+    "meta_title": "标题",
+    "meta_title_placeholder": "请输入标题",
+    "meta_icon": "图标",
+    "meta_icon_placeholder": "mdi:图标名称"
   },
   "log": {
     "log": "管理员日志",

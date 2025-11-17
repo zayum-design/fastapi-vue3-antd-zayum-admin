@@ -100,7 +100,17 @@
     "updated_at": "Updated At",
     "deleted_at": "Deleted At",
     "weigh": "Weigh",
-    "status": "Status"
+    "status": "Status",
+    "menu": "Menu",
+    "action": "Action",
+    "ajax": "Ajax",
+    "addtabs": "Add Tabs",
+    "blank": "Blank",
+    "dialog": "Dialog",
+    "meta_title": "Title",
+    "meta_title_placeholder": "Enter title",
+    "meta_icon": "Icon",
+    "meta_icon_placeholder": "mdi:icon-name"
   },
   "log": {
     "admin_log": "Admin Log",
