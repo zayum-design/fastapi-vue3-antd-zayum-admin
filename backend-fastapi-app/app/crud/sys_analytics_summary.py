@@ -136,8 +136,8 @@ class CRUDSysAnalyticsSummary:
             if all_fields_present and len(filters) == 2:
                 existing = db.query(SysAnalyticsSummary).filter(and_(*filters)).first()
                 if existing:
-                    values_str = ', '.join([f"{getattr(obj_in, '<calendar.TextCalendar object at 0x103424140>')}" for c in ['summary_type', 'summary_date']])
-                    raise ValueError(_(f"Duplicate combination of values for fields: summary_type, summary_date. Values: []"))
+                    values_str = ', '.join([f"{getattr(obj_in, c)}" for c in ['summary_type', 'summary_date']])
+                    raise ValueError(_(f"Duplicate combination of values for fields: summary_type, summary_date. Values: [{values_str}]"))
 
             # Check composite uniqueness constraint 2 (fields: summary_type, summary_year, summary_month)
             filters = []
@@ -172,8 +172,8 @@ class CRUDSysAnalyticsSummary:
             if all_fields_present and len(filters) == 3:
                 existing = db.query(SysAnalyticsSummary).filter(and_(*filters)).first()
                 if existing:
-                    values_str = ', '.join([f"{getattr(obj_in, '<calendar.TextCalendar object at 0x103424140>')}" for c in ['summary_type', 'summary_year', 'summary_month']])
-                    raise ValueError(_(f"Duplicate combination of values for fields: summary_type, summary_year, summary_month. Values: []"))
+                    values_str = ', '.join([f"{getattr(obj_in, c)}" for c in ['summary_type', 'summary_year', 'summary_month']])
+                    raise ValueError(_(f"Duplicate combination of values for fields: summary_type, summary_year, summary_month. Values: [{values_str}]"))
 
             # Check composite uniqueness constraint 3 (fields: summary_type, region_name)
             filters = []
@@ -199,8 +199,8 @@ class CRUDSysAnalyticsSummary:
             if all_fields_present and len(filters) == 2:
                 existing = db.query(SysAnalyticsSummary).filter(and_(*filters)).first()
                 if existing:
-                    values_str = ', '.join([f"{getattr(obj_in, '<calendar.TextCalendar object at 0x103424140>')}" for c in ['summary_type', 'region_name']])
-                    raise ValueError(_(f"Duplicate combination of values for fields: summary_type, region_name. Values: []"))
+                    values_str = ', '.join([f"{getattr(obj_in, c)}" for c in ['summary_type', 'region_name']])
+                    raise ValueError(_(f"Duplicate combination of values for fields: summary_type, region_name. Values: [{values_str}]"))
 
             db_obj = SysAnalyticsSummary(**obj_in.model_dump(exclude_unset=True))
             db.add(db_obj)
@@ -234,8 +234,8 @@ class CRUDSysAnalyticsSummary:
                 filters.append(SysAnalyticsSummary.summary_date == fields_to_check['summary_date'])
                 existing = db.query(SysAnalyticsSummary).filter(and_(*filters)).first()
                 if existing:
-                    values_str = ', '.join([f"{fields_to_check['<calendar.TextCalendar object at 0x103424140>']}" for c in ['summary_type', 'summary_date']])
-                    raise ValueError(_(f"Duplicate combination of values for fields: summary_type, summary_date. Values: []"))
+                    values_str = ', '.join([f"{fields_to_check[c]}" for c in ['summary_type', 'summary_date']])
+                    raise ValueError(_(f"Duplicate combination of values for fields: summary_type, summary_date. Values: [{values_str}]"))
 
             # Check composite uniqueness constraint 2 (fields: summary_type, summary_year, summary_month)
             # This check is complex: only validate if all involved fields are present in update_data
@@ -251,8 +251,8 @@ class CRUDSysAnalyticsSummary:
                 filters.append(SysAnalyticsSummary.summary_month == fields_to_check['summary_month'])
                 existing = db.query(SysAnalyticsSummary).filter(and_(*filters)).first()
                 if existing:
-                    values_str = ', '.join([f"{fields_to_check['<calendar.TextCalendar object at 0x103424140>']}" for c in ['summary_type', 'summary_year', 'summary_month']])
-                    raise ValueError(_(f"Duplicate combination of values for fields: summary_type, summary_year, summary_month. Values: []"))
+                    values_str = ', '.join([f"{fields_to_check[c]}" for c in ['summary_type', 'summary_year', 'summary_month']])
+                    raise ValueError(_(f"Duplicate combination of values for fields: summary_type, summary_year, summary_month. Values: [{values_str}]"))
 
             # Check composite uniqueness constraint 3 (fields: summary_type, region_name)
             # This check is complex: only validate if all involved fields are present in update_data
@@ -267,8 +267,8 @@ class CRUDSysAnalyticsSummary:
                 filters.append(SysAnalyticsSummary.region_name == fields_to_check['region_name'])
                 existing = db.query(SysAnalyticsSummary).filter(and_(*filters)).first()
                 if existing:
-                    values_str = ', '.join([f"{fields_to_check['<calendar.TextCalendar object at 0x103424140>']}" for c in ['summary_type', 'region_name']])
-                    raise ValueError(_(f"Duplicate combination of values for fields: summary_type, region_name. Values: []"))
+                    values_str = ', '.join([f"{fields_to_check[c]}" for c in ['summary_type', 'region_name']])
+                    raise ValueError(_(f"Duplicate combination of values for fields: summary_type, region_name. Values: [{values_str}]"))
 
             for field, value in update_data.items():
                 if hasattr(db_obj, field):

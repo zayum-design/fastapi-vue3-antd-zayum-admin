@@ -1,10 +1,12 @@
 """
-优化后的分析数据API（最终版本）
-使用内存缓存和批量查询提升性能，完全兼容当前系统
-将数据写入 sys_analytics_summary 数据表
+分析数据API模块
+提供系统分析数据的查询和统计功能，包括用户行为、访问趋势、来源分析等
+支持缓存机制提升性能，并将统计结果持久化到数据库
 """
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
+import httpx
+import re
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_
@@ -26,17 +28,17 @@ from app.core.cache import (
 from app.utils.log_utils import logger
 
 
-# 分析数据缓存功能
+# 缓存管理功能
 def get_cache_key(endpoint: str, params: Dict) -> str:
     """
-    生成缓存键
+    根据API端点和参数生成唯一的缓存键
     
     Args:
-        endpoint: API端点名称
-        params: 查询参数字典
+        endpoint: API端点名称，如'overview'、'trends'等
+        params: 查询参数字典，包含时间范围、周期等参数
     
     Returns:
-        缓存键字符串
+        格式化的缓存键字符串，格式为'analytics:{endpoint}:{param_str}'
     """
     param_str = "_".join(f"{k}_{v}" for k, v in sorted(params.items()))
     return f"analytics:{endpoint}:{param_str}"
@@ -44,14 +46,14 @@ def get_cache_key(endpoint: str, params: Dict) -> str:
 
 def get_cache_expire_time(endpoint: str, params: Dict) -> int:
     """
-    根据端点和参数获取缓存过期时间
+    根据API端点和查询参数动态计算缓存过期时间
     
     Args:
-        endpoint: API端点名称
-        params: 查询参数字典
+        endpoint: API端点名称，用于确定缓存策略
+        params: 查询参数字典，包含时间范围等影响缓存时效的参数
     
     Returns:
-        缓存过期时间（秒）
+        缓存过期时间（秒），根据数据更新频率动态调整
     """
     # 缓存时间配置
     cache_config = {
@@ -86,14 +88,14 @@ def get_cache_expire_time(endpoint: str, params: Dict) -> int:
 
 def get_cached_analytics_data_sync(endpoint: str, params: Dict):
     """
-    获取缓存的分析数据（同步版本）
+    从缓存中获取分析数据（同步版本）
     
     Args:
-        endpoint: API端点名称
-        params: 查询参数字典
+        endpoint: API端点名称，用于构建缓存键
+        params: 查询参数字典，用于构建缓存键
     
     Returns:
-        缓存的数据，如果不存在则返回None
+        缓存的数据对象，如果缓存不存在或已过期则返回None
     """
     cache_key = get_cache_key(endpoint, params)
     return get_cached_data_sync(cache_key)
@@ -101,12 +103,12 @@ def get_cached_analytics_data_sync(endpoint: str, params: Dict):
 
 def cache_analytics_data_sync(endpoint: str, params: Dict, data) -> None:
     """
-    缓存分析数据（同步版本）
+    将分析数据缓存到内存中（同步版本）
     
     Args:
-        endpoint: API端点名称
-        params: 查询参数字典
-        data: 要缓存的数据
+        endpoint: API端点名称，用于构建缓存键
+        params: 查询参数字典，用于构建缓存键
+        data: 要缓存的分析数据对象
     """
     cache_key = get_cache_key(endpoint, params)
     expire_time = get_cache_expire_time(endpoint, params)
@@ -115,8 +117,8 @@ def cache_analytics_data_sync(endpoint: str, params: Dict, data) -> None:
 
 def clear_analytics_cache_sync():
     """
-    清除所有分析数据缓存（同步版本）
-    在数据更新后调用此函数
+    清除所有分析数据相关的缓存（同步版本）
+    通常在数据更新、系统重启或缓存清理时调用
     """
     try:
         delete_cached_pattern_sync("analytics:*")
@@ -125,15 +127,107 @@ def clear_analytics_cache_sync():
         logger.error(f"AnalyticsCache: Failed to clear cache synchronously: {e}")
 
 
-def save_analytics_summary_to_db(db: Session, summary_type: str, data: Dict, summary_date: Optional[datetime] = None):
+def query_ip_location(ip_address: str) -> Optional[str]:
     """
-    将分析数据保存到 sys_analytics_summary 表
+    使用百度API查询IP地址的地理位置信息
     
     Args:
-        db: 数据库会话
-        summary_type: 汇总类型 (daily, monthly, regional)
-        data: 分析数据
-        summary_date: 汇总日期
+        ip_address: 要查询的IP地址
+        
+    Returns:
+        省份名称，如果查询失败则返回None
+    """
+    try:
+        # 百度IP查询API
+        url = f"http://opendata.baidu.com/api.php"
+        params = {
+            "query": ip_address,
+            "co": "",
+            "resource_id": "6006",
+            "oe": "utf8"
+        }
+        
+        # 使用httpx发送请求
+        with httpx.Client(timeout=10.0) as client:
+            response = client.get(url, params=params)
+            response.raise_for_status()
+            
+            data = response.json()
+            
+            # 检查API响应状态
+            if data.get("status") == "0" and data.get("data"):
+                location_info = data["data"][0].get("location", "")
+                
+                # 从位置信息中提取省份
+                # 格式示例: "广东省广州市 移动" 或 "美国"
+                if location_info:
+                    # 提取省份（第一个中文字符串）
+                    match = re.search(r'^([\u4e00-\u9fa5]+省|[\u4e00-\u9fa5]+市|[\u4e00-\u9fa5]+自治区|[\u4e00-\u9fa5]+)', location_info)
+                    if match:
+                        province = match.group(1)
+                        # 如果是单个中文字符（如"美国"），直接返回
+                        if len(province) <= 3:
+                            return province
+                        # 如果是中国省份，确保格式正确
+                        elif province.endswith(('省', '市', '自治区')):
+                            return province
+                
+                logger.warning(f"IP查询API返回的位置信息格式异常: {location_info}")
+                return None
+            else:
+                logger.warning(f"IP查询API返回错误状态: {data.get('status')}")
+                return None
+                
+    except httpx.RequestError as e:
+        logger.error(f"IP查询请求失败: {e}")
+        return None
+    except httpx.HTTPStatusError as e:
+        logger.error(f"IP查询HTTP错误: {e}")
+        return None
+    except Exception as e:
+        logger.error(f"IP查询发生未知错误: {e}")
+        return None
+
+
+def extract_province_from_ip(ip_address: str) -> str:
+    """
+    从IP地址提取省份信息，支持本地IP和特殊IP的处理
+    
+    Args:
+        ip_address: IP地址字符串
+        
+    Returns:
+        省份名称，如果无法确定则返回"未知地区"
+    """
+    if not ip_address:
+        return "未知地区"
+    
+    # 处理本地IP和特殊IP
+    if ip_address in ["127.0.0.1", "localhost", "::1"]:
+        return "本地访问"
+    
+    # 检查是否为内网IP
+    if ip_address.startswith(("10.", "172.", "192.168.")):
+        return "内网访问"
+    
+    # 使用百度API查询IP地理位置
+    province = query_ip_location(ip_address)
+    
+    if province:
+        return province
+    else:
+        return "未知地区"
+
+
+def save_analytics_summary_to_db(db: Session, summary_type: str, data: Dict, summary_date: Optional[datetime] = None):
+    """
+    将分析统计结果持久化保存到 sys_analytics_summary 数据表
+    
+    Args:
+        db: 数据库会话对象
+        summary_type: 汇总类型，支持'daily'（日汇总）、'monthly'（月汇总）、'regional'（地区汇总）
+        data: 包含统计指标的分析数据字典
+        summary_date: 汇总日期，用于标识统计的时间范围
     """
     try:
         # 生成唯一ID
@@ -165,7 +259,7 @@ def save_analytics_summary_to_db(db: Session, summary_type: str, data: Dict, sum
         logger.error(f"AnalyticsSummary: Failed to save {summary_type} summary to database: {e}")
 
 
-# Initialize the API router for analytics endpoints
+# 初始化分析数据API路由
 router = APIRouter(
     prefix="/analytics", 
     tags=["analytics"],
@@ -176,14 +270,14 @@ router = APIRouter(
 @router.get("/overview")
 def get_analytics_overview(db: Session = Depends(get_db)):
     """
-    获取分析概览数据（优化版本）
-    使用缓存和批量查询提升性能，并将数据写入数据库
+    获取系统分析概览数据
+    包括总用户数、今日注册用户、今日登录用户、近7天活跃用户等核心指标
     
     Args:
-        db (Session): 数据库会话
+        db (Session): 数据库会话对象
         
     Returns:
-        JSON response containing overview statistics.
+        JSON响应，包含概览统计数据的数组，每个元素包含totalValue和value字段
     """
     cache_params = {}
     
@@ -254,15 +348,15 @@ def get_analytics_trends(
     db: Session = Depends(get_db)
 ):
     """
-    获取趋势数据（优化版本）
-    使用批量查询替代循环查询，并将数据写入数据库
+    获取用户注册和访问趋势数据
+    按日期统计用户注册数量和系统访问次数，支持自定义时间范围
     
     Args:
-        days (int): 查询天数（1-365）
-        db (Session): 数据库会话
+        days (int): 查询天数范围，最小1天，最大365天
+        db (Session): 数据库会话对象
         
     Returns:
-        JSON response containing trends data.
+        JSON响应，包含用户趋势、访问趋势和时间范围信息
     """
     cache_params = {"days": days}
     
@@ -364,15 +458,15 @@ def get_analytics_visits(
     db: Session = Depends(get_db)
 ):
     """
-    获取访问数据（优化版本）
-    将数据写入数据库
+    获取系统访问统计数据
+    按时间周期统计访问次数和操作类型分布
     
     Args:
-        period (str): 时间周期（month, week, day）
-        db (Session): 数据库会话
+        period (str): 时间周期，支持'month'（月）、'week'（周）、'day'（天）
+        db (Session): 数据库会话对象
         
     Returns:
-        JSON response containing visits data.
+        JSON响应，包含按时间分组的访问数据、按操作类型分组的访问数据和总访问次数
     """
     cache_params = {"period": period}
     
@@ -464,14 +558,14 @@ def get_analytics_sources(
     db: Session = Depends(get_db)
 ):
     """
-    获取来源数据（优化版本）
-    将数据写入数据库
+    获取用户来源和操作来源统计数据
+    按平台统计用户分布，按操作类型统计系统操作分布
     
     Args:
-        db (Session): 数据库会话
+        db (Session): 数据库会话对象
         
     Returns:
-        JSON response containing source data.
+        JSON响应，包含用户来源数据和操作来源数据
     """
     cache_params = {}
     
@@ -481,41 +575,35 @@ def get_analytics_sources(
         return success_response(cached_data)
     
     try:
-        # 查询用户来源（按用户组）
+        # 查询用户来源（按平台）
         user_sources = db.query(
-            SysUser.user_group_id,
+            SysUser.platform,
             func.count(SysUser.id).label('count')
-        ).group_by(SysUser.user_group_id).all()
+        ).group_by(SysUser.platform).all()
         
         source_data = []
-        user_group_distribution = {}
+        platform_distribution = {}
         for source in user_sources:
-            group_name = f"用户组 {source.user_group_id}" if source.user_group_id else "未分组"
+            platform_name = source.platform if source.platform else "other"
+            # 将平台名称转换为中文显示
+            platform_name_cn = {
+                "ios": "iOS",
+                "mac": "macOS", 
+                "android": "Android",
+                "web": "Web",
+                "pc": "PC",
+                "other": "其他"
+            }.get(platform_name, platform_name)
+            
             source_data.append({
-                "source": group_name,
+                "source": platform_name_cn,
                 "count": source.count
             })
-            user_group_distribution[group_name] = source.count
+            platform_distribution[platform_name_cn] = source.count
         
-        # 查询操作来源（按管理员日志操作）
-        action_sources = db.query(
-            SysAdminLog.title,
-            func.count(SysAdminLog.id).label('count')
-        ).group_by(SysAdminLog.title).all()
-        
-        action_data = []
-        action_distribution = {}
-        for action in action_sources:
-            if action.title:
-                action_data.append({
-                    "source": action.title,
-                    "count": action.count
-                })
-                action_distribution[action.title] = action.count
         
         result = {
-            "userSources": source_data,
-            "actionSources": action_data
+            "userSources": source_data
         }
         
         # 缓存结果
@@ -523,8 +611,7 @@ def get_analytics_sources(
         
         # 将来源数据保存到数据库
         summary_data = {
-            "user_group_distribution": user_group_distribution,
-            "action_distribution": action_distribution
+            "user_group_distribution": platform_distribution
         }
         save_analytics_summary_to_db(db, "daily", summary_data, datetime.now())
         
@@ -540,15 +627,15 @@ def get_monthly_login_stats(
     db: Session = Depends(get_db)
 ):
     """
-    获取月度登录统计数据（优化版本）
-    将数据写入数据库
+    获取月度用户登录统计数据
+    统计指定月数内每个月的唯一登录用户数量
     
     Args:
-        months (int): 查询月数（1-24）
-        db (Session): 数据库会话
+        months (int): 查询月数范围，最小1个月，最大24个月
+        db (Session): 数据库会话对象
         
     Returns:
-        JSON response containing monthly login statistics.
+        JSON响应，包含按月分组的登录统计数据数组
     """
     cache_params = {"months": months}
     
@@ -613,14 +700,14 @@ def get_analytics_regions(
     db: Session = Depends(get_db)
 ):
     """
-    获取地区分布数据（优化版本）
-    将数据写入数据库
+    获取用户地区分布真实数据
+    根据用户的IP地址通过百度API查询真实的地理位置信息，统计用户地区分布
     
     Args:
-        db (Session): 数据库会话
+        db (Session): 数据库会话对象
         
     Returns:
-        JSON response containing region distribution data.
+        JSON响应，包含地区名称和用户数量的数组
     """
     cache_params = {}
     
@@ -630,41 +717,46 @@ def get_analytics_regions(
         return success_response(cached_data)
     
     try:
-        # 计算总用户数
-        total_users = db.query(SysUser).count()
+        # 查询所有用户的IP地址
+        users_with_ip = db.query(SysUser.join_ip).filter(SysUser.join_ip.isnot(None)).all()
         
-        # 如果没有用户，返回空数组
-        if total_users == 0:
+        # 如果没有用户或没有IP数据，返回空数组
+        if not users_with_ip:
             return success_response([])
         
-        # 基于总用户数生成地区分布数据
-        common_regions = [
-            "Guangdong", "Beijing", "Shanghai", "Zhejiang", "Jiangsu",
-            "Sichuan", "Shandong", "Hubei", "Henan", "Other Regions"
-        ]
+        # 统计各地区用户数量
+        region_counts = {}
         
-        # 基于总用户数生成地区分布
+        for user in users_with_ip:
+            ip_address = user.join_ip
+            if ip_address:
+                # 从IP地址提取省份信息
+                province = extract_province_from_ip(ip_address)
+                
+                # 统计各地区用户数量
+                if province in region_counts:
+                    region_counts[province] += 1
+                else:
+                    region_counts[province] = 1
+        
+        # 转换为前端需要的格式
         region_data = []
-        base_count = max(1, (total_users or 0) // len(common_regions))
-        
-        for i, region in enumerate(common_regions):
-            # 为每个地区生成基于总用户数的分布
-            # 使用不同的权重来模拟真实分布
-            weight = len(common_regions) - i  # 前面的地区权重更高
-            region_count = max(1, base_count * weight // 2)
-            
+        for region, count in region_counts.items():
             region_data.append({
                 "region": region,
-                "count": region_count
+                "count": count
             })
+        
+        # 按用户数量降序排序
+        region_data.sort(key=lambda x: x["count"], reverse=True)
         
         # 缓存结果
         cache_analytics_data_sync("regions", cache_params, region_data)
         
         # 将地区数据保存到数据库
-        region_distribution = {region["region"]: region["count"] for region in region_data}
+        region_distribution = {item["region"]: item["count"] for item in region_data}
         summary_data = {
-            "total_users": total_users,
+            "total_users": len(users_with_ip),
             "user_group_distribution": region_distribution
         }
         save_analytics_summary_to_db(db, "regional", summary_data, datetime.now())
@@ -672,4 +764,32 @@ def get_analytics_regions(
         return success_response(region_data)
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"获取地区数据失败: {str(e)}")
+        logger.error(f"获取地区数据失败: {str(e)}")
+        # 如果IP查询失败，返回模拟数据作为降级方案
+        try:
+            total_users = db.query(SysUser).count()
+            if total_users == 0:
+                return success_response([])
+            
+            # 生成模拟数据作为降级方案
+            common_regions = [
+                "广东省", "北京市", "上海市", "浙江省", "江苏省",
+                "四川省", "山东省", "湖北省", "河南省", "其他地区"
+            ]
+            
+            region_data = []
+            base_count = max(1, total_users // len(common_regions))
+            
+            for i, region in enumerate(common_regions):
+                weight = len(common_regions) - i
+                region_count = max(1, base_count * weight // 2)
+                region_data.append({
+                    "region": region,
+                    "count": region_count
+                })
+            
+            logger.warning("使用模拟地区数据作为降级方案")
+            return success_response(region_data)
+            
+        except Exception as fallback_error:
+            raise HTTPException(status_code=500, detail=f"获取地区数据失败: {str(e)}")

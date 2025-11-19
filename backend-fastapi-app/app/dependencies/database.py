@@ -75,6 +75,11 @@ def get_db():
     except Exception as e:
         # 如果连接无效，关闭并重新创建
         db.close()
+        # 如果是 HTTPException（如验证码错误），直接重新抛出
+        from fastapi import HTTPException
+        if isinstance(e, HTTPException):
+            raise e
+        # 其他异常包装为数据库连接错误
         raise DatabaseConnectionError(f"数据库会话无效: {str(e)}")
     finally:
         db.close()

@@ -37,20 +37,25 @@ class AdminLoggingMiddleware(BaseHTTPMiddleware):
             finally:
                 db.close()
         
-        # 仅记录 POST、PUT、DELETE 请求日志，并排除日志删除接口
-        if request.method in {"POST", "PUT", "DELETE"} and not request.url.path.startswith("/api/admin/admin/log/delete/") and not request.url.path.startswith("/api/admin/auth"):
+        # 仅记录 POST、PUT、DELETE 请求日志，并排除日志删除接口和文件上传接口
+        if (request.method in {"POST", "PUT", "DELETE"} and 
+            not request.url.path.startswith("/api/admin/admin/log/delete/") and 
+            not request.url.path.startswith("/api/admin/auth") and
+            not request.url.path.startswith("/api/admin/upload")):
             try:
                 body_bytes = await request.body()
                 body_text = body_bytes.decode() if body_bytes else ""
                 params = json.loads(body_text) if body_text else {}
-            except json.JSONDecodeError:
+            except (json.JSONDecodeError, UnicodeDecodeError):
                 params = {}
 
             filtered_params = filter_sensitive_data(params)
-            admin_id = getattr(request.state, "admin", None).id if hasattr(request.state, "admin") else 1
-            username = getattr(request.state, "admin", None).username if hasattr(request.state, "admin") else "unknown"
+            admin_obj = getattr(request.state, "admin", None)
+            admin_id = admin_obj.id if admin_obj else 1
+            username = admin_obj.username if admin_obj else "unknown"
             
             log_data = SysAdminLogCreate(
+                id=None,  # id 是可选的，设为 None
                 admin_id=admin_id,
                 username=username,
                 url=str(request.url),

@@ -22,7 +22,7 @@ def read_sys_admin_log_list(
     page: int = 1,
     per_page: int = 10,
     search: Optional[str] = None,
-    orderby: Optional[str] = None,  # Sorting field and direction, e.g., "name_asc"
+    orderby: Optional[str] = 'id_desc',  # Sorting field and direction, e.g., "name_asc"
     db: Session = Depends(get_db)
 ):
     """

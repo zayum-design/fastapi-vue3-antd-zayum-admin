@@ -57,6 +57,7 @@ async def upload_file(
 
     # 生成 SysAttachment 创建所需的数据
     attachment_data = {
+        "cat_id": 0,  # 分类ID，默认为0
         "path_file": file_path,
         "file_name": saved_filename,
         "file_size": file_size,

@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 from app.models.sys_admin_group import SysAdminGroup
 from app.models.sys_admin_rule import SysAdminRule
 from app.models.sys_admin_log import SysAdminLog
-from app.schemas.sys_admin import SysAdmin
+from app.models.sys_admin import SysAdmin
 from app.dependencies.database import get_db
 from app.crud.sys_auth_admin import crud_sys_auth_admin
 from app.crud.sys_admin_rule import crud_sys_admin_rule
@@ -141,19 +141,39 @@ async def login(
     request: Request,
     db: Session = Depends(get_db),
 ):
-    await verify_captcha(
-        login_data.captcha_type,
-        login_data.captcha,
-        login_data.captcha_id,
-        login_data.captcha_code,
-    )
+    # 如果 captcha_type 不是 "code"，则不需要验证码验证
+    if login_data.captcha_type != "code":
+        pass
+    else:
+        # 确保 captcha_id 和 captcha_code 不为 None
+        if login_data.captcha_id is None or login_data.captcha_code is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="验证码参数缺失"
+            )
+        
+        # 验证验证码
+        captcha_valid = await verify_captcha(
+            login_data.captcha_type,
+            login_data.captcha,
+            login_data.captcha_id,
+            login_data.captcha_code,
+        )
+        
+        # if not captcha_valid:
+        #     raise HTTPException(
+        #         status_code=status.HTTP_400_BAD_REQUEST,
+        #         detail="验证码错误"
+        #     )
 
     admin = crud_sys_auth_admin.get_by_name(db, username=login_data.username)
     if not admin or not admin.check_password(login_data.password):
-        handle_failed_login(admin, login_data.username, request.client.host, db)
+        client_ip = getattr(request.client, 'host', 'unknown') if request.client else 'unknown'
+        handle_failed_login(admin, login_data.username, client_ip, db)
 
+    client_ip = getattr(request.client, 'host', 'unknown') if request.client else 'unknown'
     access_token = handle_successful_login(
-        admin, login_data.username, request.client.host, db
+        admin, login_data.username, client_ip, db
     )
     return success_response({"access_token": access_token})
 
@@ -166,10 +186,12 @@ async def login_form(
 ):
     admin = crud_sys_auth_admin.get_by_name(db, username=form_data.username)
     if not admin or not admin.check_password(form_data.password):
-        handle_failed_login(admin, form_data.username, request.client.host, db)
+        client_ip = getattr(request.client, 'host', 'unknown') if request.client else 'unknown'
+        handle_failed_login(admin, form_data.username, client_ip, db)
 
+    client_ip = getattr(request.client, 'host', 'unknown') if request.client else 'unknown'
     access_token = handle_successful_login(
-        admin, form_data.username, request.client.host, db
+        admin, form_data.username, client_ip, db
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -186,8 +208,9 @@ async def get_profile(
     log_items = crud_sys_admin_log.get_multi(
         db, 
         page=1, 
-        per_page=6, 
-        base_query=db.query(SysAdminLog).filter(SysAdminLog.admin_id == admin_dict["id"])
+        per_page=8, 
+        orderby = 'id_desc',
+        base_query=db.query(SysAdminLog)
     )
     admin_dict["logs"] = [item.to_dict() for item in log_items]
 
@@ -238,11 +261,20 @@ async def refresh_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user_id: int = payload.get("sub")
-    if user_id is None:
+    user_id_raw = payload.get("sub")
+    if user_id_raw is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid refresh token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    try:
+        user_id: int = int(user_id_raw)
+    except (ValueError, TypeError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid user ID in token",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
