@@ -6,6 +6,7 @@
     "user_manage": "User Manager",
     "id": "Id",
     "user_group_id": "User Group Id",
+    "user_group": "User Group",
     "username": "Username",
     "nickname": "Nickname",
     "password": "Password",
@@ -120,26 +121,42 @@
       "user_rule": "User Rule",
       "user_rule_manage": "User Rule Manager",
       "id": "Id",
+      "rule_type": "Rule Type",
       "type": "Type",
+      "parent_id": "Parent Rule",
       "pid": "Pid",
       "plugin": "Plugin",
       "name": "Name",
+      "path": "Path",
       "url_path": "Url Path",
       "title": "Title",
       "description": "Description",
       "icon": "Icon",
+      "component": "Component",
+      "redirect": "Redirect",
+      "meta": "Meta",
+      "permission": "Permission",
+      "menu_display_type": "Menu Display Type",
       "menutype": "Menutype",
       "extend": "Extend",
       "model_name": "Model Name",
+      "deleted_at": "Deleted At",
       "weigh": "Weigh",
       "status": "Status",
       "created_at": "Created At",
       "updated_at": "Updated At"
     },
     "rules": {
+      "rule_type": {
+        "required": "Rule Type is required"
+      },
       "type": {
         "required": "Type is required",
         "max_length": "Type must be at most 6 characters"
+      },
+      "parent_id": {
+        "required": "Parent Rule is required",
+        "must_be_number": "Parent Rule must be a number"
       },
       "pid": {
         "required": "Pid is required",
@@ -153,6 +170,15 @@
         "required": "Name is required",
         "max_length": "Name must be at most 150 characters"
       },
+      "nickname": {
+        "required": "Name is required",
+        "min_length": "Name must be at least 2 characters",
+        "max_length": "Name must be at most 30 characters"
+      },
+      "path": {
+        "required": "Path is required",
+        "max_length": "Path must be at most 255 characters"
+      },
       "url_path": {
         "required": "Url Path is required",
         "invalid_format": "Please enter a valid Url Path URL"
@@ -163,15 +189,15 @@
       },
       "model_name": {
         "required": "Model Name is required",
-        "max_length": "Model Name must be at most 50 characters"
+        "min_length": "Model Name must be at least 2 characters",
+        "max_length": "Model Name must be at most 30 characters"
       },
       "weigh": {
         "required": "Weigh is required",
         "must_be_number": "Weigh must be a number"
       },
       "status": {
-        "required": "Status is required",
-        "max_length": "Status must be at most 6 characters"
+        "required": "Status is required"
       },
       "created_at": {
         "required": "Created At is required"

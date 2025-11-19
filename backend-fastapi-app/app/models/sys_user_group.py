@@ -45,7 +45,7 @@ class SysUserGroup(TimestampMixin, Base):
 
     @classmethod
     def from_dict(cls, data: dict) -> 'SysUserGroup':
-        valid_keys = {'rules', 'name', 'status', 'id', 'access', 'pid'}
+        valid_keys = {'id', 'status', 'name', 'rules', 'access', 'pid'}
         filtered_data = {key: value for key, value in data.items() if key in valid_keys}
         return cls(**filtered_data)
     

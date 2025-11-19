@@ -112,14 +112,6 @@ class CRUDSysUserGroup:
     def create(self, db: Session, obj_in: SysUserGroupCreate) -> SysUserGroup:
         """Create new SysUserGroup record with uniqueness validation"""
         try:
-            # Check name uniqueness
-            if hasattr(obj_in, 'name') and getattr(obj_in, 'name') is not None:
-                existing = db.query(SysUserGroup).filter(
-                    SysUserGroup.name == getattr(obj_in, 'name')
-                ).first()
-                if existing:
-                    raise ValueError(_(f"Duplicate value for name: '{getattr(obj_in, 'name')}'"))
-
             db_obj = SysUserGroup(**obj_in.model_dump(exclude_unset=True))
             db.add(db_obj)
             db.commit()
@@ -139,17 +131,6 @@ class CRUDSysUserGroup:
         """Update existing SysUserGroup record with uniqueness validation"""
         try:
             update_data = obj_in if isinstance(obj_in, dict) else obj_in.model_dump(exclude_unset=True)
-            # Check name uniqueness if being changed
-            if 'name' in update_data and update_data['name'] is not None:
-                new_name = update_data['name']
-                if new_name != getattr(db_obj, 'name'):
-                    existing = db.query(SysUserGroup).filter(
-                        SysUserGroup.name == new_name,
-                        SysUserGroup.id != getattr(db_obj, 'id')
-                    ).first()
-                    if existing:
-                        raise ValueError(_(f"Duplicate value for name: '{new_name}'"))
-
             for field, value in update_data.items():
                 if hasattr(db_obj, field):
                     setattr(db_obj, field, value)

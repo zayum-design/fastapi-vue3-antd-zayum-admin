@@ -132,9 +132,11 @@
           name="pid"
           :rules="formRules.pid"
         >
-          <a-input
+          <a-select
             v-model:value="currentItem.pid"
             :disabled="mode === 'view'"
+            :options="userGroupOptions"
+            :placeholder="$t('user.group.field.pid')"
           />
         </a-form-item>
 
@@ -154,10 +156,17 @@
           name="rules"
           :rules="formRules.rules"
         >
-          <a-input
+          <a-select
             v-model:value="currentItem.rules"
+            mode="multiple"
             :disabled="mode === 'view'"
-          />
+            :placeholder="$t('user.group.placeholder.rules')"
+          >
+            <a-select-option value="all">全部权限</a-select-option>
+            <a-select-option value="read">读取权限</a-select-option>
+            <a-select-option value="write">写入权限</a-select-option>
+            <a-select-option value="delete">删除权限</a-select-option>
+          </a-select>
         </a-form-item>
 
         <a-form-item
@@ -165,10 +174,17 @@
           name="access"
           :rules="formRules.access"
         >
-          <a-input
+          <a-select
             v-model:value="currentItem.access"
+            mode="multiple"
             :disabled="mode === 'view'"
-          />
+            :placeholder="$t('user.group.placeholder.access')"
+          >
+            <a-select-option value="all">全部访问</a-select-option>
+            <a-select-option value="public">公开访问</a-select-option>
+            <a-select-option value="private">私有访问</a-select-option>
+            <a-select-option value="protected">受保护访问</a-select-option>
+          </a-select>
         </a-form-item>
 
         <a-form-item
@@ -246,13 +262,22 @@ dayjs.extend(timezone);
 
 const TIME_ZONE = import.meta.env.VITE_TIME_ZONE || "Asia/Shanghai";
 const form = ref<FormInstance | null>(null);
+const userGroupOptions = ref<{ value: number; label: string }[]>([]);
+
+// Helper function to convert array to object for backend
+const convertArrayToObject = (value: any) => {
+  if (Array.isArray(value)) {
+    return { permissions: value };
+  }
+  return value;
+};
 
 interface UserGroup {
   id: number;
   pid: number;
   name: string;
-  rules: any;
-  access: any;
+  rules: string[];
+  access: string[];
   status: string;
   created_at: string;
   updated_at: string;
@@ -262,8 +287,8 @@ const currentItem: UnwrapRef<UserGroup> = reactive({
   id: 0,
   pid: 0,
   name: "",
-  rules: "",
-  access: "",
+  rules: ["all"],
+  access: ["all"],
   status: "normal",
   created_at: dayjs().tz(TIME_ZONE).format("YYYY-MM-DD HH:mm:ss"),
   updated_at: dayjs().tz(TIME_ZONE).format("YYYY-MM-DD HH:mm:ss"),
@@ -309,13 +334,6 @@ const wrapperCol = { span: 14 };
 const formRules = reactive({
   pid: [
     { required: true, message: $t("user.group.rules.pid.required") },
-    {
-      validator: (_: any, value: number) => {
-        if (isNaN(value))
-          return Promise.reject($t("user.group.rules.pid.must_be_number"));
-        return Promise.resolve();
-      },
-    },
   ],
   name: [
     { required: true, message: $t("user.group.rules.nickname.required") },
@@ -335,10 +353,30 @@ const formRules = reactive({
 
 const columns = computed(() => [
   { title: $t("user.group.field.id"), dataIndex: "id", key: "id" },
-  { title: $t("user.group.field.pid"), dataIndex: "pid", key: "pid" },
+  { title: $t("user.group.field.pid"), dataIndex: "parent_name", key: "parent_name" },
   { title: $t("user.group.field.name"), dataIndex: "name", key: "name" },
-  { title: $t("user.group.field.rules"), dataIndex: "rules", key: "rules" },
-  { title: $t("user.group.field.access"), dataIndex: "access", key: "access" },
+  { 
+    title: $t("user.group.field.rules"), 
+    dataIndex: "rules", 
+    key: "rules",
+    customRender: ({ text }: { text: any }) => {
+      if (typeof text === 'object' && text !== null && text.permissions) {
+        return text.permissions.join(", ");
+      }
+      return Array.isArray(text) ? text.join(", ") : String(text || "");
+    }
+  },
+  { 
+    title: $t("user.group.field.access"), 
+    dataIndex: "access", 
+    key: "access",
+    customRender: ({ text }: { text: any }) => {
+      if (typeof text === 'object' && text !== null && text.permissions) {
+        return text.permissions.join(", ");
+      }
+      return Array.isArray(text) ? text.join(", ") : String(text || "");
+    }
+  },
   { title: $t("user.group.field.status"), dataIndex: "status", key: "status" },
   {
     title: $t("user.group.field.created_at"),
@@ -369,12 +407,48 @@ const onTableChange = (pag: any, filters: any, sorter: any) => {
   fetchItems();
 };
 
+const fetchUserGroupOptions = async () => {
+  try {
+    const response = await fetchUserGroupItems({
+      page: 1,
+      perPage: -1, // Get all items
+      search: "",
+    });
+    
+    // Filter out current item when editing to avoid self-reference
+    const filteredItems = mode.value === 'edit' 
+      ? response.items.filter((item: any) => item.id !== currentItem.id)
+      : response.items;
+    
+    userGroupOptions.value = [
+      { value: 0, label: $t("user.group.root_group") },
+      ...filteredItems.map((item: any) => ({
+        value: item.id,
+        label: item.name,
+      })),
+    ];
+  } catch (error) {
+    console.error($t("common.fetch_items_error"), error);
+  }
+};
+
 const openDialog = (item: any, modeText: "add" | "edit" | "view") => {
   mode.value = modeText;
   if (mode.value === "add") {
     resetCurrentItem();
   } else {
-    Object.assign(currentItem, item);
+    // Handle rules and access data from backend
+    const formattedItem = {
+      ...item,
+      rules: Array.isArray(item.rules) ? item.rules : 
+             (typeof item.rules === 'object' && item.rules !== null && item.rules.permissions) ? 
+             item.rules.permissions : ["all"],
+      access: Array.isArray(item.access) ? item.access : 
+              (typeof item.access === 'object' && item.access !== null && item.access.permissions) ? 
+              item.access.permissions : ["all"]
+    };
+    
+    Object.assign(currentItem, formattedItem);
 
     if (currentItem.created_at) {
       item.created_at = dayjs(currentItem.created_at).tz(TIME_ZONE);
@@ -384,6 +458,7 @@ const openDialog = (item: any, modeText: "add" | "edit" | "view") => {
       item.updated_at = dayjs(currentItem.updated_at).tz(TIME_ZONE);
     }
   }
+  fetchUserGroupOptions();
   isDialogVisible.value = true;
 };
 
@@ -392,8 +467,8 @@ const resetCurrentItem = () => {
     id: 0,
     pid: "0",
     name: "",
-    rules: "",
-    access: "",
+    rules: ["all"],
+    access: ["all"],
     status: "normal",
     created_at: dayjs().tz(TIME_ZONE).format("YYYY-MM-DD HH:mm:ss"),
     updated_at: dayjs().tz(TIME_ZONE).format("YYYY-MM-DD HH:mm:ss"),
@@ -421,13 +496,14 @@ const onSubmit = async () => {
   }
 };
 
+
 const saveItem = async () => {
   try {
     await saveUserGroup({
       pid: currentItem.pid,
       name: currentItem.name,
-      rules: currentItem.rules,
-      access: currentItem.access,
+      rules: convertArrayToObject(currentItem.rules),
+      access: convertArrayToObject(currentItem.access),
       status: currentItem.status,
       created_at: currentItem.created_at
         ? dayjs(currentItem.created_at).format("YYYY-MM-DD HH:mm:ss")
@@ -451,8 +527,8 @@ const updateItem = async () => {
       id: currentItem.id,
       pid: currentItem.pid,
       name: currentItem.name,
-      rules: currentItem.rules,
-      access: currentItem.access,
+      rules: convertArrayToObject(currentItem.rules),
+      access: convertArrayToObject(currentItem.access),
       status: currentItem.status,
       created_at: currentItem.created_at
         ? dayjs(currentItem.created_at).format("YYYY-MM-DD HH:mm:ss")

@@ -55,10 +55,22 @@ def read_sys_user_group_list(
     response_page = page
     response_per_page = per_page
 
+    # Prepare the response data with parent name information
+    items_with_parent_name = []
+    for item in items:
+        item_dict = item.to_dict()
+        # Get parent name if pid is not 0
+        if item.pid != 0:
+            parent_item = crud_sys_user_group.get(db, id=item.pid)
+            item_dict["parent_name"] = parent_item.name if parent_item else "未知父级"
+        else:
+            item_dict["parent_name"] = "根分组"
+        items_with_parent_name.append(item_dict)
+
     # Prepare the response data
     return success_response(
         {
-            "items": [item.to_dict() for item in items],  # Convert each model instance to a dictionary
+            "items": items_with_parent_name,
             "total": total,
             "page": response_page,
             "per_page": response_per_page,

@@ -7,12 +7,12 @@ import re
 
 
 class SysUserGroupBase(BaseModel):
-    id: int = Field(...)
+    id: Optional[int] = Field(None)
     pid: int = Field(...)
-    name: str = Field(Field(...), max_length=100)
+    name: str = Field(..., max_length=100)
     rules: dict = Field(...)
     access: dict = Field(...)
-    status: Literal['normal', 'hidden'] = Field(Field(...), max_length=6)
+    status: Literal['normal', 'hidden'] = Field(..., max_length=6)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -45,4 +45,3 @@ class SysUserGroupInDBBase(SysUserGroupBase):
 
 class SysUserGroup(SysUserGroupInDBBase):
     pass
-

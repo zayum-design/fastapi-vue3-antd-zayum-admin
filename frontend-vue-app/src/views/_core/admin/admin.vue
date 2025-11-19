@@ -64,6 +64,13 @@
             :scroll="{ x: true }"
           >
             <template #bodyCell="{ column, record }">
+              <template v-if="column.key === 'avatar'">
+                <a-avatar
+                  :size="32"
+                  :src="displayAvatar(record.avatar)"
+                  @error="handleImageError"
+                />
+              </template>
               <template v-if="column.key === 'actions'">
                 <a-space>
                   <a-button
@@ -129,10 +136,20 @@
           name="group_id"
           :rules="formRules.group_id"
         >
-          <a-input
+          <a-select
             v-model:value="currentItem.group_id"
             :disabled="mode === 'view'"
-          />
+            placeholder="请选择管理员组"
+          >
+            <a-select-option :value="0">根管理员组</a-select-option>
+            <a-select-option
+              v-for="group in allGroups"
+              :key="group.id"
+              :value="group.id"
+            >
+              {{ group.name }}
+            </a-select-option>
+          </a-select>
         </a-form-item>
 
         <a-form-item
@@ -165,15 +182,39 @@
           <a-input-password
             v-model:value="currentItem.password"
             :disabled="mode === 'view'"
-            placeholder="请输入密码"
+            :placeholder="mode === 'edit' ? '留空不修改密码' : '请输入密码'"
+            autocomplete="new-password"
           />
         </a-form-item>
 
         <a-form-item :label="$t('admin.admin.field.avatar')">
-          <a-input
-            v-model:value="currentItem.avatar"
-            :disabled="mode === 'view'"
-          />
+          <a-flex gap="middle" vertical align="center">
+            <a-avatar
+              :size="128"
+              :src="displayAvatar(currentItem.avatar)"
+            ></a-avatar>
+            <a-button
+              @click="triggerAvatarUpload"
+              :loading="uploading"
+              size="small"
+              :disabled="mode === 'view'"
+            >
+              {{ $t("general.profile.edit_avatar") }}
+            </a-button>
+
+            <input
+              ref="avatarInput"
+              type="file"
+              accept="image/*"
+              style="display: none"
+              @change="handleAvatarUpload"
+            />
+            <a-input
+              v-model:value="currentItem.avatar"
+              :disabled="mode === 'view'"
+              placeholder="头像URL（自动填充）"
+            />
+          </a-flex>
         </a-form-item>
 
         <a-form-item
@@ -278,13 +319,47 @@
         </a-form-item>
       </a-form>
     </a-modal>
+
+    <!-- Avatar Cropper Modal -->
+    <a-modal
+      v-model:open="showCropperModal"
+      :title="$t('general.profile.edit_avatar')"
+      @ok="cropAndUpload"
+      @cancel="cancelCrop"
+      :confirmLoading="uploading"
+      :width="800"
+    >
+      <Cropper
+        ref="cropper"
+        class="cropper"
+        :src="cropperImage"
+        :stencil-props="{
+          aspectRatio: 1,
+          handlers: {},
+          movable: true,
+          resizable: true,
+        }"
+        :resize-image="{
+          adjustStencil: false
+        }"
+      />
+    </a-modal>
   </div>
 </template>
+
+<style scoped>
+.cropper {
+  height: 500px;
+  background: #eee;
+}
+</style>
 
 <script lang="ts" setup>
 import { ref, reactive, computed, onMounted, type UnwrapRef } from "vue";
 import { AccessControl } from "@/_core/access";
 import { fetchAdminItems, saveAdmin, deleteAdmin } from "@/api/admin/admin";
+import { fetchAdminGroupItems } from "@/api/admin/admin_group";
+import { uploadApi } from "@/api/admin";
 import { $t } from "@/locales";
 import {
   FileAddOutlined,
@@ -297,6 +372,10 @@ import { message, type FormInstance } from "ant-design-vue";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
+import { useAppConfig } from "@/_core/hooks";
+const { webURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
+import { Cropper } from 'vue-advanced-cropper';
+import 'vue-advanced-cropper/dist/style.css';
 
 // Setup dayjs plugins
 dayjs.extend(utc);
@@ -304,6 +383,16 @@ dayjs.extend(timezone);
 
 const TIME_ZONE = import.meta.env.VITE_TIME_ZONE || "Asia/Shanghai";
 const form = ref<FormInstance | null>(null);
+const defaultAvatar = "/src/assets/avatar.png";
+const errorImage = "/src/assets/image-error.png";
+
+// Avatar upload related variables
+const uploading = ref(false);
+const avatarInput = ref<HTMLInputElement | null>(null);
+const showCropperModal = ref(false);
+const cropperImage = ref<string>("");
+const cropper = ref<InstanceType<typeof Cropper> | null>(null);
+const selectedFile = ref<File | null>(null);
 
 interface Admin {
   id: number;
@@ -371,6 +460,17 @@ const size = ref("middle");
 const loading = ref(false);
 const rowKey = ref("id");
 const items = ref([]);
+interface AdminGroupItem {
+  id: number;
+  pid: number;
+  name: string;
+  rules: (number | string)[];
+  access: string[];
+  created_at: string;
+  updated_at: string;
+  status: string;
+}
+const allGroups = ref<AdminGroupItem[]>([]); // 所有管理员组用于下拉选择
 const pagination = ref({ current: 1, pageSize: 10, total: 0 });
 const search = ref("");
 
@@ -378,7 +478,7 @@ const labelCol = { style: { width: "150px" } };
 const wrapperCol = { span: 14 };
 
 // Validation rules
-const formRules = reactive({
+const formRules = computed(() => ({
   group_id: [
     { required: true, message: $t("admin.admin.rules.id.required") },
     {
@@ -408,24 +508,25 @@ const formRules = reactive({
   password: [
     {
       required: mode.value === "add",
-      message: $t("admin.admin.rules.required"),
+      message: $t("admin.admin.rules.password.required"),
     },
     {
       validator: (_: any, value: string) => {
         const errors = [];
-        if (mode.value === "edit" && !value) return Promise.resolve();
+        // 在编辑模式下，密码为空时直接通过验证
+        if (mode.value === "edit" && (!value || value.trim() === "")) return Promise.resolve();
         if (value && value.length < 6)
-          errors.push($t("admin.admin.rules.password.password_min_length"));
+          errors.push($t("admin.admin.rules.password.min_length"));
         if (value && !/[A-Z]/.test(value))
           errors.push(
-            $t("admin.admin.rules.password.password_uppercase_required")
+            $t("admin.admin.rules.password.uppercase_required")
           );
         if (value && !/[a-z]/.test(value))
           errors.push(
-            $t("admin.admin.rules.password.password_lowercase_required")
+            $t("admin.admin.rules.password.lowercase_required")
           );
         if (value && !/\d/.test(value))
-          errors.push($t("admin.admin.rules.password.password_digit_required"));
+          errors.push($t("admin.admin.rules.password.digit_required"));
         return errors.length > 0
           ? Promise.reject(errors.join("，"))
           : Promise.resolve();
@@ -464,7 +565,7 @@ const formRules = reactive({
   updated_at: [
     { required: true, message: $t("admin.admin.rules.updated_at.required") },
   ],
-});
+}));
 
 const columns = computed(() => [
   { title: $t("admin.admin.field.id"), dataIndex: "id", key: "id" },
@@ -472,6 +573,7 @@ const columns = computed(() => [
     title: $t("admin.admin.field.group_id"),
     dataIndex: "group_id",
     key: "group_id",
+    customRender: ({ text }: { text: number }) => getGroupName(text)
   },
   {
     title: $t("admin.admin.field.username"),
@@ -531,12 +633,14 @@ const onTableChange = (pag: any, filters: any, sorter: any) => {
   fetchItems();
 };
 
-const openDialog = (item: any, modeText: "add" | "edit" | "view") => {
+const openDialog = async (item: any, modeText: "add" | "edit" | "view") => {
   mode.value = modeText;
   if (mode.value === "add") {
     resetCurrentItem();
   } else {
     Object.assign(currentItem, item);
+    // 在编辑模式下，密码字段设置为空
+    currentItem.password = "";
 
     if (currentItem.login_at) {
       item.login_at = dayjs(currentItem.login_at).tz(TIME_ZONE);
@@ -551,6 +655,7 @@ const openDialog = (item: any, modeText: "add" | "edit" | "view") => {
     }
   }
   isDialogVisible.value = true;
+  await fetchAllGroups(); // 确保获取所有管理员组数据
 };
 
 const resetCurrentItem = () => {
@@ -629,12 +734,12 @@ const saveItem = async () => {
 
 const updateItem = async () => {
   try {
-    await saveAdmin({
+    // 构建更新数据，如果密码为空则不包含密码字段
+    const updateData: any = {
       id: currentItem.id,
       group_id: currentItem.group_id,
       username: currentItem.username,
       nickname: currentItem.nickname,
-      password: currentItem.password,
       avatar: currentItem.avatar,
       email: currentItem.email,
       mobile: currentItem.mobile,
@@ -651,7 +756,14 @@ const updateItem = async () => {
       updated_at: currentItem.updated_at
         ? dayjs(currentItem.updated_at).format("YYYY-MM-DD HH:mm:ss")
         : null,
-    });
+    };
+    
+    // 只有在密码不为空时才包含密码字段
+    if (currentItem.password && currentItem.password.trim() !== "") {
+      updateData.password = currentItem.password;
+    }
+    
+    await saveAdmin(updateData);
     fetchItems();
     closeDialog();
     message.success($t("common.update_success"));
@@ -688,6 +800,94 @@ const deleteSelectedItems = async () => {
   }
 };
 
+function displayAvatar(avatar: string | null): string {
+  // 如果头像为空或无效，使用默认头像
+  if (!avatar || avatar.trim() === "") {
+    return defaultAvatar;
+  }
+  
+  // 如果头像已经是完整 URL 或本地 assets 路径，直接返回
+  if (avatar.startsWith(webURL) || avatar.startsWith("/src/assets/")) {
+    return avatar;
+  }
+  
+  // 如果头像路径以 /uploads/ 开头，转换为 API 路径
+  if (avatar.startsWith("/uploads/")) {
+    return webURL + "/api/common" + avatar;
+  }
+  
+  // 否则，添加 webURL 前缀
+  return webURL + avatar;
+}
+
+function triggerAvatarUpload() {
+  if (avatarInput.value) {
+    avatarInput.value.click();
+  }
+}
+
+async function handleAvatarUpload(event: Event) {
+  const fileInput = event.target as HTMLInputElement;
+  const file = fileInput.files?.[0];
+  if (file) {
+    selectedFile.value = file;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        cropperImage.value = reader.result;
+        showCropperModal.value = true;
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+async function cropAndUpload() {
+  if (!cropper.value) return;
+
+  try {
+    const { canvas } = cropper.value.getResult();
+    if (!canvas) return;
+
+    canvas.toBlob(async (blob: Blob | null) => {
+      if (blob) {
+        try {
+          uploading.value = true;
+          const fileName = selectedFile.value?.name || "avatar.jpg";
+          const croppedFile = new File([blob], fileName, { type: blob.type });
+          const response = await uploadApi(croppedFile, "avatar");
+          
+          // 直接存储服务器返回的相对地址，不转换为完整URL
+          currentItem.avatar = response.image_url;
+          
+          message.success($t("general.profile.avatar_updated_successfully"));
+          showCropperModal.value = false;
+        } catch (error) {
+          console.error($t("general.profile.error_uploading_avatar"), error);
+          message.error($t("general.profile.error_uploading_avatar"));
+        } finally {
+          uploading.value = false;
+        }
+      }
+    }, "image/jpeg", 0.9); // 0.9 是图片质量
+  } catch (error) {
+    console.error("Error while processing cropper:", error);
+    message.error($t("general.profile.error_uploading_avatar"));
+  }
+}
+
+function cancelCrop() {
+  showCropperModal.value = false;
+  if (avatarInput.value) {
+    avatarInput.value.value = "";
+  }
+}
+
+function handleImageError(event: Event) {
+  const img = event.target as HTMLImageElement;
+  img.src = errorImage;
+}
+
 const fetchItems = async () => {
   loading.value = true;
   try {
@@ -703,6 +903,33 @@ const fetchItems = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+// 获取所有管理员组用于下拉选择
+const fetchAllGroups = async () => {
+  try {
+    const response = await fetchAdminGroupItems({
+      page: 1,
+      perPage: -1,
+      search: "",
+    });
+    allGroups.value = response.items.map((item: any) => ({
+      ...item,
+      rules: item.rules || [],
+      access: item.access || [],
+    }));
+  } catch (error) {
+    console.error($t("common.fetch_items_error"), error);
+  }
+};
+
+// 根据管理员组ID获取组名称
+const getGroupName = (groupId: number): string => {
+  if (groupId === 0) {
+    return "根管理员组";
+  }
+  const group = allGroups.value.find(group => group.id === groupId);
+  return group ? group.name : `未知组(${groupId})`;
 };
 
 onMounted(() => {

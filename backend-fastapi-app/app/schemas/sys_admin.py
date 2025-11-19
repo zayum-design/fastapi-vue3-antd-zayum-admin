@@ -84,6 +84,22 @@ class SysAdminUpdate(BaseModel):
     token: Optional[str] = Field(None, max_length=512)
     status: Optional[Literal['normal', 'hidden']] = Field(None, max_length=6)
 
+    @field_validator('password')
+    def validate_password(cls, v):
+        # 在更新模式下，密码为空时直接通过验证（表示不修改密码）
+        if v is None or v == "":
+            return v
+        # 只有在密码不为空时才进行密码强度验证
+        if len(v) < 6:
+            raise ValueError(_('Password must be at least 6 characters long.'))
+        if not re.search(r'[A-Z]', v):
+            raise ValueError(_('Password must contain at least one uppercase letter.'))
+        if not re.search(r'[a-z]', v):
+            raise ValueError(_('Password must contain at least one lowercase letter.'))
+        if not re.search(r'\d', v):
+            raise ValueError(_('Password must contain at least one digit.'))
+        return v
+
     class Config:
         from_attributes = True
 

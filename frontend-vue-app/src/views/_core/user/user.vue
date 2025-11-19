@@ -125,8 +125,13 @@
         <a-input v-model:value="currentItem.id" :disabled="true" />
         </a-form-item>
             
-        <a-form-item :label="$t('user.field.user_group_id')" name="user_group_id" :rules="formRules.user_group_id">
-        <a-input v-model:value="currentItem.user_group_id" :disabled="mode === 'view'" />
+        <a-form-item :label="$t('user.field.user_group')" name="user_group_id" :rules="formRules.user_group_id">
+        <a-select
+            v-model:value="currentItem.user_group_id"
+            :disabled="mode === 'view'"
+            :options="userGroupOptions"
+            :placeholder="$t('user.field.user_group')"
+        />
         </a-form-item>
             
         <a-form-item :label="$t('user.field.username')" name="username" :rules="formRules.username">
@@ -140,8 +145,8 @@
         <a-form-item :label="$t('user.field.password')" name="password" :rules="formRules.password" v-if="mode === 'add'">
         <a-input-password
             v-model:value="currentItem.password"
-            :disabled="mode === 'view'"
             placeholder="请输入密码"
+            autocomplete="off"
         />
         </a-form-item>
         <a-form-item :label="$t('user.field.password')" name="password" :rules="formRules.password" v-else>
@@ -149,6 +154,7 @@
             v-model:value="currentItem.password"
             :disabled="mode === 'view'"
             placeholder="留空表示不修改密码"
+            autocomplete="off"
         />
         </a-form-item>
             
@@ -263,12 +269,12 @@
             v-model:value="currentItem.platform"
             :disabled="mode === 'view'"
         >
-            <a-select-option value="ios">iOS</a-select-option>
-            <a-select-option value="mac">macOS</a-select-option>
-            <a-select-option value="android">Android</a-select-option>
-            <a-select-option value="web">Web</a-select-option>
-            <a-select-option value="pc">PC</a-select-option>
-            <a-select-option value="other">其他</a-select-option>
+            <a-select-option value="ios">{{ $t("common.platform.ios") }}</a-select-option>
+            <a-select-option value="mac">{{ $t("common.platform.mac") }}</a-select-option>
+            <a-select-option value="android">{{ $t("common.platform.android") }}</a-select-option>
+            <a-select-option value="web">{{ $t("common.platform.web") }}</a-select-option>
+            <a-select-option value="pc">{{ $t("common.platform.pc") }}</a-select-option>
+            <a-select-option value="other">{{ $t("common.platform.other") }}</a-select-option>
         </a-select>
         </a-form-item>
                 
@@ -305,6 +311,7 @@ import {
   saveUser,
   deleteUser,
 } from "@/api/admin/user";
+import { fetchUserGroupItems } from "@/api/admin/user_group";
 import { $t } from "@/locales";
 import {
   FileAddOutlined,
@@ -324,6 +331,8 @@ dayjs.extend(timezone);
 
 const TIME_ZONE = import.meta.env.VITE_TIME_ZONE || "Asia/Shanghai";
 const form = ref<FormInstance | null>(null);
+const userGroupOptions = ref<{ value: number; label: string }[]>([]);
+const userGroups = ref<any[]>([]);
 
 interface User {
   id: number;
@@ -424,7 +433,7 @@ const labelCol = { style: { width: "150px" } };
 const wrapperCol = { span: 14 };
 
 // Validation rules
-const formRules = reactive({
+const formRules = computed(() => ({
     user_group_id: [
     { required: true, message: $t('user.rules.id.required') },
     { validator: (_: any, value: number) => {  if (isNaN(value) || value <= 0) return Promise.reject($t('user.rules.group_id.must_be_positive'));  return Promise.resolve();}}
@@ -441,7 +450,7 @@ const formRules = reactive({
     { max: 30, message: $t('user.rules.nickname.max_length') }
   ],
   password: [
-    { required: false, message: $t('user.rules.required') },
+    { required: mode.value === 'add', message: $t('user.rules.password.required') },
     { validator: (_: any, value: string) => {  
       const errors = [];  
       if (mode.value === 'edit' && !value) return Promise.resolve();  
@@ -485,36 +494,38 @@ const formRules = reactive({
     { required: true, message: $t('user.rules.updated_at.required') }
   ],
 
-});
+}));
 
 const columns = computed(() => [
   { title: $t('user.field.id'), dataIndex: 'id', key: 'id' },
-{ title: $t('user.field.user_group_id'), dataIndex: 'user_group_id', key: 'user_group_id' },
-{ title: $t('user.field.username'), dataIndex: 'username', key: 'username' },
-{ title: $t('user.field.nickname'), dataIndex: 'nickname', key: 'nickname' },
-{ title: $t('user.field.password'), dataIndex: 'password', key: 'password', customRender: () => '******' },
-{ title: $t('user.field.email'), dataIndex: 'email', key: 'email' },
-{ title: $t('user.field.mobile'), dataIndex: 'mobile', key: 'mobile' },
-{ title: $t('user.field.avatar'), dataIndex: 'avatar', key: 'avatar' },
-{ title: $t('user.field.level'), dataIndex: 'level', key: 'level' },
-{ title: $t('user.field.gender'), dataIndex: 'gender', key: 'gender' },
-{ title: $t('user.field.birthday'), dataIndex: 'birthday', key: 'birthday' },
-{ title: $t('user.field.bio'), dataIndex: 'bio', key: 'bio' },
-{ title: $t('user.field.balance'), dataIndex: 'balance', key: 'balance' },
-{ title: $t('user.field.score'), dataIndex: 'score', key: 'score' },
-{ title: $t('user.field.successions'), dataIndex: 'successions', key: 'successions' },
-{ title: $t('user.field.max_successions'), dataIndex: 'max_successions', key: 'max_successions' },
-{ title: $t('user.field.prev_time'), dataIndex: 'prev_time', key: 'prev_time' },
-{ title: $t('user.field.login_time'), dataIndex: 'login_time', key: 'login_time' },
-{ title: $t('user.field.login_ip'), dataIndex: 'login_ip', key: 'login_ip' },
-{ title: $t('user.field.login_failure'), dataIndex: 'login_failure', key: 'login_failure' },
-{ title: $t('user.field.join_ip'), dataIndex: 'join_ip', key: 'join_ip' },
-{ title: $t('user.field.status'), dataIndex: 'status', key: 'status' },
-{ title: $t('user.field.platform'), dataIndex: 'platform', key: 'platform' },
-{ title: $t('user.field.created_at'), dataIndex: 'created_at', key: 'created_at' },
-{ title: $t('user.field.updated_at'), dataIndex: 'updated_at', key: 'updated_at' },
-{ title: $t('common.actions'), key: 'actions', fixed: 'right', align: "center" },
-
+  { 
+    title: $t('user.field.user_group'), 
+    dataIndex: 'user_group_id', 
+    key: 'user_group_id',
+    customRender: ({ text }: { text: number }) => getUserGroupName(text)
+  },
+  { title: $t('user.field.username'), dataIndex: 'username', key: 'username' },
+  { title: $t('user.field.nickname'), dataIndex: 'nickname', key: 'nickname' },
+  { title: $t('user.field.email'), dataIndex: 'email', key: 'email' },
+  { title: $t('user.field.mobile'), dataIndex: 'mobile', key: 'mobile' },
+  { title: $t('user.field.avatar'), dataIndex: 'avatar', key: 'avatar' },
+  { title: $t('user.field.level'), dataIndex: 'level', key: 'level' },
+  { title: $t('user.field.gender'), dataIndex: 'gender', key: 'gender' },
+  { title: $t('user.field.birthday'), dataIndex: 'birthday', key: 'birthday' },
+  { title: $t('user.field.balance'), dataIndex: 'balance', key: 'balance' },
+  { title: $t('user.field.score'), dataIndex: 'score', key: 'score' },
+  { title: $t('user.field.successions'), dataIndex: 'successions', key: 'successions' },
+  { title: $t('user.field.max_successions'), dataIndex: 'max_successions', key: 'max_successions' },
+  { title: $t('user.field.prev_time'), dataIndex: 'prev_time', key: 'prev_time' },
+  { title: $t('user.field.login_time'), dataIndex: 'login_time', key: 'login_time' },
+  { title: $t('user.field.login_ip'), dataIndex: 'login_ip', key: 'login_ip' },
+  { title: $t('user.field.login_failure'), dataIndex: 'login_failure', key: 'login_failure' },
+  { title: $t('user.field.join_ip'), dataIndex: 'join_ip', key: 'join_ip' },
+  { title: $t('user.field.status'), dataIndex: 'status', key: 'status' },
+  { title: $t('user.field.platform'), dataIndex: 'platform', key: 'platform' },
+  { title: $t('user.field.created_at'), dataIndex: 'created_at', key: 'created_at' },
+  { title: $t('user.field.updated_at'), dataIndex: 'updated_at', key: 'updated_at' },
+  { title: $t('common.actions'), key: 'actions', fixed: 'right', align: "center" },
 ]);
 
 const onSelectChange = (selectedRowIds: Key[]) => {
@@ -526,6 +537,48 @@ const onTableChange = (pag: any, filters: any, sorter: any) => {
   pagination.value.current = pag.current;
   pagination.value.pageSize = pag.pageSize;
   fetchItems();
+};
+
+const fetchUserGroups = async () => {
+  try {
+    const response = await fetchUserGroupItems({
+      page: 1,
+      perPage: -1, // Get all items
+      search: "",
+    });
+    userGroups.value = response.items;
+    
+    // Build hierarchical options
+    userGroupOptions.value = buildUserGroupOptions(response.items);
+  } catch (error) {
+    console.error($t("common.fetch_items_error"), error);
+  }
+};
+
+// Helper function to build hierarchical user group options
+const buildUserGroupOptions = (groups: any[], level = 0): { value: number; label: string }[] => {
+  const options: { value: number; label: string }[] = [];
+  
+  groups.forEach(group => {
+    const prefix = '　'.repeat(level); // Using full-width spaces for indentation
+    options.push({
+      value: group.id,
+      label: `${prefix}${group.name}`
+    });
+    
+    // Recursively add children if any
+    if (group.children && group.children.length > 0) {
+      options.push(...buildUserGroupOptions(group.children, level + 1));
+    }
+  });
+  
+  return options;
+};
+
+// Helper function to get user group name by ID
+const getUserGroupName = (groupId: number): string => {
+  const group = userGroups.value.find(g => g.id === groupId);
+  return group ? group.name : `${$t('user.group.field.user_group')}(${groupId})`;
 };
 
 const openDialog = (item: any, modeText: "add" | "edit" | "view") => {
@@ -552,6 +605,7 @@ const openDialog = (item: any, modeText: "add" | "edit" | "view") => {
     }
             
   }
+  fetchUserGroups(); // Load user groups when opening dialog
   isDialogVisible.value = true;
 };
 
@@ -739,5 +793,6 @@ const fetchItems = async () => {
 
 onMounted(() => {
   fetchItems();
+  fetchUserGroups(); // Load user groups on page initialization
 });
 </script>

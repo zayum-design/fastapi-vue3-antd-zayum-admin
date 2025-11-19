@@ -136,10 +136,21 @@
           name="pid"
           :rules="formRules.pid"
         >
-          <a-input
+          <a-select
             v-model:value="currentItem.pid"
             :disabled="mode === 'view'"
-          />
+            placeholder="请选择父级分组"
+          >
+            <a-select-option :value="0">根分组</a-select-option>
+            <a-select-option
+              v-for="group in allGroups"
+              :key="group.id"
+              :value="group.id"
+              :disabled="group.id === currentItem.id"
+            >
+              {{ group.name }}
+            </a-select-option>
+          </a-select>
         </a-form-item>
 
         <a-form-item
@@ -152,7 +163,6 @@
             :disabled="mode === 'view'"
           />
         </a-form-item>
-
         <a-form-item
           :label="$t('admin.group.rules')"
           name="rules"
@@ -261,9 +271,9 @@ const TIME_ZONE = import.meta.env.VITE_TIME_ZONE || "Asia/Shanghai";
 const form = ref<FormInstance | null>(null);
 
 // 日期时间格式常量
-const dateTimeFormat = 'YYYY-MM-DD HH:mm:ss';
-const dateFormat = 'YYYY-MM-DD';
-const timeFormat = 'HH:mm:ss';
+const dateTimeFormat = "YYYY-MM-DD HH:mm:ss";
+const dateFormat = "YYYY-MM-DD";
+const timeFormat = "HH:mm:ss";
 
 interface AdminGroup {
   id: number;
@@ -329,6 +339,7 @@ interface AdminGroupItem {
 }
 
 const items = ref<AdminGroupItem[]>([]);
+const allGroups = ref<AdminGroupItem[]>([]); // 所有管理员组用于映射父级名称
 const pagination = ref({ current: 1, pageSize: 10, total: 0 });
 const search = ref("");
 
@@ -336,16 +347,7 @@ const labelCol = { style: { width: "150px" } };
 const wrapperCol = { span: 14 };
 
 const formRules = reactive({
-  pid: [
-    { required: true, message: $t("admin_group.id.field_required") },
-    {
-      validator: (_: any, value: number) => {
-        if (isNaN(value) || value <= 0)
-          return Promise.reject($t("admin_group.id.must_be_positive"));
-        return Promise.resolve();
-      },
-    },
-  ],
+  pid: [{ required: true, message: $t("admin_group.id.field_required") }],
   name: [
     { required: true, message: $t("admin_group.nickname.field_required") },
     { min: 2, message: $t("admin_group.nickname.min_length") },
@@ -368,7 +370,12 @@ const formRules = reactive({
 
 const columns = computed(() => [
   { title: $t("admin.group.id"), dataIndex: "id", key: "id" },
-  { title: $t("admin.group.pid"), dataIndex: "pid", key: "pid" },
+  {
+    title: $t("admin.group.pid"),
+    dataIndex: "pid",
+    key: "pid",
+    customRender: ({ text }: { text: number }) => getParentName(text),
+  },
   { title: $t("admin.group.name"), dataIndex: "name", key: "name" },
   {
     title: $t("admin.group.rules"),
@@ -420,7 +427,9 @@ const openDialog = async (item: any, modeText: "add" | "edit" | "view") => {
     const formatDateTime = (dateString: string) => {
       if (!dateString) return moment().tz(TIME_ZONE).format(dateTimeFormat);
       const m = moment(dateString, dateTimeFormat);
-      return m.isValid() ? m.tz(TIME_ZONE).format(dateTimeFormat) : moment().tz(TIME_ZONE).format(dateTimeFormat);
+      return m.isValid()
+        ? m.tz(TIME_ZONE).format(dateTimeFormat)
+        : moment().tz(TIME_ZONE).format(dateTimeFormat);
     };
 
     Object.assign(currentItem, {
@@ -444,6 +453,7 @@ const openDialog = async (item: any, modeText: "add" | "edit" | "view") => {
   }
 
   isDialogVisible.value = true;
+  await fetchAllGroups(); // 确保获取所有管理员组数据
   await fetchAdminRule();
 };
 
@@ -590,8 +600,6 @@ const deleteItem = async (id: number) => {
   }
 };
 
- 
-
 const deleteSelectedItems = async () => {
   try {
     state.loading = true;
@@ -608,6 +616,33 @@ const deleteSelectedItems = async () => {
   } finally {
     state.loading = false;
   }
+};
+
+// 获取所有管理员组用于映射父级名称
+const fetchAllGroups = async () => {
+  try {
+    const response = await fetchAdminGroupItems({
+      page: 1,
+      perPage: -1,
+      search: "",
+    });
+    allGroups.value = response.items.map((item: any) => ({
+      ...item,
+      rules: item.rules || [],
+      access: item.access || [],
+    }));
+  } catch (error) {
+    console.error($t("common.fetch_items_error"), error);
+  }
+};
+
+// 根据父级ID获取父级名称
+const getParentName = (pid: number): string => {
+  if (pid === 0) {
+    return "根分组";
+  }
+  const parentGroup = allGroups.value.find((group) => group.id === pid);
+  return parentGroup ? parentGroup.name : `未知分组(${pid})`;
 };
 
 const fetchItems = async () => {
@@ -640,7 +675,7 @@ interface TreeNode {
   children?: TreeNode[];
   isLeaf?: boolean;
 }
- 
+
 const fetchAdminRule = async () => {
   loading.value = true;
   try {
@@ -698,5 +733,6 @@ const flattenPermissions = (items: any[]): string[] => {
 
 onMounted(() => {
   fetchItems();
+  fetchAllGroups(); // 获取所有管理员组用于映射父级名称
 });
 </script>

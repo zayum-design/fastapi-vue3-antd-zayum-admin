@@ -123,8 +123,9 @@ class SysAdmin(TimestampMixin, Base):
     @password.setter
     def password(self, pw: str):
         '''设置用户密码，并进行加密'''
+        # 如果密码为空，则不设置密码（保持原密码不变）
         if not pw:
-            raise ValueError(_("Password cannot be empty"))
+            return
         if len(pw) < 8:
             raise ValueError(_("Password must be at least 8 characters"))
         pw_hash = bcrypt.hashpw(pw.encode('utf8'), bcrypt.gensalt())

@@ -53,5 +53,15 @@
   "image": "图片",
   "file": "文件",
   "error": "错误",
-  "root_category": "根分类"
+  "root_category": "根分类",
+  "male": "男",
+  "female": "女",
+  "platform": {
+    "ios": "iOS",
+    "mac": "macOS",
+    "android": "Android",
+    "web": "Web",
+    "pc": "PC",
+    "other": "其他"
+  }
 }

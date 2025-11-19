@@ -53,5 +53,15 @@
   "image": "Image",
   "file": "File",
   "error": "Error",
-  "root_category": "Root Category"
+  "root_category": "Root Category",
+  "male": "Male",
+  "female": "Female",
+  "platform": {
+    "ios": "iOS",
+    "mac": "macOS",
+    "android": "Android",
+    "web": "Web",
+    "pc": "PC",
+    "other": "Other"
+  }
 }
