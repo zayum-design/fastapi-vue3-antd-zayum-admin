@@ -63,7 +63,7 @@ export const layoutConfig = {
     /** 是否启用 */
     enable: true,
     /** Logo图片路径 */
-    source: '/logo.png'
+    source: '/src/assets/logo-2.svg'
   },
 
   /** 标签栏配置 */
@@ -153,7 +153,7 @@ export const layoutConfig = {
       /** 是否启用 */
       enable: true,
       /** 公司名称 */
-      companyName: 'EasyIIT Design',
+      companyName: 'Zayum Design',
       /** 公司网站链接 */
       companySiteLink: '',
       /** 版权日期 */

@@ -5,7 +5,7 @@ import type { Recordable } from '@/_core/types';
 import { computed, ref } from 'vue';
 
 import { z } from '@/_core/ui/common-ui';
-import { AuthenticationCodeLogin } from './components/';
+import { AuthenticationCodeLogin } from './components';
 import { $t } from '@/locales';
 
 defineOptions({ name: 'CodeLogin' });

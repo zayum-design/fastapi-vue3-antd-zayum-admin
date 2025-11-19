@@ -6,14 +6,14 @@
           <a-card-header class="flex items-center justify-between">
             <a-space wrap>
               <AccessControl :codes="['attachment_category.add','all']" type="code">
-              <a-button
-                type="primary"
-                @click="openDialog(currentItem, 'add')"
-              >
-                <FileAddOutlined />
-                {{ $t("common.add_item") }}
-              </a-button>
-            </AccessControl>
+                <a-button
+                  type="primary"
+                  @click="openDialog(currentItem, 'add')"
+                >
+                  <FileAddOutlined />
+                  {{ $t("common.add_item") }}
+                </a-button>
+              </AccessControl>
               <AccessControl :codes="['attachment_category.delete','all']" type="code">
                 <a-popconfirm
                   :title="$t('common.confirm_delete')"
@@ -76,12 +76,10 @@
                       type="primary"
                       @click="openDialog(record, 'edit')"
                     >
-                      <EditOutlined /> </a-button
-                  ></AccessControl>
-<AccessControl
-                    :codes="['attachment_category.delete','all']"
-                    type="code"
-                  >
+                      <EditOutlined />
+                    </a-button>
+                  </AccessControl>
+                  <AccessControl :codes="['attachment_category.delete','all']" type="code">
                     <a-popconfirm
                       :title="$t('common.confirm_delete')"
                       :ok-text="$t('common.yes')"
@@ -121,12 +119,29 @@
         :rules="formRules"
       >
         
-        <a-form-item :label="$t('attachment.category.field.id')" v-if="mode !== 'add'">
-        <a-input v-model:value="currentItem.id" :disabled="true" />
-        </a-form-item>
+        <template v-if="mode !== 'add'">
+          <a-form-item :label="$t('attachment.category.field.id')">
+            <a-input v-model:value="currentItem.id" :disabled="true" />
+          </a-form-item>
+        </template>
             
         <a-form-item :label="$t('attachment.category.field.pid')" name="pid" :rules="formRules.pid">
-        <a-input v-model:value="currentItem.pid" :disabled="mode === 'view'" />
+        <a-select
+            v-model:value="currentItem.pid"
+            :disabled="mode === 'view'"
+            :placeholder="$t('common.select_placeholder')"
+            :loading="loading"
+        >
+            <a-select-option :value="0">{{ $t('common.root_category') }}</a-select-option>
+            <a-select-option 
+                v-for="category in hierarchicalCategories" 
+                :key="category.id" 
+                :value="category.id"
+                :disabled="category.id === currentItem.id" 
+            >
+                {{ category.displayName }}
+            </a-select-option>
+        </a-select>
         </a-form-item>
             
         <a-form-item :label="$t('attachment.category.field.name')" name="name" :rules="formRules.name">
@@ -249,22 +264,81 @@ const items = ref([]);
 const pagination = ref({ current: 1, pageSize: 10, total: 0 });
 const search = ref("");
 
+// 计算层级分类 - 使用简单的方法避免递归问题
+const hierarchicalCategories = computed(() => {
+  if (!items.value || items.value.length === 0) {
+    return [];
+  }
+  
+  const result: any[] = [];
+  
+  try {
+    // 获取根分类
+    const rootCategories = items.value.filter((item: any) => item.pid === 0);
+    
+    // 处理根分类
+    rootCategories.forEach((category: any) => {
+      result.push({
+        id: category.id,
+        name: category.name,
+        displayName: category.name,
+        level: 0
+      });
+      
+      // 获取一级子分类
+      const level1Categories = items.value.filter((item: any) => item.pid === category.id);
+      level1Categories.forEach((child: any) => {
+        result.push({
+          id: child.id,
+          name: child.name,
+          displayName: category.name + ' / ' + child.name,
+          level: 1
+        });
+        
+        // 获取二级子分类
+        const level2Categories = items.value.filter((item: any) => item.pid === child.id);
+        level2Categories.forEach((grandchild: any) => {
+          result.push({
+            id: grandchild.id,
+            name: grandchild.name,
+            displayName: category.name + ' / ' + child.name + ' / ' + grandchild.name,
+            level: 2
+          });
+          
+          // 获取三级子分类（最多支持三级）
+          const level3Categories = items.value.filter((item: any) => item.pid === grandchild.id);
+          level3Categories.forEach((greatGrandchild: any) => {
+            result.push({
+              id: greatGrandchild.id,
+              name: greatGrandchild.name,
+              displayName: category.name + ' / ' + child.name + ' / ' + grandchild.name + ' / ' + greatGrandchild.name,
+              level: 3
+            });
+          });
+        });
+      });
+    });
+  } catch (error) {
+    console.error('Error building hierarchical categories:', error);
+    // 如果出现错误，返回空数组避免DOM错误
+    return [];
+  }
+  
+  return result;
+});
+
 const labelCol = { style: { width: "150px" } };
 const wrapperCol = { span: 14 };
 
 // Validation rules
 const formRules = reactive({
     pid: [
-    { required: true, message: $t('attachment.category.rules.pid.required') },
-    { validator: (_: any, value: number) => {
-    if (isNaN(value)) return Promise.reject($t('attachment.category.rules.pid.must_be_number'));
-    return Promise.resolve();
-    }}
+    { required: true, message: $t('attachment.category.rules.pid.required') }
   ],
   name: [
-    { required: true, message: $t('attachment.category.rules.nickname.required') },
-    { min: 2, message: $t('attachment.category.rules.nickname.min_length') },
-    { max: 30, message: $t('attachment.category.rules.nickname.max_length') }
+    { required: true, message: $t('attachment.category.rules.name.required') },
+    { min: 2, message: $t('attachment.category.rules.name.min_length') },
+    { max: 30, message: $t('attachment.category.rules.name.max_length') }
   ],
   status: [
     { required: true, message: $t('attachment.category.rules.status.required') }
@@ -280,8 +354,28 @@ const formRules = reactive({
 
 const columns = computed(() => [
   { title: $t('attachment.category.field.id'), dataIndex: 'id', key: 'id' },
-{ title: $t('attachment.category.field.pid'), dataIndex: 'pid', key: 'pid' },
-{ title: $t('attachment.category.field.name'), dataIndex: 'name', key: 'name' },
+{ 
+  title: $t('attachment.category.field.pid'), 
+  dataIndex: 'pid', 
+  key: 'pid',
+  customRender: ({ text }: { text: number }) => {
+    if (text === 0) {
+      return $t('common.root_category');
+    }
+    const parentCategory = (items.value as any[]).find((item: any) => item.id === text);
+    return parentCategory ? parentCategory.name : text.toString();
+  }
+},
+{ 
+  title: $t('attachment.category.field.name'), 
+  dataIndex: 'name', 
+  key: 'name',
+  customRender: ({ text, record }: { text: string, record: any }) => {
+    // 查找当前分类在层级结构中的显示名称
+    const categoryInHierarchy = hierarchicalCategories.value.find((cat: any) => cat.id === record.id);
+    return categoryInHierarchy ? categoryInHierarchy.displayName : text;
+  }
+},
 { title: $t('attachment.category.field.status'), dataIndex: 'status', key: 'status' },
 { title: $t('attachment.category.field.created_at'), dataIndex: 'created_at', key: 'created_at' },
 { title: $t('attachment.category.field.updated_at'), dataIndex: 'updated_at', key: 'updated_at' },
@@ -307,14 +401,8 @@ const openDialog = (item: any, modeText: "add" | "edit" | "view") => {
   } else {
     Object.assign(currentItem, item);
     
-    if (currentItem.created_at) {
-        item.created_at = dayjs(currentItem.created_at).tz(TIME_ZONE);
-    }
-            
-    if (currentItem.updated_at) {
-        item.updated_at = dayjs(currentItem.updated_at).tz(TIME_ZONE);
-    }
-            
+    // 修复：保持日期为字符串格式，避免类型错误
+    // 日期选择器会自动处理字符串格式的日期
   }
   isDialogVisible.value = true;
 };
@@ -336,7 +424,6 @@ const closeDialog = () => {
 };
 
 const onSubmit = async () => {
-  
   try {
     // Validate the form before submission
     await form.value?.validate();
@@ -346,12 +433,9 @@ const onSubmit = async () => {
     } else if (mode.value === "edit") {
       await updateItem();
     }
-
   } catch (error) {
     console.log($t("common.error"), error);
-  } finally {
     confirmLoading.value = false;
-    
   }
 };
 
@@ -371,6 +455,9 @@ const saveItem = async () => {
     message.success($t("common.save_success"));
   } catch (error) {
     console.error($t("common.save_item_failed"), error);
+    throw error;
+  } finally {
+    confirmLoading.value = false;
   }
 };
 
@@ -390,6 +477,9 @@ const updateItem = async () => {
     message.success($t("common.update_success"));
   } catch (error) {
     console.error($t("common.update_item_failed"), error);
+    throw error;
+  } finally {
+    confirmLoading.value = false;
   }
 };
 

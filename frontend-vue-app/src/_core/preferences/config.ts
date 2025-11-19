@@ -32,7 +32,7 @@ const defaultPreferences: Preferences = {
   },
   copyright: {
     companyName: 'Zayum',
-    companySiteLink: 'https://www.zayum.pro',
+    companySiteLink: 'https://www.zayum.com',
     date: '2024',
     enable: true,
     icp: '',
@@ -51,7 +51,7 @@ const defaultPreferences: Preferences = {
   },
   logo: {
     enable: true,
-    source: '@/assets/logo-2.svg',
+    source: '/src/assets/logo.png',
   },
   navigation: {
     accordion: true,

@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.dependencies.database import get_db
 from app.core.security import get_current_admin
 from app.crud.sys_attachment import crud_sys_attachment
+from app.crud.sys_attachment_category import crud_sys_attachment_category
 from app.schemas.sys_attachment import SysAttachmentCreate, SysAttachmentUpdate
 from app.utils.responses import success_response
 from app.utils.response_handlers import ErrorCode
@@ -22,7 +23,7 @@ def read_sys_attachment_list(
     page: int = 1,
     per_page: int = 10,
     search: Optional[str] = None,
-    orderby: Optional[str] = None,  # Sorting field and direction, e.g., "name_asc"
+    orderby: Optional[str] = 'id_desc',  # Sorting field and direction, e.g., "name_asc"
     db: Session = Depends(get_db)
 ):
     """
@@ -55,10 +56,25 @@ def read_sys_attachment_list(
     response_page = page
     response_per_page = per_page
 
+    # Get all attachment categories for name mapping
+    all_categories = crud_sys_attachment_category.get_all(db)
+    category_map = {category.id: category.name for category in all_categories}
+
+    # Prepare the response data with category names
+    items_with_category_names = []
+    for item in items:
+        item_dict = item.to_dict()
+        # Add category name if cat_id exists
+        if item.cat_id and item.cat_id in category_map:
+            item_dict['cat_name'] = category_map[item.cat_id]
+        else:
+            item_dict['cat_name'] = None
+        items_with_category_names.append(item_dict)
+
     # Prepare the response data
     return success_response(
         {
-            "items": [item.to_dict() for item in items],  # Convert each model instance to a dictionary
+            "items": items_with_category_names,
             "total": total,
             "page": response_page,
             "per_page": response_per_page,

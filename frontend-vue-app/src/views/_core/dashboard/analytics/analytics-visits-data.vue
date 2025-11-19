@@ -8,17 +8,17 @@ const chartRef = ref<EchartsUIType>();
 const { renderEcharts } = useEcharts(chartRef);
 const loading = ref(true);
 
-// 获取客户端数据
-const loadClientData = async () => {
+// 获取平台数据
+const loadPlatformData = async () => {
   try {
     loading.value = true;
     const response = await fetchAnalyticsSources();
     
     // 处理响应数据
-    let clientData: Array<{name: string, value: number}> = [];
+    let platformData: Array<{name: string, value: number}> = [];
     if (response && Array.isArray(response)) {
       // 如果返回的是数组格式，直接使用
-      clientData = response.map((item: any) => ({
+      platformData = response.map((item: any) => ({
         name: item.source,
         value: item.count
       }));
@@ -26,7 +26,7 @@ const loadClientData = async () => {
       // 如果返回的是对象格式，尝试获取数据
       const sourcesData = (response as any).userSources || (response as any).actionSources || [];
       if (sourcesData.length > 0) {
-        clientData = sourcesData.map((source: any) => ({
+        platformData = sourcesData.map((source: any) => ({
           name: source.source,
           value: source.count
         }));
@@ -34,111 +34,107 @@ const loadClientData = async () => {
     }
 
     // 如果没有数据，使用默认数据
-    if (clientData.length === 0) {
-      clientData = [
+    if (platformData.length === 0) {
+      platformData = [
         { name: '网页', value: 1048 },
         { name: '移动端', value: 735 },
         { name: 'Ipad', value: 580 },
-        { name: '客户端', value: 484 },
-        { name: '第三方', value: 300 },
-        { name: '其它', value: 200 },
+        { name: '平台', value: 484 },
       ];
     }
 
-    // 准备雷达图数据
-    const radarIndicators = clientData.map((item: {name: string, value: number}) => ({ name: item.name }));
-    const radarValues = clientData.map((item: {name: string, value: number}) => item.value);
-
     renderEcharts({
       legend: {
-        bottom: 0,
-        data: ['客户端分布'],
-      },
-      radar: {
-        indicator: radarIndicators,
-        radius: '60%',
-        splitNumber: 8,
+        bottom: '2%',
+        left: 'center',
       },
       series: [
         {
-          areaStyle: {
-            opacity: 0.3,
-            shadowBlur: 10,
-            shadowColor: 'rgba(0,0,0,.2)',
-            shadowOffsetX: 0,
-            shadowOffsetY: 10,
+          animationDelay() {
+            return Math.random() * 100;
           },
-          data: [
-            {
-              itemStyle: {
-                color: '#5ab1ef',
-              },
-              name: '客户端分布',
-              value: radarValues,
+          animationEasing: 'exponentialInOut',
+          animationType: 'scale',
+          avoidLabelOverlap: false,
+          color: ['#5ab1ef', '#b6a2de', '#67e0e3', '#2ec7c9'],
+          data: platformData,
+          emphasis: {
+            label: {
+              fontSize: '12',
+              fontWeight: 'bold',
+              show: true,
             },
-          ],
+          },
           itemStyle: {
             borderRadius: 10,
             borderWidth: 2,
           },
-          symbolSize: 0,
-          type: 'radar',
+          label: {
+            position: 'center',
+            show: false,
+          },
+          labelLine: {
+            show: false,
+          },
+          name: '平台分布',
+          radius: ['40%', '65%'],
+          type: 'pie',
         },
       ],
       tooltip: {
         trigger: 'item',
-        formatter: '{a} <br/>{b}: {c}'
+        formatter: '{a} <br/>{b}: {c} ({d}%)'
       },
     });
   } catch (error) {
-    console.error('Failed to fetch client data:', error);
+    console.error('Failed to fetch platform data:', error);
     // 出错时使用默认数据
     renderEcharts({
       legend: {
-        bottom: 0,
-        data: ['客户端分布'],
-      },
-      radar: {
-        indicator: [
-          { name: '网页' },
-          { name: '移动端' },
-          { name: 'Ipad' },
-          { name: '客户端' },
-          { name: '第三方' },
-          { name: '其它' },
-        ],
-        radius: '60%',
-        splitNumber: 8,
+        bottom: '2%',
+        left: 'center',
       },
       series: [
         {
-          areaStyle: {
-            opacity: 0.3,
-            shadowBlur: 10,
-            shadowColor: 'rgba(0,0,0,.2)',
-            shadowOffsetX: 0,
-            shadowOffsetY: 10,
+          animationDelay() {
+            return Math.random() * 100;
           },
+          animationEasing: 'exponentialInOut',
+          animationType: 'scale',
+          avoidLabelOverlap: false,
+          color: ['#5ab1ef', '#b6a2de', '#67e0e3', '#2ec7c9'],
           data: [
-            {
-              itemStyle: {
-                color: '#5ab1ef',
-              },
-              name: '客户端分布',
-              value: [1048, 735, 580, 484, 300, 200],
-            },
+            { name: '网页', value: 1048 },
+            { name: '移动端', value: 735 },
+            { name: 'Ipad', value: 580 },
+            { name: '平台', value: 484 },
           ],
+          emphasis: {
+            label: {
+              fontSize: '12',
+              fontWeight: 'bold',
+              show: true,
+            },
+          },
           itemStyle: {
             borderRadius: 10,
             borderWidth: 2,
           },
-          symbolSize: 0,
-          type: 'radar',
+          label: {
+            position: 'center',
+            show: false,
+          },
+          labelLine: {
+            show: false,
+          },
+          name: '平台分布',
+          radius: ['40%', '65%'],
+          type: 'pie',
         },
       ],
       tooltip: {
         trigger: 'item',
-        formatter: '{a} <br/>{b}: {c}'
+        formatter: '{a} <br/>{b}: {c} ({d}%)'
       },
     });
   } finally {
@@ -147,7 +143,7 @@ const loadClientData = async () => {
 };
 
 onMounted(() => {
-  loadClientData();
+  loadPlatformData();
 });
 </script>
 

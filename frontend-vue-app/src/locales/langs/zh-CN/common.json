@@ -47,5 +47,11 @@
   "delete_selected_success": "选中项删除成功",
   "delete_selected_failed": "删除选中项失败",
   "fetch_items_error": "获取项目失败",
-   "field_required":"此项目必须填写"
+   "field_required":"此项目必须填写",
+  "select_placeholder": "请选择",
+  "no_category": "无分类",
+  "image": "图片",
+  "file": "文件",
+  "error": "错误",
+  "root_category": "根分类"
 }

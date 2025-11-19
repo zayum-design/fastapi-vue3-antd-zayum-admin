@@ -6,6 +6,10 @@ export namespace AuthApi {
   export interface LoginParams {
     password?: string;
     username?: string;
+    captcha_type?: string;
+    captcha?: boolean;
+    captcha_id?: string | null;
+    captcha_code?: string | null;
   }
 
   /** 登录接口返回值 */

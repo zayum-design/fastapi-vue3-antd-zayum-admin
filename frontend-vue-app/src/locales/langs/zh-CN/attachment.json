@@ -5,6 +5,7 @@
     "attachment": "附件",
     "id": "编号",
     "cat_id": "分类ID",
+    "category": "分类",
     "admin_id": "管理员ID",
     "user_id": "用户ID",
     "att_type": "附件类型",
@@ -49,13 +50,13 @@
     }
   },
 
-  "category": {
+    "category": {
     "category": "附件分类",
     "field": {
       "attachment_category": "附件分类",
       "attachment_category_manage": "附件分类管理",
       "id": "编号",
-      "pid": "上级分类ID",
+      "pid": "上级分类",
       "name": "分类名称",
       "status": "状态",
       "created_at": "创建时间",
@@ -63,11 +64,11 @@
     },
     "rules": {
       "pid": {
-        "required": "上级分类ID不能为空",
-        "must_be_positive": "上级分类ID必须为正整数"
+        "required": "上级分类不能为空"
       },
       "name": {
         "required": "分类名称不能为空",
+        "min_length": "分类名称至少为2个字符",
         "max_length": "分类名称最多为30个字符"
       },
       "status": {

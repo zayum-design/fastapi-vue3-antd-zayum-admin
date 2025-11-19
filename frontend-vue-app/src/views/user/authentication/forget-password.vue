@@ -5,7 +5,7 @@ import type { Recordable } from '@/_core/types';
 import { computed, ref } from 'vue';
 
 import { z } from '@/_core/ui/common-ui';
-import { AuthenticationForgetPassword } from './components/';
+import { AuthenticationForgetPassword } from './components';
 
 import { $t } from '@/locales';
 

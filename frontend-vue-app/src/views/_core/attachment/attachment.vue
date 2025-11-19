@@ -61,6 +61,17 @@
             :scroll="{ x: true }"
           >
             <template #bodyCell="{ column, record }">
+              <template v-if="column.key === 'thumb'">
+                <div class="flex justify-center">
+                  <img 
+                    :src="getThumbnailUrl(record)" 
+                    :alt="record.file_name || 'file'"
+                    class="w-12 h-12 object-cover rounded border cursor-pointer hover:opacity-80"
+                    @error="handleImageError"
+                    @click="openAttachment(record)"
+                  />
+                </div>
+              </template>
               <template v-if="column.key === 'actions'">
                 <a-space>
                   <a-button
@@ -125,8 +136,21 @@
         <a-input v-model:value="currentItem.id" :disabled="true" />
         </a-form-item>
             
-        <a-form-item :label="$t('attachment.field.cat_id')" >
-        <a-input v-model:value="currentItem.cat_id" :disabled="mode === 'view'" />
+        <a-form-item :label="$t('attachment.field.category')" >
+        <a-select
+            v-model:value="currentItem.cat_id"
+            :disabled="mode === 'view'"
+            :placeholder="$t('common.select_placeholder')"
+        >
+            <a-select-option :value="0">{{ $t('common.no_category') }}</a-select-option>
+            <a-select-option 
+                v-for="category in hierarchicalCategories" 
+                :key="category.id" 
+                :value="category.id"
+            >
+                {{ category.displayName }}
+            </a-select-option>
+        </a-select>
         </a-form-item>
             
         <a-form-item :label="$t('attachment.field.admin_id')" name="admin_id" :rules="formRules.admin_id">
@@ -216,6 +240,7 @@ import {
   saveAttachment,
   deleteAttachment,
 } from "@/api/admin/attachment";
+import { fetchAttachmentCategoryItems } from "@/api/admin/attachment_category";
 import { $t } from "@/locales";
 import {
   FileAddOutlined,
@@ -228,6 +253,8 @@ import { message, type FormInstance } from "ant-design-vue";
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
+import { useAppConfig } from "@/_core/hooks";
+const { webURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
 
 // Setup dayjs plugins
 dayjs.extend(utc);
@@ -254,6 +281,15 @@ interface Attachment {
   created_at: string;
   updated_at: string;
   
+}
+
+interface Category {
+  id: number;
+  name: string;
+  pid: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
 }
 
 const currentItem: UnwrapRef<Attachment> = reactive({
@@ -308,6 +344,32 @@ const rowKey = ref("id");
 const items = ref([]);
 const pagination = ref({ current: 1, pageSize: 10, total: 0 });
 const search = ref("");
+const categories = ref<Category[]>([]);
+
+// 计算层级分类
+const hierarchicalCategories = computed(() => {
+  const buildHierarchy = (items: Category[], parentId: number = 0, level: number = 0): any[] => {
+    const result: any[] = [];
+    const children = items.filter(item => item.pid === parentId);
+    
+    children.forEach(child => {
+      const displayName = '　'.repeat(level * 2) + child.name;
+      result.push({
+        ...child,
+        displayName,
+        level
+      });
+      
+      // 递归处理子分类
+      const grandchildren = buildHierarchy(items, child.id, level + 1);
+      result.push(...grandchildren);
+    });
+    
+    return result;
+  };
+  
+  return buildHierarchy(categories.value);
+});
 
 const labelCol = { style: { width: "150px" } };
 const wrapperCol = { span: 14 };
@@ -354,7 +416,7 @@ const formRules = reactive({
 
 const columns = computed(() => [
   { title: $t('attachment.field.id'), dataIndex: 'id', key: 'id' },
-{ title: $t('attachment.field.cat_id'), dataIndex: 'cat_id', key: 'cat_id' },
+{ title: $t('attachment.field.category'), dataIndex: 'cat_name', key: 'cat_name' },
 { title: $t('attachment.field.admin_id'), dataIndex: 'admin_id', key: 'admin_id' },
 { title: $t('attachment.field.user_id'), dataIndex: 'user_id', key: 'user_id' },
 { title: $t('attachment.field.att_type'), dataIndex: 'att_type', key: 'att_type' },
@@ -547,7 +609,105 @@ const fetchItems = async () => {
   }
 };
 
+// 获取分类数据
+const fetchCategories = async () => {
+  try {
+    const response = await fetchAttachmentCategoryItems({
+      page: 1,
+      perPage: -1, // 获取所有分类
+    });
+    categories.value = response.items;
+  } catch (error) {
+    console.error("获取分类数据失败", error);
+  }
+};
+
+// 获取缩略图URL
+const getThumbnailUrl = (record: any) => {
+  // 如果是图片类型，显示实际的图片地址
+  if (record.att_type === 'image' && record.path_file) {
+    return getAttachmentUrl(record.path_file);
+  }
+  
+  // 如果是文件类型，根据文件扩展名显示对应的文件类型图标
+  if (record.att_type === 'file' && record.file_name) {
+    const extension = getFileExtension(record.file_name);
+    return getFileTypeIcon(extension);
+  }
+  
+  // 默认显示通用文件图标
+  return '/src/assets/flie-type/file.png';
+};
+
+// 获取文件扩展名
+const getFileExtension = (filename: string) => {
+  const parts = filename.split('.');
+  return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : '';
+};
+
+// 根据文件扩展名获取对应的文件类型图标
+const getFileTypeIcon = (extension: string) => {
+  const iconMap: Record<string, string> = {
+    'pdf': '/src/assets/flie-type/file-type-pdf.png',
+    'doc': '/src/assets/flie-type/file-type-doc.png',
+    'docx': '/src/assets/flie-type/file-type-docx.png',
+    'xls': '/src/assets/flie-type/file-type-xls.png',
+    'xlsx': '/src/assets/flie-type/file-type-xlsx.png',
+    'ppt': '/src/assets/flie-type/file-type-ppt.png',
+    'pptx': '/src/assets/flie-type/file-type-pptx.png',
+    'txt': '/src/assets/flie-type/file-type-txt.png',
+    'zip': '/src/assets/flie-type/file-type-zip.png',
+    'rar': '/src/assets/flie-type/file-type-rar.png',
+  };
+  
+  return iconMap[extension] || '/src/assets/flie-type/file.png';
+};
+
+// 获取附件完整URL
+const getAttachmentUrl = (path: string): string => {
+  // 如果路径为空或无效，返回空字符串
+  if (!path || path.trim() === "") {
+    return '';
+  }
+  
+  // 如果路径已经是完整 URL 或本地 assets 路径，直接返回
+  if (path.startsWith(webURL) || path.startsWith("/src/assets/")) {
+    return path;
+  }
+  
+  // 如果路径以 /uploads/ 开头，转换为 API 路径
+  if (path.startsWith("/uploads/")) {
+    return webURL + "/api/common" + path;
+  }
+  
+  // 否则，添加 webURL 前缀
+  return webURL + path;
+};
+
+// 在新窗口打开附件
+const openAttachment = (record: any) => {
+  if (record.att_type === 'image' && record.path_file) {
+    const url = getAttachmentUrl(record.path_file);
+    if (url) {
+      window.open(url, '_blank');
+    }
+  } else if (record.att_type === 'file' && record.path_file) {
+    const url = getAttachmentUrl(record.path_file);
+    if (url) {
+      window.open(url, '_blank');
+    }
+  }
+};
+
+// 图片加载错误处理
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement;
+  // 如果图片加载失败，显示图片错误图标
+  img.src = '/src/assets/image-error.png';
+};
+
 onMounted(() => {
   fetchItems();
+  fetchCategories();
 });
 </script>

@@ -47,5 +47,11 @@
   "delete_selected_success": "Selected items deleted successfully",
   "delete_selected_failed": "Failed to delete selected items",
   "fetch_items_error": "Failed to fetch items",
-  "field_required":"Field Required"
+  "field_required":"Field Required",
+  "select_placeholder": "Please select",
+  "no_category": "No Category",
+  "image": "Image",
+  "file": "File",
+  "error": "Error",
+  "root_category": "Root Category"
 }

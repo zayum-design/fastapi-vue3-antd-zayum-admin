@@ -26,18 +26,7 @@ const loadRegionData = async () => {
 
     // 如果没有数据，使用默认数据
     if (regionData.length === 0) {
-      regionData = [
-        { name: '广东省', value: 1200 },
-        { name: '北京市', value: 850 },
-        { name: '上海市', value: 780 },
-        { name: '浙江省', value: 650 },
-        { name: '江苏省', value: 620 },
-        { name: '四川省', value: 580 },
-        { name: '山东省', value: 550 },
-        { name: '湖北省', value: 480 },
-        { name: '河南省', value: 450 },
-        { name: '其他地区', value: 1200 },
-      ];
+      regionData = [];
     }
 
     renderEcharts({
@@ -68,29 +57,7 @@ const loadRegionData = async () => {
     console.error('Failed to fetch region data:', error);
     // 出错时使用默认数据
     renderEcharts({
-      series: [
-        {
-          animationDelay() {
-            return Math.random() * 400;
-          },
-          animationEasing: 'exponentialInOut',
-          animationType: 'scale',
-          center: ['50%', '50%'],
-          color: ['#5ab1ef', '#b6a2de', '#67e0e3', '#2ec7c9'],
-          data: [
-            { name: '广州', value: 500 },
-            { name: '上海', value: 310 },
-            { name: '福建', value: 274 },
-            { name: '北京', value: 400 },
-          ].sort((a, b) => {
-            return a.value - b.value;
-          }),
-          name: '用户地区分布',
-          radius: '80%',
-          roseType: 'radius',
-          type: 'pie',
-        },
-      ],
+      series: [],
       tooltip: {
         trigger: 'item',
         formatter: '{a} <br/>{b}: {c} ({d}%)'

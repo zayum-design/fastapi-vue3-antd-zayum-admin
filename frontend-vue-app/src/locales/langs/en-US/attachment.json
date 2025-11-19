@@ -4,6 +4,7 @@
   "field": {
     "id": "Id",
     "cat_id": "Cat Id",
+    "category": "Category",
     "admin_id": "Admin Id",
     "user_id": "User Id",
     "att_type": "Att Type",
@@ -53,7 +54,7 @@
       "attachment_category": "Attachment Category",
       "attachment_category_manage": "Attachment Category Manager",
       "id": "Id",
-      "pid": "Pid",
+      "pid": "Parent Category",
       "name": "Name",
       "status": "Status",
       "created_at": "Created At",
@@ -61,11 +62,11 @@
     },
     "rules": {
       "pid": {
-        "required": "Pid is required",
-        "must_be_positive": "Pid must be a positive integer"
+        "required": "Parent Category is required"
       },
       "name": {
         "required": "Name is required",
+        "min_length": "Name must be at least 2 characters",
         "max_length": "Name must be at most 30 characters"
       },
       "status": {

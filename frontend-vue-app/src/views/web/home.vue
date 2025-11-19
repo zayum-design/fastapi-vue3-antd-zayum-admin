@@ -17,7 +17,7 @@
             <a href="http://doc.zayumadmin.com" target="_blank">文档</a>
           </a-menu-item>
           <a-menu-item key="github" class="hover:text-white-200 bg-transparent">
-            <a href="https://github.com/easyiit-design/fastapi-vue3-antd-zayum-admin" target="_blank">GitHub</a>
+            <a href="https://github.com/zayum-design/fastapi-vue3-antd-zayum-admin" target="_blank">GitHub</a>
           </a-menu-item>
         </a-menu>
         <a-space wrap>
@@ -184,7 +184,7 @@ npm run dev</code></pre>
             <ul class="space-y-2">
               <li><a href="http://demo.zayumadmin.com" target="_blank" class="text-gray-400 hover:text-white">Demo演示</a></li>
               <li><a href="http://doc.zayumadmin.com" target="_blank" class="text-gray-400 hover:text-white">文档</a></li>
-              <li><a href="https://github.com/easyiit-design/fastapi-vue3-antd-zayum-admin" target="_blank" class="text-gray-400 hover:text-white">GitHub</a></li>
+              <li><a href="https://github.com/zayum-design/fastapi-vue3-antd-zayum-admin" target="_blank" class="text-gray-400 hover:text-white">GitHub</a></li>
             </ul>
           </a-col>
           <a-col :xs="24" :md="8">

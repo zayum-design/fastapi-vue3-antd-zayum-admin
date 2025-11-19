@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { AuthenticationQrCodeLogin } from './components/';
+import { AuthenticationQrCodeLogin } from './components';
 import { ADMIN_LOGIN_PATH } from '@/constants';
 
 defineOptions({ name: 'QrCodeLogin' });

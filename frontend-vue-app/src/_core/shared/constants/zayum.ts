@@ -1,7 +1,7 @@
 /**
  * @zh_CN GITHUB 仓库地址
  */
-export const ZAYUM_GITHUB_URL = 'https://github.com/easyiit-design/fastapi-vue3-antd-zayum-admin';
+export const ZAYUM_GITHUB_URL = 'https://github.com/zayum-design/fastapi-vue3-antd-zayum-admin';
 
 /**
  * @zh_CN 文档地址

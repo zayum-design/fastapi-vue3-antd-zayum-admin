@@ -173,7 +173,7 @@ const uploading = ref(false);
 const tab = ref("profile");
 const form = ref();
 const avatarInput = ref<HTMLInputElement | null>(null);
-const defaultAvatar = "/uploads/avatar/avatar.png";
+const defaultAvatar = "/src/assets/avatar.png";
 
 const showCropperModal = ref(false);
 const cropperImage = ref<string>("");
@@ -288,9 +288,23 @@ function cancelCrop() {
 }
 
 function displayAvatar(avatar: string): string {
-  return avatar && !avatar.startsWith(webURL)
-    ? webURL + avatar
-    : avatar || defaultAvatar;
+  // 如果头像为空或无效，使用默认头像
+  if (!avatar || avatar.trim() === "") {
+    return defaultAvatar;
+  }
+  
+  // 如果头像已经是完整 URL 或本地 assets 路径，直接返回
+  if (avatar.startsWith(webURL) || avatar.startsWith("/src/assets/")) {
+    return avatar;
+  }
+  
+  // 如果头像路径以 /uploads/ 开头，转换为 API 路径
+  if (avatar.startsWith("/uploads/")) {
+    return webURL + "/api/common" + avatar;
+  }
+  
+  // 否则，添加 webURL 前缀
+  return webURL + avatar;
 }
 
 async function saveProfile() {

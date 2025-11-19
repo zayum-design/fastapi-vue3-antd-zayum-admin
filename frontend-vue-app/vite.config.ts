@@ -13,15 +13,15 @@ function injectMetadata(env: Record<string, string>) {
         `<head><script>
           window.__ZAYUM_ADMIN_METADATA__ = {
             authorEmail: 'yixiniis@foxmail.com',
-            authorName: 'Zhanor',
-            authorUrl: 'http://zhanor.com',
+            authorName: 'Zayum',
+            authorUrl: 'http://zayum.com',
             buildTime: new Date().toISOString(),
             dependencies: {},
-            description: 'Project Description',
+            description: 'A python admin pannel',
             devDependencies: {},
-            homepage: 'http://zhanor.com',
+            homepage: 'http://zayum.com',
             license: 'MIT',
-            repositoryUrl: 'https://github.com/easyiit-design/fastapi-vue3-antd-zayum-admin',
+            repositoryUrl: 'https://github.com/zayum-design/fastapi-vue3-antd-zayum-admin',
             version: '1.0.2'
           };
           window._ZAYUM_ADMIN_PRO_APP_CONF_ = {

@@ -5,7 +5,7 @@ import type { Recordable } from '@/_core/types';
 import { computed, h, ref } from 'vue';
 
 import { z } from '@/_core/ui/common-ui';
-import { AuthenticationRegister } from './components/';
+import { AuthenticationRegister } from './components';
 import { $t } from '@/locales';
 
 defineOptions({ name: 'Register' });
