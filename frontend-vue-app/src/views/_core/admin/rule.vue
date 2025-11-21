@@ -1064,12 +1064,21 @@ const formRules = reactive({
 const columns = computed(() => [
   { key: "tree", align: "center" },
 
-  { title: $t("admin.rule.id"), dataIndex: "id", align: "center", key: "id" },
+  { 
+    title: $t("admin.rule.id"), 
+    dataIndex: "id", 
+    align: "center", 
+    key: "id",
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
 
   {
     title: $t("admin.rule.rule_type"),
     dataIndex: "rule_type",
     key: "rule_type",
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
   },
 
   {
@@ -1077,11 +1086,25 @@ const columns = computed(() => [
     dataIndex: "parent_id",
     key: "parent_id",
     width: 90,
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
   },
 
-  { title: $t("admin.rule.name"), dataIndex: "name", key: "name" },
+  { 
+    title: $t("admin.rule.name"), 
+    dataIndex: "name", 
+    key: "name",
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
 
-  { title: $t("admin.rule.path"), dataIndex: "path", key: "path" },
+  { 
+    title: $t("admin.rule.path"), 
+    dataIndex: "path", 
+    key: "path",
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
 
   // { title: $t('admin.rule.component'), dataIndex: 'component', key: 'component' },
 
@@ -1105,17 +1128,33 @@ const columns = computed(() => [
     title: $t("admin.rule.menu_display_type"),
     dataIndex: "menu_display_type",
     key: "menu_display_type",
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
   },
 
   {
     title: $t("admin.rule.model_name"),
     dataIndex: "model_name",
     key: "model_name",
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
   },
 
-  { title: $t("admin.rule.weigh"), dataIndex: "weigh", key: "weigh" },
+  { 
+    title: $t("admin.rule.weigh"), 
+    dataIndex: "weigh", 
+    key: "weigh",
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
 
-  { title: $t("admin.rule.status"), dataIndex: "status", key: "status" },
+  { 
+    title: $t("admin.rule.status"), 
+    dataIndex: "status", 
+    key: "status",
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
 
   {
     title: $t("common.actions"),
@@ -1143,10 +1182,27 @@ const onSelectChange = (selectedRowIds: Key[]) => {
   state.selectedRowIds = selectedRowIds;
 };
 
+const orderby = ref('');
+
 const onTableChange = (pag: any, filters: any, sorter: any) => {
   console.log("onTableChange", pag, filters, sorter);
   pagination.value.current = pag.current;
   pagination.value.pageSize = pag.pageSize;
+  
+  // Handle sorting
+  if (sorter && sorter.field) {
+    const field = sorter.field;
+    const order = sorter.order;
+    if (order) {
+      const direction = order === 'ascend' ? 'asc' : 'desc';
+      orderby.value = `${field}_${direction}`;
+    } else {
+      orderby.value = '';
+    }
+  } else {
+    orderby.value = '';
+  }
+  
   fetchItems();
 };
 
@@ -1361,6 +1417,7 @@ const fetchItems = async () => {
       page: pagination.value.current,
       perPage: pagination.value.pageSize,
       search: search.value,
+      orderby: orderby.value,
     });
     // items.value = response.items;
     items.value = addPrefixForTree(response.items);

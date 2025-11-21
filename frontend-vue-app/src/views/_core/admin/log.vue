@@ -289,15 +289,45 @@ const formRules = reactive({
 });
 
 const columns = computed(() => [
-  { title: $t('admin.log.field.id'), dataIndex: 'id', key: 'id' },
-{ title: $t('admin.log.field.admin_id'), dataIndex: 'admin_id', key: 'admin_id' },
-{ title: $t('admin.log.field.username'), dataIndex: 'username', key: 'username' },
-{ title: $t('admin.log.field.url'), dataIndex: 'url', key: 'url' },
-{ title: $t('admin.log.field.title'), dataIndex: 'title', key: 'title' },
-{ title: $t('admin.log.field.ip'), dataIndex: 'ip', key: 'ip' },
-{ title: $t('admin.log.field.created_at'), dataIndex: 'created_at', key: 'created_at' },
-{ title: $t('admin.log.field.updated_at'), dataIndex: 'updated_at', key: 'updated_at' },
-{ title: $t('common.actions'), key: 'actions', fixed: 'right', align: "center" },
+  { 
+    title: $t('admin.log.field.id'), 
+    dataIndex: 'id', 
+    key: 'id',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('admin.log.field.admin_id'), 
+    dataIndex: 'admin_id', 
+    key: 'admin_id',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('admin.log.field.username'), 
+    dataIndex: 'username', 
+    key: 'username',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { title: $t('admin.log.field.url'), dataIndex: 'url', key: 'url' },
+  { title: $t('admin.log.field.title'), dataIndex: 'title', key: 'title' },
+  { title: $t('admin.log.field.ip'), dataIndex: 'ip', key: 'ip' },
+  { 
+    title: $t('admin.log.field.created_at'), 
+    dataIndex: 'created_at', 
+    key: 'created_at',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('admin.log.field.updated_at'), 
+    dataIndex: 'updated_at', 
+    key: 'updated_at',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { title: $t('common.actions'), key: 'actions', fixed: 'right', align: "center" },
 
 ]);
 
@@ -305,10 +335,27 @@ const onSelectChange = (selectedRowIds: Key[]) => {
   state.selectedRowIds = selectedRowIds;
 };
 
+const orderby = ref('');
+
 const onTableChange = (pag: any, filters: any, sorter: any) => {
   console.log("onTableChange", pag, filters, sorter);
   pagination.value.current = pag.current;
   pagination.value.pageSize = pag.pageSize;
+  
+  // Handle sorting
+  if (sorter && sorter.field) {
+    const field = sorter.field;
+    const order = sorter.order;
+    if (order) {
+      const direction = order === 'ascend' ? 'asc' : 'desc';
+      orderby.value = `${field}_${direction}`;
+    } else {
+      orderby.value = '';
+    }
+  } else {
+    orderby.value = '';
+  }
+  
   fetchItems();
 };
 
@@ -452,6 +499,7 @@ const fetchItems = async () => {
       page: pagination.value.current,
       perPage: pagination.value.pageSize,
       search: search.value,
+      orderby: orderby.value,
     });
     items.value = response.items;
     pagination.value.total = response.total;

@@ -66,11 +66,14 @@
                   <img 
                     :src="getThumbnailUrl(record)" 
                     :alt="record.file_name || 'file'"
-                    class="w-12 h-12 object-cover rounded border cursor-pointer hover:opacity-80"
+                    class="w-12 object-contain rounded border cursor-pointer hover:opacity-80"
                     @error="handleImageError"
                     @click="openAttachment(record)"
                   />
                 </div>
+              </template>
+              <template v-if="column.key === 'file_size'">
+                {{ formatFileSize(record.file_size) }}
               </template>
               <template v-if="column.key === 'actions'">
                 <a-space>
@@ -415,18 +418,36 @@ const formRules = reactive({
 });
 
 const columns = computed(() => [
-  { title: $t('attachment.field.id'), dataIndex: 'id', key: 'id' },
-{ title: $t('attachment.field.category'), dataIndex: 'cat_name', key: 'cat_name' },
-{ title: $t('attachment.field.admin_id'), dataIndex: 'admin_id', key: 'admin_id' },
-{ title: $t('attachment.field.user_id'), dataIndex: 'user_id', key: 'user_id' },
-{ title: $t('attachment.field.att_type'), dataIndex: 'att_type', key: 'att_type' },
-{ title: $t('attachment.field.thumb'), dataIndex: 'thumb', key: 'thumb' },
-{ title: $t('attachment.field.path_file'), dataIndex: 'path_file', key: 'path_file' },
-{ title: $t('attachment.field.file_name'), dataIndex: 'file_name', key: 'file_name' },
-{ title: $t('attachment.field.file_size'), dataIndex: 'file_size', key: 'file_size' },
-{ title: $t('attachment.field.created_at'), dataIndex: 'created_at', key: 'created_at' },
-{ title: $t('attachment.field.updated_at'), dataIndex: 'updated_at', key: 'updated_at' },
-{ title: $t('common.actions'), key: 'actions', fixed: 'right', align: "center" },
+  { 
+    title: $t('attachment.field.id'), 
+    dataIndex: 'id', 
+    key: 'id',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { title: $t('attachment.field.category'), dataIndex: 'cat_name', key: 'cat_name' },
+  { title: $t('attachment.field.admin_id'), dataIndex: 'admin_id', key: 'admin_id' },
+  { title: $t('attachment.field.user_id'), dataIndex: 'user_id', key: 'user_id' },
+  { title: $t('attachment.field.att_type'), dataIndex: 'att_type', key: 'att_type' },
+  { title: $t('attachment.field.thumb'), dataIndex: 'thumb', key: 'thumb' },
+  // { title: $t('attachment.field.path_file'), dataIndex: 'path_file', key: 'path_file' },
+  { title: $t('attachment.field.file_name'), dataIndex: 'file_name', key: 'file_name' },
+  { title: $t('attachment.field.file_size'), dataIndex: 'file_size', key: 'file_size' },
+  { 
+    title: $t('attachment.field.created_at'), 
+    dataIndex: 'created_at', 
+    key: 'created_at',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('attachment.field.updated_at'), 
+    dataIndex: 'updated_at', 
+    key: 'updated_at',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { title: $t('common.actions'), key: 'actions', fixed: 'right', align: "center" },
 
 ]);
 
@@ -434,10 +455,27 @@ const onSelectChange = (selectedRowIds: Key[]) => {
   state.selectedRowIds = selectedRowIds;
 };
 
+const orderby = ref('');
+
 const onTableChange = (pag: any, filters: any, sorter: any) => {
   console.log("onTableChange", pag, filters, sorter);
   pagination.value.current = pag.current;
   pagination.value.pageSize = pag.pageSize;
+  
+  // Handle sorting
+  if (sorter && sorter.field) {
+    const field = sorter.field;
+    const order = sorter.order;
+    if (order) {
+      const direction = order === 'ascend' ? 'asc' : 'desc';
+      orderby.value = `${field}_${direction}`;
+    } else {
+      orderby.value = '';
+    }
+  } else {
+    orderby.value = '';
+  }
+  
   fetchItems();
 };
 
@@ -599,6 +637,7 @@ const fetchItems = async () => {
       page: pagination.value.current,
       perPage: pagination.value.pageSize,
       search: search.value,
+      orderby: orderby.value,
     });
     items.value = response.items;
     pagination.value.total = response.total;
@@ -704,6 +743,13 @@ const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement;
   // 如果图片加载失败，显示图片错误图标
   img.src = '/src/assets/image-error.png';
+};
+
+// 格式化文件大小为MB
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 MB';
+  const mb = bytes / (1024 * 1024);
+  return `${mb.toFixed(2)} MB`;
 };
 
 onMounted(() => {

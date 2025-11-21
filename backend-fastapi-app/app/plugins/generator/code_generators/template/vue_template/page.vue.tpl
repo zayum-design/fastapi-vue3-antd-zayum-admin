@@ -162,6 +162,7 @@ const rowKey = ref("id");
 const items = ref([]);
 const pagination = ref({ current: 1, pageSize: 10, total: 0 });
 const search = ref("");
+const orderby = ref('');
 
 const labelCol = { style: { width: "150px" } };
 const wrapperCol = { span: 14 };
@@ -183,6 +184,21 @@ const onTableChange = (pag: any, filters: any, sorter: any) => {
   console.log("onTableChange", pag, filters, sorter);
   pagination.value.current = pag.current;
   pagination.value.pageSize = pag.pageSize;
+  
+  // Handle sorting
+  if (sorter && sorter.field) {
+    const field = sorter.field;
+    const order = sorter.order;
+    if (order) {
+      const direction = order === 'ascend' ? 'asc' : 'desc';
+      orderby.value = `${field}_${direction}`;
+    } else {
+      orderby.value = '';
+    }
+  } else {
+    orderby.value = '';
+  }
+  
   fetchItems();
 };
 
@@ -290,6 +306,7 @@ const fetchItems = async () => {
       page: pagination.value.current,
       perPage: pagination.value.pageSize,
       search: search.value,
+      orderby: orderby.value,
     });
     items.value = response.items;
     pagination.value.total = response.total;

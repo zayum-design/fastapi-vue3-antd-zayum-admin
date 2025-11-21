@@ -7,16 +7,19 @@ export async function fetchUserBalanceLogItems({
   page = 1,
   perPage = 10,
   search = '',
+  orderby = '',
 }: {
   page?: number;
   perPage?: number;
   search?: string;
+  orderby?: string;
 }) {
   return requestClient.get<SuccessItemsData>('/admin/user/balance/log/list', {
     params: {
       page,
       per_page: perPage,
       search,
+      orderby,
     },
   });
 }

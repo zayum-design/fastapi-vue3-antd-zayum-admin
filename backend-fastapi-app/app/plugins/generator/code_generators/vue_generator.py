@@ -309,12 +309,12 @@ def generate_vue_code(table: 'Table',
                 if field_name.lower() == "password":  # 不显示密码明文
                     columns += f"""{{ title: $t('{table_dot}.field.{field_name}'), dataIndex: '{field_name}', key: '{field_name}', customRender: () => '******' }},\n"""
                 else:
-                    columns += f"""{{ title: $t('{table_dot}.field.{field_name}'), dataIndex: '{field_name}', key: '{field_name}' }},\n"""
+                    columns += f"""{{ title: $t('{table_dot}.field.{field_name}'), dataIndex: '{field_name}', key: '{field_name}', sorter: true, sortDirections: ['ascend', 'descend'] }},\n"""
         else:
             if field_name.lower() == "password":  # 不显示密码明文
                 columns += f"""{{ title: $t('{table_dot}.field.{field_name}'), dataIndex: '{field_name}', key: '{field_name}', customRender: () => '******' }},\n"""
             else:
-                columns += f"""{{ title: $t('{table_dot}.field.{field_name}'), dataIndex: '{field_name}', key: '{field_name}' }},\n"""
+                columns += f"""{{ title: $t('{table_dot}.field.{field_name}'), dataIndex: '{field_name}', key: '{field_name}', sorter: true, sortDirections: ['ascend', 'descend'] }},\n"""
         # Payload fields
         if field_name != "id":
             if "datetime" in field_type.lower() or "timestamp" in field_type.lower():

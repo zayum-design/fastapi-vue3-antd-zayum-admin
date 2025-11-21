@@ -7,16 +7,19 @@ export async function fetchAdminRuleItems({
   page = 1,
   perPage = -1,
   search = '',
+  orderby = '',
 }: {
   page?: number;
   perPage?: number;
   search?: string;
+  orderby?: string;
 }) {
   return requestClient.get<SuccessItemsData>('/admin/admin/rule/list', {
     params: {
       page,
       per_page: perPage,
       search,
+      orderby,
     },
   });
 }

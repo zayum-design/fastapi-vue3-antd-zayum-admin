@@ -87,7 +87,9 @@ class CodeGenerationResponse(BaseModel):
 @router.get("/tables", tags=["generator"], response_model=TablesResponse)
 def get_tables(db: Session = Depends(get_db)):
     try:
-        inspector = inspect(db.bind)
+        # 从数据库依赖中导入引擎
+        from app.dependencies.database import engine
+        inspector = inspect(engine)
         tables = inspector.get_table_names()
         return success_response(tables)
     except Exception as e:
@@ -103,12 +105,14 @@ def get_tables(db: Session = Depends(get_db)):
 )
 def generate_code(
     table_name: str,
-    fields: Optional[str] = 'all',
-    operations: Optional[str] = 'create,read,update,delete',
+    fields: str = 'all',
+    operations: str = 'create,read,update,delete',
     db: Session = Depends(get_db)
 ) -> CodeGenerationResponse:
     try:
-        inspector = inspect(db.bind)
+        # 从数据库依赖中导入引擎
+        from app.dependencies.database import engine
+        inspector = inspect(engine)
         if table_name not in inspector.get_table_names():
             raise HTTPException(
                 status_code=404, detail=f"Table {table_name} not found in the database."
@@ -120,7 +124,7 @@ def generate_code(
         ]
 
         metadata = MetaData()
-        table = Table(table_name, metadata, autoload_with=db.bind)
+        table = Table(table_name, metadata, autoload_with=engine)
 
         model_code = generate_model_code(table)
         crud_code = generate_crud_code(inspector, table)
@@ -152,43 +156,8 @@ def generate_code(
         )
 
 
-def map_sql_type_to_ts(sql_type: TypeEngine) -> str:
-    """Map SQL type to TypeScript type."""
-    type_name = str(sql_type).lower()
-    if "int" in type_name or "serial" in type_name:
-        return "number"
-    elif "decimal" in type_name or "numeric" in type_name or "float" in type_name or "double" in type_name:
-        return "number"
-    elif "bool" in type_name:
-        return "boolean"
-    elif "date" in type_name or "time" in type_name:
-        return "string"
-    elif "json" in type_name:
-        return "any"
-    else:
-        return "string"
-
-
-def default_value(sql_type: TypeEngine, server_default: str = None) -> str:
-    """Get default value for a field based on its type."""
-    type_name = str(sql_type).lower()
-
-    if server_default:
-        if server_default.startswith("'") and server_default.endswith("'"):
-            return f"'{server_default[1:-1]}'"
-        return server_default
-
-    if "int" in type_name or "decimal" in type_name or "numeric" in type_name or "float" in type_name:
-        return "0"
-    elif "bool" in type_name:
-        return "false"
-    elif "date" in type_name or "time" in type_name:
-        return "null"
-    else:
-        return "''"
-
-
 def map_sql_type_to_ts(col_type) -> str:
+    """Map SQL type to TypeScript type."""
     if isinstance(col_type, SqlEnum):
         return "string"
     if hasattr(col_type, "python_type"):
@@ -208,7 +177,8 @@ def map_sql_type_to_ts(col_type) -> str:
     return "any"
 
 
-def default_value(col_type, server_default) -> str:
+def default_value(col_type, server_default: Optional[str] = None) -> str:
+    """Get default value for a field based on its type."""
     if isinstance(col_type, SqlEnum):
         return f"'{col_type.enums[0]}'"
     if hasattr(col_type, "python_type"):

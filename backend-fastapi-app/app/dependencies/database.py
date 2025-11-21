@@ -16,16 +16,19 @@ def create_db_engine():
     try:
         engine = create_engine(
             settings.DATABASE_URL,
-            pool_pre_ping=True,
+            pool_pre_ping=True,  # 在从连接池获取连接前执行ping测试
             echo=False,
-            pool_size=3,  # 减少连接池大小
-            max_overflow=5,  # 减少最大溢出连接数
-            pool_recycle=1800,  # 30分钟回收连接
-            pool_timeout=15,
+            pool_size=5,  # 增加连接池大小
+            max_overflow=10,  # 增加最大溢出连接数
+            pool_recycle=3600,  # 1小时回收连接，避免MySQL wait_timeout问题
+            pool_timeout=30,  # 增加连接获取超时时间
             connect_args={
-                'connect_timeout': 10,
+                'connect_timeout': 15,  # 增加连接超时时间
+                'read_timeout': 30,  # 增加读取超时时间
+                'write_timeout': 30,  # 增加写入超时时间
                 'charset': 'utf8mb4',
-                'autocommit': True  # 启用自动提交
+                'autocommit': True,  # 启用自动提交
+                'client_flag': 0,  # 清除可能导致问题的客户端标志
             }
         )
         return engine

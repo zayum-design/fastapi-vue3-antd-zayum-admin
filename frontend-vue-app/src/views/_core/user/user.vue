@@ -497,34 +497,144 @@ const formRules = computed(() => ({
 }));
 
 const columns = computed(() => [
-  { title: $t('user.field.id'), dataIndex: 'id', key: 'id' },
+  { 
+    title: $t('user.field.id'), 
+    dataIndex: 'id', 
+    key: 'id',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
   { 
     title: $t('user.field.user_group'), 
     dataIndex: 'user_group_id', 
     key: 'user_group_id',
-    customRender: ({ text }: { text: number }) => getUserGroupName(text)
+    customRender: ({ text }: { text: number }) => getUserGroupName(text),
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
   },
-  { title: $t('user.field.username'), dataIndex: 'username', key: 'username' },
-  { title: $t('user.field.nickname'), dataIndex: 'nickname', key: 'nickname' },
-  { title: $t('user.field.email'), dataIndex: 'email', key: 'email' },
-  { title: $t('user.field.mobile'), dataIndex: 'mobile', key: 'mobile' },
+  { 
+    title: $t('user.field.username'), 
+    dataIndex: 'username', 
+    key: 'username',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.field.nickname'), 
+    dataIndex: 'nickname', 
+    key: 'nickname',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.field.email'), 
+    dataIndex: 'email', 
+    key: 'email',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.field.mobile'), 
+    dataIndex: 'mobile', 
+    key: 'mobile',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
   { title: $t('user.field.avatar'), dataIndex: 'avatar', key: 'avatar' },
-  { title: $t('user.field.level'), dataIndex: 'level', key: 'level' },
-  { title: $t('user.field.gender'), dataIndex: 'gender', key: 'gender' },
+  { 
+    title: $t('user.field.level'), 
+    dataIndex: 'level', 
+    key: 'level',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.field.gender'), 
+    dataIndex: 'gender', 
+    key: 'gender',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
   { title: $t('user.field.birthday'), dataIndex: 'birthday', key: 'birthday' },
-  { title: $t('user.field.balance'), dataIndex: 'balance', key: 'balance' },
-  { title: $t('user.field.score'), dataIndex: 'score', key: 'score' },
-  { title: $t('user.field.successions'), dataIndex: 'successions', key: 'successions' },
-  { title: $t('user.field.max_successions'), dataIndex: 'max_successions', key: 'max_successions' },
-  { title: $t('user.field.prev_time'), dataIndex: 'prev_time', key: 'prev_time' },
-  { title: $t('user.field.login_time'), dataIndex: 'login_time', key: 'login_time' },
+  { 
+    title: $t('user.field.balance'), 
+    dataIndex: 'balance', 
+    key: 'balance',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.field.score'), 
+    dataIndex: 'score', 
+    key: 'score',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.field.successions'), 
+    dataIndex: 'successions', 
+    key: 'successions',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.field.max_successions'), 
+    dataIndex: 'max_successions', 
+    key: 'max_successions',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.field.prev_time'), 
+    dataIndex: 'prev_time', 
+    key: 'prev_time',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.field.login_time'), 
+    dataIndex: 'login_time', 
+    key: 'login_time',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
   { title: $t('user.field.login_ip'), dataIndex: 'login_ip', key: 'login_ip' },
-  { title: $t('user.field.login_failure'), dataIndex: 'login_failure', key: 'login_failure' },
+  { 
+    title: $t('user.field.login_failure'), 
+    dataIndex: 'login_failure', 
+    key: 'login_failure',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
   { title: $t('user.field.join_ip'), dataIndex: 'join_ip', key: 'join_ip' },
-  { title: $t('user.field.status'), dataIndex: 'status', key: 'status' },
-  { title: $t('user.field.platform'), dataIndex: 'platform', key: 'platform' },
-  { title: $t('user.field.created_at'), dataIndex: 'created_at', key: 'created_at' },
-  { title: $t('user.field.updated_at'), dataIndex: 'updated_at', key: 'updated_at' },
+  { 
+    title: $t('user.field.status'), 
+    dataIndex: 'status', 
+    key: 'status',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.field.platform'), 
+    dataIndex: 'platform', 
+    key: 'platform',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.field.created_at'), 
+    dataIndex: 'created_at', 
+    key: 'created_at',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.field.updated_at'), 
+    dataIndex: 'updated_at', 
+    key: 'updated_at',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
   { title: $t('common.actions'), key: 'actions', fixed: 'right', align: "center" },
 ]);
 
@@ -532,10 +642,27 @@ const onSelectChange = (selectedRowIds: Key[]) => {
   state.selectedRowIds = selectedRowIds;
 };
 
+const orderby = ref('');
+
 const onTableChange = (pag: any, filters: any, sorter: any) => {
   console.log("onTableChange", pag, filters, sorter);
   pagination.value.current = pag.current;
   pagination.value.pageSize = pag.pageSize;
+  
+  // Handle sorting
+  if (sorter && sorter.field) {
+    const field = sorter.field;
+    const order = sorter.order;
+    if (order) {
+      const direction = order === 'ascend' ? 'asc' : 'desc';
+      orderby.value = `${field}_${direction}`;
+    } else {
+      orderby.value = '';
+    }
+  } else {
+    orderby.value = '';
+  }
+  
   fetchItems();
 };
 
@@ -781,6 +908,7 @@ const fetchItems = async () => {
       page: pagination.value.current,
       perPage: pagination.value.pageSize,
       search: search.value,
+      orderby: orderby.value,
     });
     items.value = response.items;
     pagination.value.total = response.total;

@@ -320,17 +320,29 @@ const formRules = reactive({
 });
 
 const columns = computed(() => [
-  { title: $t('general.category.field.id'), dataIndex: 'id', key: 'id' },
-{ title: $t('general.category.field.pid'), dataIndex: 'pid', key: 'pid' },
-{ title: $t('general.category.field.type'), dataIndex: 'type', key: 'type' },
-{ title: $t('general.category.field.name'), dataIndex: 'name', key: 'name' },
-{ title: $t('general.category.field.thumb'), dataIndex: 'thumb', key: 'thumb' },
-{ title: $t('general.category.field.keywords'), dataIndex: 'keywords', key: 'keywords' },
-{ title: $t('general.category.field.weigh'), dataIndex: 'weigh', key: 'weigh' },
-{ title: $t('general.category.field.status'), dataIndex: 'status', key: 'status' },
-{ title: $t('general.category.field.created_at'), dataIndex: 'created_at', key: 'created_at' },
-{ title: $t('general.category.field.updated_at'), dataIndex: 'updated_at', key: 'updated_at' },
-{ title: $t('common.actions'), key: 'actions', fixed: 'right', align: "center" },
+  { 
+    title: $t('general.category.field.id'), 
+    dataIndex: 'id', 
+    key: 'id',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { title: $t('general.category.field.pid'), dataIndex: 'pid', key: 'pid' },
+  { title: $t('general.category.field.type'), dataIndex: 'type', key: 'type' },
+  { title: $t('general.category.field.name'), dataIndex: 'name', key: 'name' },
+  { title: $t('general.category.field.thumb'), dataIndex: 'thumb', key: 'thumb' },
+  { title: $t('general.category.field.keywords'), dataIndex: 'keywords', key: 'keywords' },
+  { title: $t('general.category.field.weigh'), dataIndex: 'weigh', key: 'weigh' },
+  { 
+    title: $t('general.category.field.status'), 
+    dataIndex: 'status', 
+    key: 'status',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { title: $t('general.category.field.created_at'), dataIndex: 'created_at', key: 'created_at' },
+  { title: $t('general.category.field.updated_at'), dataIndex: 'updated_at', key: 'updated_at' },
+  { title: $t('common.actions'), key: 'actions', fixed: 'right', align: "center" },
 
 ]);
 
@@ -338,10 +350,27 @@ const onSelectChange = (selectedRowIds: Key[]) => {
   state.selectedRowIds = selectedRowIds;
 };
 
+const orderby = ref('');
+
 const onTableChange = (pag: any, filters: any, sorter: any) => {
   console.log("onTableChange", pag, filters, sorter);
   pagination.value.current = pag.current;
   pagination.value.pageSize = pag.pageSize;
+  
+  // Handle sorting
+  if (sorter && sorter.field) {
+    const field = sorter.field;
+    const order = sorter.order;
+    if (order) {
+      const direction = order === 'ascend' ? 'asc' : 'desc';
+      orderby.value = `${field}_${direction}`;
+    } else {
+      orderby.value = '';
+    }
+  } else {
+    orderby.value = '';
+  }
+  
   fetchItems();
 };
 
@@ -488,6 +517,7 @@ const fetchItems = async () => {
       page: pagination.value.current,
       perPage: pagination.value.pageSize,
       search: search.value,
+      orderby: orderby.value,
     });
     items.value = response.items;
     pagination.value.total = response.total;

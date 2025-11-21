@@ -379,34 +379,122 @@ const formRules = reactive({
 });
 
 const columns = computed(() => [
-  { title: $t('user.rule.field.id'), dataIndex: 'id', key: 'id' },
-{ title: $t('user.rule.field.rule_type'), dataIndex: 'rule_type', key: 'rule_type' },
-{ title: $t('user.rule.field.parent_id'), dataIndex: 'parent_id', key: 'parent_id' },
-{ title: $t('user.rule.field.name'), dataIndex: 'name', key: 'name' },
-{ title: $t('user.rule.field.path'), dataIndex: 'path', key: 'path' },
-{ title: $t('user.rule.field.component'), dataIndex: 'component', key: 'component' },
-{ title: $t('user.rule.field.redirect'), dataIndex: 'redirect', key: 'redirect' },
-{ title: $t('user.rule.field.meta'), dataIndex: 'meta', key: 'meta' },
-{ title: $t('user.rule.field.permission'), dataIndex: 'permission', key: 'permission' },
-{ title: $t('user.rule.field.menu_display_type'), dataIndex: 'menu_display_type', key: 'menu_display_type' },
-{ title: $t('user.rule.field.model_name'), dataIndex: 'model_name', key: 'model_name' },
-{ title: $t('user.rule.field.deleted_at'), dataIndex: 'deleted_at', key: 'deleted_at' },
-{ title: $t('user.rule.field.weigh'), dataIndex: 'weigh', key: 'weigh' },
-{ title: $t('user.rule.field.status'), dataIndex: 'status', key: 'status' },
-{ title: $t('user.rule.field.created_at'), dataIndex: 'created_at', key: 'created_at' },
-{ title: $t('user.rule.field.updated_at'), dataIndex: 'updated_at', key: 'updated_at' },
-{ title: $t('common.actions'), key: 'actions', fixed: 'right', align: "center" },
-
+  { 
+    title: $t('user.rule.field.id'), 
+    dataIndex: 'id', 
+    key: 'id',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.rule.field.rule_type'), 
+    dataIndex: 'rule_type', 
+    key: 'rule_type',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.rule.field.parent_id'), 
+    dataIndex: 'parent_id', 
+    key: 'parent_id',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.rule.field.name'), 
+    dataIndex: 'name', 
+    key: 'name',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.rule.field.path'), 
+    dataIndex: 'path', 
+    key: 'path',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { title: $t('user.rule.field.component'), dataIndex: 'component', key: 'component' },
+  { title: $t('user.rule.field.redirect'), dataIndex: 'redirect', key: 'redirect' },
+  { title: $t('user.rule.field.meta'), dataIndex: 'meta', key: 'meta' },
+  { title: $t('user.rule.field.permission'), dataIndex: 'permission', key: 'permission' },
+  { 
+    title: $t('user.rule.field.menu_display_type'), 
+    dataIndex: 'menu_display_type', 
+    key: 'menu_display_type',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.rule.field.model_name'), 
+    dataIndex: 'model_name', 
+    key: 'model_name',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.rule.field.deleted_at'), 
+    dataIndex: 'deleted_at', 
+    key: 'deleted_at',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.rule.field.weigh'), 
+    dataIndex: 'weigh', 
+    key: 'weigh',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.rule.field.status'), 
+    dataIndex: 'status', 
+    key: 'status',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.rule.field.created_at'), 
+    dataIndex: 'created_at', 
+    key: 'created_at',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.rule.field.updated_at'), 
+    dataIndex: 'updated_at', 
+    key: 'updated_at',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { title: $t('common.actions'), key: 'actions', fixed: 'right', align: "center" },
 ]);
 
 const onSelectChange = (selectedRowIds: Key[]) => {
   state.selectedRowIds = selectedRowIds;
 };
 
+const orderby = ref('');
+
 const onTableChange = (pag: any, filters: any, sorter: any) => {
   console.log("onTableChange", pag, filters, sorter);
   pagination.value.current = pag.current;
   pagination.value.pageSize = pag.pageSize;
+  
+  // Handle sorting
+  if (sorter && sorter.field) {
+    const field = sorter.field;
+    const order = sorter.order;
+    if (order) {
+      const direction = order === 'ascend' ? 'asc' : 'desc';
+      orderby.value = `${field}_${direction}`;
+    } else {
+      orderby.value = '';
+    }
+  } else {
+    orderby.value = '';
+  }
+  
   fetchItems();
 };
 
@@ -572,6 +660,7 @@ const fetchItems = async () => {
       page: pagination.value.current,
       perPage: pagination.value.pageSize,
       search: search.value,
+      orderby: orderby.value,
     });
     items.value = response.items;
     pagination.value.total = response.total;

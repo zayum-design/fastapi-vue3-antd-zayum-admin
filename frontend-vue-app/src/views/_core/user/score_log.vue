@@ -282,26 +282,90 @@ const formRules = reactive({
 });
 
 const columns = computed(() => [
-  { title: $t('user.score_log.field.id'), dataIndex: 'id', key: 'id' },
-{ title: $t('user.score_log.field.user_id'), dataIndex: 'user_id', key: 'user_id' },
-{ title: $t('user.score_log.field.score'), dataIndex: 'score', key: 'score' },
-{ title: $t('user.score_log.field.before'), dataIndex: 'before', key: 'before' },
-{ title: $t('user.score_log.field.after'), dataIndex: 'after', key: 'after' },
-{ title: $t('user.score_log.field.memo'), dataIndex: 'memo', key: 'memo' },
-{ title: $t('user.score_log.field.created_at'), dataIndex: 'created_at', key: 'created_at' },
-{ title: $t('user.score_log.field.updated_at'), dataIndex: 'updated_at', key: 'updated_at' },
-{ title: $t('common.actions'), key: 'actions', fixed: 'right', align: "center" },
-
+  { 
+    title: $t('user.score_log.field.id'), 
+    dataIndex: 'id', 
+    key: 'id',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.score_log.field.user_id'), 
+    dataIndex: 'user_id', 
+    key: 'user_id',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.score_log.field.score'), 
+    dataIndex: 'score', 
+    key: 'score',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.score_log.field.before'), 
+    dataIndex: 'before', 
+    key: 'before',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.score_log.field.after'), 
+    dataIndex: 'after', 
+    key: 'after',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.score_log.field.memo'), 
+    dataIndex: 'memo', 
+    key: 'memo',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.score_log.field.created_at'), 
+    dataIndex: 'created_at', 
+    key: 'created_at',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { 
+    title: $t('user.score_log.field.updated_at'), 
+    dataIndex: 'updated_at', 
+    key: 'updated_at',
+    sorter: true,
+    sortDirections: ['ascend', 'descend'],
+  },
+  { title: $t('common.actions'), key: 'actions', fixed: 'right', align: "center" },
 ]);
 
 const onSelectChange = (selectedRowIds: Key[]) => {
   state.selectedRowIds = selectedRowIds;
 };
 
+const orderby = ref('');
+
 const onTableChange = (pag: any, filters: any, sorter: any) => {
   console.log("onTableChange", pag, filters, sorter);
   pagination.value.current = pag.current;
   pagination.value.pageSize = pag.pageSize;
+  
+  // Handle sorting
+  if (sorter && sorter.field) {
+    const field = sorter.field;
+    const order = sorter.order;
+    if (order) {
+      const direction = order === 'ascend' ? 'asc' : 'desc';
+      orderby.value = `${field}_${direction}`;
+    } else {
+      orderby.value = '';
+    }
+  } else {
+    orderby.value = '';
+  }
+  
   fetchItems();
 };
 
@@ -439,6 +503,7 @@ const fetchItems = async () => {
       page: pagination.value.current,
       perPage: pagination.value.pageSize,
       search: search.value,
+      orderby: orderby.value,
     });
     items.value = response.items;
     pagination.value.total = response.total;
