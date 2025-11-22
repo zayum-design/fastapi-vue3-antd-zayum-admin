@@ -291,7 +291,7 @@ tail -f logs/app.log
 ## 📞 支持
 
 - 文档: [项目文档](../docs/)
-- 问题: [GitHub Issues](https://github.com/easyiit-design/fastapi-vue3-antd-zayum-admin/issues)
+- 问题: [GitHub Issues](https://github.com/zayum-design/fastapi-vue3-antd-zayum-admin/issues)
 - 邮箱: 联系项目维护者
 
 ---

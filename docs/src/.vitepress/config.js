@@ -9,7 +9,7 @@ export default defineConfig({
     ignoreDeadLinks: true,
     nav: [
       { text: '首页', link: '/' },
-      { text: 'GitHub', link: 'https://github.com/easyiit-design/fastapi-vue3-antd-zayum-admin' }
+      { text: 'GitHub', link: 'https://github.com/zayum-design/fastapi-vue3-antd-zayum-admin' }
     ],
     sidebar: [
       {
