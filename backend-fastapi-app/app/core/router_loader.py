@@ -41,7 +41,7 @@ def load_installation_routes(app: FastAPI):
     Args:
         app: FastAPI 应用实例
     """
-    from app.install.install_check import router as install_check
+    from install.install_check import router as install_check
     app.include_router(install_check, prefix="/api", tags=["installation Check"])
 
 
@@ -52,5 +52,5 @@ def load_install_routes(app: FastAPI):
     Args:
         app: FastAPI 应用实例
     """
-    from app.install.install import router as install_router
+    from install.install import router as install_router
     app.include_router(install_router, prefix="/api/install", tags=["installation"])

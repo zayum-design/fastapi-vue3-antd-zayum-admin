@@ -1,0 +1,48 @@
+# 使用官方Python基础镜像
+FROM python:3.9-slim
+
+# 设置工作目录
+WORKDIR /app
+
+# 复制依赖文件
+COPY requirements.txt .
+
+# 方案1：使用国内镜像源（清华源）
+RUN pip install --no-cache-dir \
+    -i https://pypi.tuna.tsinghua.edu.cn/simple \
+    --trusted-host pypi.tuna.tsinghua.edu.cn \
+    --timeout=120 \
+    --retries=3 \
+    -r requirements.txt
+
+# 如果方案1失败，可以使用方案2：阿里云镜像源
+# RUN pip install --no-cache-dir \
+#     -i https://mirrors.aliyun.com/pypi/simple/ \
+#     --trusted-host mirrors.aliyun.com \
+#     --timeout=120 \
+#     --retries=3 \
+#     -r requirements.txt
+
+# 或者方案3：分步安装依赖（针对大包单独处理）
+# RUN pip install --no-cache-dir \
+#     -i https://pypi.tuna.tsinghua.edu.cn/simple \
+#     --trusted-host pypi.tuna.tsinghua.edu.cn \
+#     --timeout=300 \
+#     --retries=5 \
+#     sqlalchemy==2.0.36
+# 
+# RUN pip install --no-cache-dir \
+#     -i https://pypi.tuna.tsinghua.edu.cn/simple \
+#     --trusted-host pypi.tuna.tsinghua.edu.cn \
+#     --timeout=120 \
+#     --retries=3 \
+#     -r requirements.txt
+
+# 复制应用代码
+COPY . .
+
+# 暴露端口
+EXPOSE 8000
+
+# 启动命令
+CMD ["supervisord", "-c", "supervisord/supervisord.conf"]

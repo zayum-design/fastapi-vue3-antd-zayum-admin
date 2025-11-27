@@ -21,7 +21,7 @@ class SysPlugin(TimestampMixin, Base):
     downloads: Mapped[int] = mapped_column()
     download_url: Mapped[str] = mapped_column(String(255))
     md5_hash: Mapped[str] = mapped_column(String(32))
-    price: Mapped[float] = mapped_column(DECIMAL(10, 0))
+    price: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 2), server_default=text("'0.00'"))
     paid: Mapped[int] = mapped_column(SMALLINT)
     installed: Mapped[int] = mapped_column(SMALLINT)
     enabled: Mapped[int] = mapped_column(SMALLINT)

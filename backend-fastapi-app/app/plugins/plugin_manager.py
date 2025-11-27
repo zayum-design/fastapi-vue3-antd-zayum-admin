@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import sys  # 添加此行以导入 sys 模块
 import importlib
-from typing import List
+from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.models.sys_plugin import SysPlugin as PluginModel
 from app.crud.sys_plugin import CRUDSysPlugin
@@ -31,7 +31,7 @@ class Plugin:
 
     def unload(self, router: APIRouter):
         try:
-            if hasattr(self.module, "unregister"):
+            if self.module and hasattr(self.module, "unregister"):
                 self.module.unregister(router)
                 logger.info(f"Plugin '{self.uuid}' unloaded successfully.")
             # 从 sys.modules 中移除插件模块
@@ -44,8 +44,11 @@ class Plugin:
 
 
 class PluginManager:
-    _instance: PluginManager = None
+    _instance: Optional[PluginManager] = None
     plugins: List[Plugin]  # 类级别声明类型
+    db: Session
+    plugin_dir: str
+    router: Optional[APIRouter]
 
     def __new__(cls, db: Session):
         if cls._instance is None:
@@ -73,21 +76,28 @@ class PluginManager:
             logger.info(f"Plugin '{plugin_uuid}' is already loaded.")
             return
         plugin = Plugin(uuid=plugin_uuid)
-        plugin.load(self.router)
-        self.plugins.append(plugin)
-        logger.info(f"Plugin '{plugin_uuid}' loaded and added to plugins list.")
+        if self.router:
+            plugin.load(self.router)
+            self.plugins.append(plugin)
+            logger.info(f"Plugin '{plugin_uuid}' loaded and added to plugins list.")
+        else:
+            logger.warning(f"Cannot load plugin '{plugin_uuid}': router is not set.")
 
     def unload_plugin(self, plugin_uuid: str):
         plugin = next((p for p in self.plugins if p.uuid == plugin_uuid), None)
         if not plugin:
             logger.info(f"Plugin '{plugin_uuid}' is not loaded.")
             return
-        plugin.unload(self.router)
-        self.plugins.remove(plugin)
-        logger.info(f"Plugin '{plugin_uuid}' unloaded and removed from plugins list.")
+        if self.router:
+            plugin.unload(self.router)
+            self.plugins.remove(plugin)
+            logger.info(f"Plugin '{plugin_uuid}' unloaded and removed from plugins list.")
+        else:
+            logger.warning(f"Cannot unload plugin '{plugin_uuid}': router is not set.")
 
     def enable_plugin(self, plugin_uuid: str):
-        plugin_record = CRUDSysPlugin.get_by_uuid(db=self.db, uuid=plugin_uuid)
+        crud_plugin = CRUDSysPlugin()
+        plugin_record = crud_plugin.get_by_uuid(db=self.db, uuid=plugin_uuid)
         if not plugin_record:
             raise ValueError(f"Plugin '{plugin_uuid}' not found.")
         if plugin_record.enabled:
@@ -98,7 +108,8 @@ class PluginManager:
         self.load_plugin(plugin_uuid)
 
     def disable_plugin(self, plugin_uuid: str):
-        plugin_record = CRUDSysPlugin.get_by_uuid(db=self.db, uuid=plugin_uuid)
+        crud_plugin = CRUDSysPlugin()
+        plugin_record = crud_plugin.get_by_uuid(db=self.db, uuid=plugin_uuid)
         if not plugin_record:
             raise ValueError(f"Plugin '{plugin_uuid}' not found.")
         if not plugin_record.enabled:

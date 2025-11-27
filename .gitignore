@@ -169,6 +169,9 @@ public/build/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.production
+.env.development
+.env
 
 # Optional npm cache directory
 .npm
@@ -261,3 +264,4 @@ backend-fastapi-app/uploads
 
 # 前端
 frontend-vue-app/tests
+

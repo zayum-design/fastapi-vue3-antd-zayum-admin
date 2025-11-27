@@ -7,6 +7,24 @@ from sqlalchemy.orm import declarative_base
 
 # 定义 Base
 Base = declarative_base()
+
+# 显式导入所有模型类
+from .sys_admin import SysAdmin
+from .sys_admin_group import SysAdminGroup
+from .sys_admin_log import SysAdminLog
+from .sys_admin_rule import SysAdminRule
+from .sys_analytics_summary import SysAnalyticsSummary
+from .sys_attachment import SysAttachment
+from .sys_attachment_category import SysAttachmentCategory
+from .sys_general_category import SysGeneralCategory
+from .sys_general_config import SysGeneralConfig
+from .sys_notification import SysNotification
+from .sys_plugin import SysPlugin
+from .sys_user import SysUser
+from .sys_user_balance_log import SysUserBalanceLog
+from .sys_user_group import SysUserGroup
+from .sys_user_rule import SysUserRule
+from .sys_user_score_log import SysUserScoreLog
  
 PLUGIN_DIR = os.path.join(os.path.dirname(__file__), "../plugins")
 
