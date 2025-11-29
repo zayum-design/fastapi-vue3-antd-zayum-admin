@@ -265,3 +265,4 @@ backend-fastapi-app/uploads
 # 前端
 frontend-vue-app/tests
 
+deployment-guides

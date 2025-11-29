@@ -176,7 +176,7 @@ if (enableShortcutKey.value) {
 
   <LogoutModal
     :cancel-text="$t('common.cancel')"
-    :confirm-text="$t('common.confirm')+'88888888'"
+    :confirm-text="$t('common.confirm')"
     :fullscreen-button="false"
     :title="$t('common.prompt')"
     centered
