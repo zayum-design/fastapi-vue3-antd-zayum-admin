@@ -5,8 +5,19 @@
 
 set -e
 
-echo "🚀 开始部署 FastAPI + Vue3 管理系统..."
+echo "🚀 开始部署 Zayum Admin 系统..."
 echo "=========================================="
+
+# 检查是否已安装系统
+echo "🔍 检查系统安装状态..."
+if [ -f "backend-fastapi-app/install.lock" ]; then
+    echo "❌ 系统已安装，检测到 install.lock 文件"
+    echo "💡 如需重新部署，请先删除 install.lock 文件："
+    echo "   rm backend-fastapi-app/install.lock"
+    echo "⚠️  注意：删除 install.lock 文件后，系统将重新执行安装流程"
+    exit 1
+fi
+echo "✅ 系统未安装，继续部署流程..."
 
 # 检查必要工具
 check_command() {
@@ -72,8 +83,8 @@ read -s -p "请输入 MySQL 密码 (默认: password): " mysql_password
 mysql_password=${mysql_password:-password}
 echo ""
 
-read -p "请输入数据库名称 (默认: fastapi_admin): " mysql_db
-mysql_db=${mysql_db:-fastapi_admin}
+read -p "请输入数据库名称 (默认: zayum_admin): " mysql_db
+mysql_db=${mysql_db:-zayum_admin}
 
 read -p "请输入 MySQL 主机地址 (默认: localhost): " mysql_host
 mysql_host=${mysql_host:-localhost}
@@ -81,11 +92,14 @@ mysql_host=${mysql_host:-localhost}
 read -p "请输入 MySQL 端口 (默认: 3306): " mysql_port
 mysql_port=${mysql_port:-3306}
 
+read -p "请输入系统域名 (例如: demo.zayumadmin.com): " system_domain
+system_domain=${system_domain:-demo.zayumadmin.com}
+
 # 保存配置到 backend-fastapi-app/.env
 echo "💾 保存数据库配置到 .env 文件..."
 cat > backend-fastapi-app/.env << EOF
 # 项目基本配置
-PROJECT_NAME=FastAPI Admin
+PROJECT_NAME=Zayum Admin
 TIMEZONE=Asia/Shanghai
 
 #系统路由
@@ -122,7 +136,7 @@ UPLOAD_DIR=./uploads
 PLUGINS_DIR=./plugins
 
 # CORS 配置
-ALLOW_ORIGINS=["http://localhost:5173", "http://127.0.0.1:5173", "http://demo.zayumadmin.com","http://zayumadmin.com"]
+ALLOW_ORIGINS=["http://localhost:5173", "http://127.0.0.1:5173", "http://$system_domain","https://$system_domain"]
 ALLOW_CREDENTIALS=true
 ALLOW_METHODS=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
 ALLOW_HEADERS=["*", "X-Captcha-Id"]
@@ -146,6 +160,63 @@ sed -i.bak "s|mysql+pymysql://.*|mysql+pymysql://$mysql_user:$mysql_password@$my
 cd ..
 
 echo "✅ alembic.ini 配置已更新"
+
+# 管理员配置
+echo ""
+echo "👤 管理员配置"
+echo "=========================================="
+
+read -p "是否使用默认管理员信息？(y/n, 默认: y): " use_default_admin
+use_default_admin=${use_default_admin:-y}
+
+if [ "$use_default_admin" = "y" ] || [ "$use_default_admin" = "Y" ]; then
+    echo "✅ 使用默认管理员信息"
+    admin_username="admin"
+    admin_password="Admin@888"
+    admin_nickname="系统管理员"
+    admin_email="13800000000@qq.com"
+    admin_mobile="13800000000"
+else
+    echo "📝 请输入自定义管理员信息"
+    read -p "请输入管理员用户名 (默认: admin): " admin_username
+    admin_username=${admin_username:-admin}
+
+    read -s -p "请输入管理员密码 (默认: Admin@888): " admin_password
+    admin_password=${admin_password:-Admin@888}
+    echo ""
+
+    read -p "请输入管理员昵称 (默认: 系统管理员): " admin_nickname
+    admin_nickname=${admin_nickname:-系统管理员}
+
+    read -p "请输入管理员邮箱 (默认: 13800000000@qq.com): " admin_email
+    admin_email=${admin_email:-13800000000@qq.com}
+
+    read -p "请输入管理员手机号 (默认: 13800000000): " admin_mobile
+    admin_mobile=${admin_mobile:-13800000000}
+fi
+
+# 更新管理员信息到 auto_insert_data.py
+echo "💾 更新管理员信息到初始数据文件..."
+cd backend-fastapi-app
+
+# 生成密码哈希
+echo "生成密码哈希..."
+hashed_password=$(python3 -c "
+import bcrypt
+pw_hash = bcrypt.hashpw(b'$admin_password', bcrypt.gensalt())
+print(pw_hash.decode('utf8'))
+")
+
+# 更新 auto_insert_data.py 文件中的管理员信息
+echo "更新 auto_insert_data.py 文件..."
+sed -i.bak "s/'username': 'admin'/'username': '$admin_username'/" alembic/versions/auto_insert_data.py
+sed -i.bak "s/'nickname': 'SupperAdmin'/'nickname': '$admin_nickname'/" alembic/versions/auto_insert_data.py
+sed -i.bak "s/'password': '[^']*'/'password': '$hashed_password'/" alembic/versions/auto_insert_data.py
+sed -i.bak "s/'email': '[^']*'/'email': '$admin_email'/" alembic/versions/auto_insert_data.py
+sed -i.bak "s/'mobile': '[^']*'/'mobile': '$admin_mobile'/" alembic/versions/auto_insert_data.py
+
+echo "✅ 管理员信息已更新到初始数据文件"
+cd ..
 
 # 数据库迁移
 echo ""
@@ -184,67 +255,6 @@ else
     exit 1
 fi
 cd ..
-
-# 管理员配置
-echo ""
-echo "👤 管理员配置"
-echo "=========================================="
-
-read -p "请输入管理员用户名 (默认: admin): " admin_username
-admin_username=${admin_username:-admin}
-
-read -s -p "请输入管理员密码 (默认: admin123456): " admin_password
-admin_password=${admin_password:-admin123456}
-echo ""
-
-read -p "请输入管理员昵称 (默认: 超级管理员): " admin_nickname
-admin_nickname=${admin_nickname:-超级管理员}
-
-read -p "请输入管理员邮箱 (默认: admin@example.com): " admin_email
-admin_email=${admin_email:-admin@example.com}
-
-read -p "请输入管理员手机号 (默认: 13800000000): " admin_mobile
-admin_mobile=${admin_mobile:-13800000000}
-
-# 更新管理员信息
-echo "💾 更新管理员信息..."
-cd backend-fastapi-app
-
-# 创建临时Python脚本来更新管理员信息
-cat > update_admin.py << EOF
-import sys
-import bcrypt
-sys.path.append('.')
-
-from app.models.sys_admin import SysAdmin
-from app.dependencies.database import get_db
-
-def update_admin_info():
-    # 生成密码哈希
-    pw_hash = bcrypt.hashpw("$admin_password".encode('utf8'), bcrypt.gensalt())
-    hashed_password = pw_hash.decode('utf8')
-    
-    # 更新管理员信息
-    print(f"更新管理员信息:")
-    print(f"用户名: $admin_username")
-    print(f"昵称: $admin_nickname")
-    print(f"邮箱: $admin_email")
-    print(f"手机号: $admin_mobile")
-    
-    # 这里需要实际的数据库更新逻辑
-    # 由于数据库连接复杂，这里只输出信息
-    print("✅ 管理员信息已配置完成")
-    print("💡 注意：实际数据库更新需要在应用启动后通过API或数据库工具完成")
-
-if __name__ == "__main__":
-    update_admin_info()
-EOF
-
-python3 update_admin.py
-rm update_admin.py
-cd ..
-
-echo "✅ 管理员信息配置完成"
 
 # 启动后端服务
 echo ""

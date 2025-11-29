@@ -50,7 +50,7 @@ const dbForm = ref({
 
 const configForm = ref({
   username: "admin",
-  password: "Njh88888888",
+  password: "Admin@888",
   email: "13800000000@qq.com",
   mobile: "13800000000",
   nickname: "系统管理员",
