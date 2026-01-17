@@ -1,5 +1,5 @@
 -- MySQL 数据库安装脚本
--- 生成时间: 2025-11-27 12:24:20
+-- 生成时间: 2025-11-30 10:32:13
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -21,12 +21,12 @@ CREATE TABLE `sys_admin` (
   `login_ip` VARCHAR(50) AUTO_INCREMENT,
   `token` VARCHAR(512) AUTO_INCREMENT,
   `status` VARCHAR(6) AUTO_INCREMENT NOT NULL,
-  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x103250f40>,
-  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x1032514e0>
+  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98680>,
+  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98c20>
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 插入 sys_admin 表数据
-INSERT INTO `sys_admin` (`id`, `group_id`, `username`, `nickname`, `password`, `avatar`, `email`, `mobile`, `login_failure`, `login_at`, `login_ip`, `token`, `status`, `created_at`, `updated_at`) VALUES ('1', '1', 'admin', 'SupperAdmin', '$2b$12$8qJ15oSRtULhh8A/EctDU.MzQm.vyoZRpohknvZqCY5Yr8N9crF4K', '/uploads/avatar/avatar_1_c7b7e5.png', '13800000000@qq.com', '13800000000', '0', '2025-11-27T03:57:44', '127.0.0.1', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzY0ODIwNjY0fQ.AqDtBeSgXEj6V1bA1pEYHwxU7jU4c5ItF2ypxf0bHgw', 'normal', '2025-06-26T02:59:10', '2025-11-27T03:57:44');
+INSERT INTO `sys_admin` (`id`, `group_id`, `username`, `nickname`, `password`, `avatar`, `email`, `mobile`, `login_failure`, `login_at`, `login_ip`, `token`, `status`, `created_at`, `updated_at`) VALUES ('1', '1', 'admin', 'SupperAdmin', '$2b$12$PSRSTAdY7Vi8bFgeD5BOA.ZDozJ9rPYVklWGC6y6o7om6QWgR.WlW', '/uploads/avatar/avatar_1_c7b7e5.png', '13800000000@qq.com', '13800000000', '0', '2025-11-29T01:53:50', '127.0.0.1', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzY0OTg2MDMwfQ.RE7NJAattKcfoRKYRMUIByfllR85Dj7iXYV5j76L49U', 'normal', '2025-06-26T02:59:10', '2025-11-29T01:53:50');
 
 -- 检查并创建表 sys_user_balance_log
 DROP TABLE IF EXISTS `sys_user_balance_log`;
@@ -38,8 +38,8 @@ CREATE TABLE `sys_user_balance_log` (
   `before` DECIMAL(10, 0) AUTO_INCREMENT NOT NULL,
   `after` DECIMAL(10, 0) AUTO_INCREMENT NOT NULL,
   `memo` VARCHAR(255) AUTO_INCREMENT,
-  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x103250f40>,
-  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x1032514e0>
+  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98680>,
+  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98c20>
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 检查并创建表 sys_attachment
@@ -60,8 +60,8 @@ CREATE TABLE `sys_attachment` (
   `storage` VARCHAR(100) AUTO_INCREMENT NOT NULL,
   `sha1` VARCHAR(40) AUTO_INCREMENT,
   `general_attachment_col` VARCHAR(45) AUTO_INCREMENT,
-  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x103250f40>,
-  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x1032514e0>
+  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98680>,
+  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98c20>
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 检查并创建表 sys_general_category
@@ -77,8 +77,8 @@ CREATE TABLE `sys_general_category` (
   `description` VARCHAR(255) AUTO_INCREMENT,
   `weigh` INTEGER AUTO_INCREMENT NOT NULL,
   `status` VARCHAR(6) AUTO_INCREMENT NOT NULL,
-  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x103250f40>,
-  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x1032514e0>
+  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98680>,
+  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98c20>
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 插入 sys_general_category 表数据
@@ -103,8 +103,8 @@ CREATE TABLE `sys_admin_rule` (
   `deleted_at` DATETIME AUTO_INCREMENT,
   `weigh` INTEGER AUTO_INCREMENT NOT NULL,
   `status` VARCHAR(7) AUTO_INCREMENT NOT NULL,
-  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x103250f40>,
-  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x1032514e0>
+  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98680>,
+  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98c20>
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 插入 sys_admin_rule 表数据
@@ -153,8 +153,8 @@ CREATE TABLE `sys_notification` (
   `related_url` VARCHAR(500) AUTO_INCREMENT,
   `priority` INTEGER AUTO_INCREMENT NOT NULL,
   `expires_at` DATETIME AUTO_INCREMENT,
-  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x103250f40>,
-  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x1032514e0>
+  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98680>,
+  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98c20>
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 检查并创建表 sys_admin_log
@@ -169,12 +169,13 @@ CREATE TABLE `sys_admin_log` (
   `content` TEXT AUTO_INCREMENT NOT NULL,
   `ip` VARCHAR(50) AUTO_INCREMENT NOT NULL,
   `useragent` TEXT AUTO_INCREMENT,
-  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x103250f40>,
-  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x1032514e0>
+  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98680>,
+  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98c20>
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 插入 sys_admin_log 表数据
 INSERT INTO `sys_admin_log` (`id`, `admin_id`, `username`, `url`, `title`, `content`, `ip`, `useragent`, `created_at`, `updated_at`) VALUES ('1', '1', 'admin', 'http://127.0.0.1:8000/api/admin/user/create', 'POST', '{"user_group_id": 1, "username": "uuuu", "nickname": "uuuu", "password": "*", "email": "dsfa@ddd.ccc", "mobile": "13345443233", "avatar": "", "level": 0, "gender": "male", "birthday": "2025-11-27", "bio": "", "balance": 0, "score": 0, "successions": 0, "max_successions": 0, "prev_time": "2025-11-27 11:58:30", "login_time": "2025-11-27 11:58:30", "login_ip": "", "login_failure": 0, "join_ip": "", "verification": "", "token": "", "status": "normal", "platform": "web", "created_at": "2025-11-27 11:58:30", "updated_at": "2025-11-27 11:58:30"}', '127.0.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36', '2025-11-27T03:59:30', '2025-11-27T03:59:30');
+INSERT INTO `sys_admin_log` (`id`, `admin_id`, `username`, `url`, `title`, `content`, `ip`, `useragent`, `created_at`, `updated_at`) VALUES ('2', '1', 'admin', 'http://127.0.0.1:8000/api/admin/admin/update/1', 'PUT', '{"id": 1, "group_id": 1, "username": "admin", "nickname": "SupperAdmin", "avatar": "/uploads/avatar/avatar_1_c7b7e5.png", "email": "13800000000@qq.com", "mobile": "13800000000", "login_failure": 0, "login_at": "2025-11-29 01:26:27", "login_ip": "127.0.0.1", "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzY0OTg0Mzg3fQ.6kogc16gtD9ipLIr7eqrwgBCRQvtSdkBTx5VvFJF6oQ", "status": "normal", "created_at": "2025-06-26 02:59:10", "updated_at": "2025-11-29 01:26:27", "password": "*"}', '127.0.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36', '2025-11-29T01:53:39', '2025-11-29T01:53:39');
 
 -- 检查并创建表 sys_user_rule
 DROP TABLE IF EXISTS `sys_user_rule`;
@@ -194,8 +195,8 @@ CREATE TABLE `sys_user_rule` (
   `deleted_at` DATETIME AUTO_INCREMENT,
   `weigh` INTEGER AUTO_INCREMENT NOT NULL,
   `status` VARCHAR(7) AUTO_INCREMENT NOT NULL,
-  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x103250f40>,
-  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x1032514e0>
+  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98680>,
+  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98c20>
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 插入 sys_user_rule 表数据
@@ -213,8 +214,8 @@ CREATE TABLE `sys_admin_group` (
   `rules` JSON AUTO_INCREMENT NOT NULL,
   `access` JSON AUTO_INCREMENT NOT NULL,
   `status` VARCHAR(6) AUTO_INCREMENT NOT NULL,
-  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x103250f40>,
-  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x1032514e0>
+  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98680>,
+  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98c20>
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 插入 sys_admin_group 表数据
@@ -239,8 +240,8 @@ CREATE TABLE `sys_plugin` (
   `enabled` SMALLINT AUTO_INCREMENT NOT NULL,
   `setting_menu` VARCHAR(255) AUTO_INCREMENT NOT NULL,
   `status` VARCHAR(6) AUTO_INCREMENT NOT NULL,
-  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x103250f40>,
-  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x1032514e0>
+  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98680>,
+  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98c20>
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 插入 sys_plugin 表数据
@@ -275,8 +276,8 @@ CREATE TABLE `sys_user` (
   `token` VARCHAR(250) AUTO_INCREMENT,
   `status` VARCHAR(6) AUTO_INCREMENT NOT NULL,
   `platform` VARCHAR(7) AUTO_INCREMENT NOT NULL,
-  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x103250f40>,
-  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x1032514e0>
+  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98680>,
+  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98c20>
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 插入 sys_user 表数据
@@ -292,8 +293,8 @@ CREATE TABLE `sys_user_score_log` (
   `before` INTEGER AUTO_INCREMENT NOT NULL,
   `after` INTEGER AUTO_INCREMENT NOT NULL,
   `memo` VARCHAR(255) AUTO_INCREMENT,
-  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x103250f40>,
-  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x1032514e0>
+  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98680>,
+  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98c20>
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 检查并创建表 sys_analytics_summary
@@ -313,8 +314,8 @@ CREATE TABLE `sys_analytics_summary` (
   `total_visits` INTEGER AUTO_INCREMENT,
   `user_group_distribution` JSON AUTO_INCREMENT,
   `action_distribution` JSON AUTO_INCREMENT,
-  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x103250f40>,
-  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x1032514e0>
+  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98680>,
+  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98c20>
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 检查并创建表 sys_attachment_category
@@ -325,8 +326,8 @@ CREATE TABLE `sys_attachment_category` (
   `pid` INTEGER AUTO_INCREMENT NOT NULL,
   `name` VARCHAR(30) AUTO_INCREMENT NOT NULL,
   `status` VARCHAR(6) AUTO_INCREMENT NOT NULL,
-  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x103250f40>,
-  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x1032514e0>
+  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98680>,
+  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98c20>
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 插入 sys_attachment_category 表数据
@@ -342,8 +343,8 @@ CREATE TABLE `sys_user_group` (
   `rules` JSON AUTO_INCREMENT NOT NULL,
   `access` JSON AUTO_INCREMENT NOT NULL,
   `status` VARCHAR(6) AUTO_INCREMENT NOT NULL,
-  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x103250f40>,
-  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x1032514e0>
+  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98680>,
+  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98c20>
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 插入 sys_user_group 表数据
@@ -365,8 +366,8 @@ CREATE TABLE `sys_general_config` (
   `rule` VARCHAR(100) AUTO_INCREMENT,
   `extend` VARCHAR(255) AUTO_INCREMENT,
   `setting` VARCHAR(255) AUTO_INCREMENT,
-  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x103250f40>,
-  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x1032514e0>
+  `created_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98680>,
+  `updated_at` DATETIME AUTO_INCREMENT NOT NULL DEFAULT <function TimestampMixin.<lambda> at 0x102f98c20>
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 插入 sys_general_config 表数据

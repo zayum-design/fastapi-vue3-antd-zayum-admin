@@ -69,12 +69,21 @@ class PreferenceManager {
     this.initialPreferences = merge({}, overrides, defaultPreferences);
 
     // 加载并合并当前存储的偏好设置
+    const cached = this.loadCachedPreferences();
     const mergedPreference = merge(
       {},
       // overrides,
-      this.loadCachedPreferences() || {},
+      cached || {},
       this.initialPreferences,
     );
+
+    // 确保copyright字段被正确设置
+    if (overrides?.copyright) {
+      mergedPreference.copyright = {
+        ...mergedPreference.copyright,
+        ...overrides.copyright
+      };
+    }
 
     // 更新偏好设置
     this.updatePreferences(mergedPreference);

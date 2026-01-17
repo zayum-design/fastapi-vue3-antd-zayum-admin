@@ -194,6 +194,15 @@ npm run dev</code></pre>
         </a-row>
         <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
           <p>© 2025 ZayumAdmin. All rights reserved.</p>
+          <div v-if="preferences.copyright.icp" class="mt-2">
+            <a 
+              :href="preferences.copyright.icpLink || 'javascript:void(0)'" 
+              target="_blank" 
+              class="text-gray-400 hover:text-white"
+            >
+              {{ preferences.copyright.icp }}
+            </a>
+          </div>
         </div>
       </div>
     </a-layout-footer>
@@ -210,6 +219,7 @@ import {
   GlobalOutlined,
   DeploymentUnitOutlined
 } from '@ant-design/icons-vue'
+import { preferences } from '@/_core/preferences'
 
 export default defineComponent({
   name: 'HomePage',
@@ -245,7 +255,8 @@ export default defineComponent({
     })
 
     return {
-      header
+      header,
+      preferences
     }
   }
 })

@@ -28,17 +28,17 @@ def import_SysAdmin(db: Session):
       sysadmin_item.group_id = 1
       sysadmin_item.username = 'admin'
       sysadmin_item.nickname = 'SupperAdmin'
-      sysadmin_item.password = '$2b$12$8qJ15oSRtULhh8A/EctDU.MzQm.vyoZRpohknvZqCY5Yr8N9crF4K'
+      sysadmin_item.password = '$2b$12$PSRSTAdY7Vi8bFgeD5BOA.ZDozJ9rPYVklWGC6y6o7om6QWgR.WlW'
       sysadmin_item.avatar = '/uploads/avatar/avatar_1_c7b7e5.png'
       sysadmin_item.email = '13800000000@qq.com'
       sysadmin_item.mobile = '13800000000'
       sysadmin_item.login_failure = 0
-      sysadmin_item.login_at = datetime.fromisoformat('2025-11-27T03:57:44')
+      sysadmin_item.login_at = datetime.fromisoformat('2025-11-29T01:53:50')
       sysadmin_item.login_ip = '127.0.0.1'
-      sysadmin_item.token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzY0ODIwNjY0fQ.AqDtBeSgXEj6V1bA1pEYHwxU7jU4c5ItF2ypxf0bHgw'
+      sysadmin_item.token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzY0OTg2MDMwfQ.RE7NJAattKcfoRKYRMUIByfllR85Dj7iXYV5j76L49U'
       sysadmin_item.status = 'normal'
       sysadmin_item.created_at = datetime.fromisoformat('2025-06-26T02:59:10')
-      sysadmin_item.updated_at = datetime.fromisoformat('2025-11-27T03:57:44')
+      sysadmin_item.updated_at = datetime.fromisoformat('2025-11-29T01:53:50')
       db.add(sysadmin_item)
 
 def import_SysUserBalanceLog(db: Session):
@@ -584,6 +584,18 @@ def import_SysAdminLog(db: Session):
       sysadminlog_item.useragent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36'
       sysadminlog_item.created_at = datetime.fromisoformat('2025-11-27T03:59:30')
       sysadminlog_item.updated_at = datetime.fromisoformat('2025-11-27T03:59:30')
+      db.add(sysadminlog_item)
+      sysadminlog_item = SysAdminLog()
+      sysadminlog_item.id = 2
+      sysadminlog_item.admin_id = 1
+      sysadminlog_item.username = 'admin'
+      sysadminlog_item.url = 'http://127.0.0.1:8000/api/admin/admin/update/1'
+      sysadminlog_item.title = 'PUT'
+      sysadminlog_item.content = '{"id": 1, "group_id": 1, "username": "admin", "nickname": "SupperAdmin", "avatar": "/uploads/avatar/avatar_1_c7b7e5.png", "email": "13800000000@qq.com", "mobile": "13800000000", "login_failure": 0, "login_at": "2025-11-29 01:26:27", "login_ip": "127.0.0.1", "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzY0OTg0Mzg3fQ.6kogc16gtD9ipLIr7eqrwgBCRQvtSdkBTx5VvFJF6oQ", "status": "normal", "created_at": "2025-06-26 02:59:10", "updated_at": "2025-11-29 01:26:27", "password": "*"}'
+      sysadminlog_item.ip = '127.0.0.1'
+      sysadminlog_item.useragent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36'
+      sysadminlog_item.created_at = datetime.fromisoformat('2025-11-29T01:53:39')
+      sysadminlog_item.updated_at = datetime.fromisoformat('2025-11-29T01:53:39')
       db.add(sysadminlog_item)
 
 def import_SysUserRule(db: Session):

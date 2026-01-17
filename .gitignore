@@ -265,4 +265,10 @@ backend-fastapi-app/uploads
 # 前端
 frontend-vue-app/tests
 
-deployment-guides
+deploy-private
+
+# 私有部署脚本
+deploy-private.sh
+deploy-private.log
+SSH_KEY_SETUP.md
+README_PRIVATE_DEPLOY.md

@@ -14,17 +14,17 @@ def import_data():
         sys_admin.group_id = 1
         sys_admin.username = 'admin'
         sys_admin.nickname = 'SupperAdmin'
-        sys_admin.password = '$2b$12$8qJ15oSRtULhh8A/EctDU.MzQm.vyoZRpohknvZqCY5Yr8N9crF4K'
+        sys_admin.password = '$2b$12$PSRSTAdY7Vi8bFgeD5BOA.ZDozJ9rPYVklWGC6y6o7om6QWgR.WlW'
         sys_admin.avatar = '/uploads/avatar/avatar_1_c7b7e5.png'
         sys_admin.email = '13800000000@qq.com'
         sys_admin.mobile = '13800000000'
         sys_admin.login_failure = 0
-        sys_admin.login_at = datetime.fromisoformat('2025-11-27T03:57:44')
+        sys_admin.login_at = datetime.fromisoformat('2025-11-29T01:53:50')
         sys_admin.login_ip = '127.0.0.1'
-        sys_admin.token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzY0ODIwNjY0fQ.AqDtBeSgXEj6V1bA1pEYHwxU7jU4c5ItF2ypxf0bHgw'
+        sys_admin.token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzY0OTg2MDMwfQ.RE7NJAattKcfoRKYRMUIByfllR85Dj7iXYV5j76L49U'
         sys_admin.status = 'normal'
         sys_admin.created_at = datetime.fromisoformat('2025-06-26T02:59:10')
-        sys_admin.updated_at = datetime.fromisoformat('2025-11-27T03:57:44')
+        sys_admin.updated_at = datetime.fromisoformat('2025-11-29T01:53:50')
         db.add(sys_admin)
 
         # 插入 sys_general_category 表数据
@@ -116,6 +116,18 @@ def import_data():
         sys_admin_log.useragent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36'
         sys_admin_log.created_at = datetime.fromisoformat('2025-11-27T03:59:30')
         sys_admin_log.updated_at = datetime.fromisoformat('2025-11-27T03:59:30')
+        db.add(sys_admin_log)
+        sys_admin_log = SysAdminLog()
+        sys_admin_log.id = 2
+        sys_admin_log.admin_id = 1
+        sys_admin_log.username = 'admin'
+        sys_admin_log.url = 'http://127.0.0.1:8000/api/admin/admin/update/1'
+        sys_admin_log.title = 'PUT'
+        sys_admin_log.content = '{"id": 1, "group_id": 1, "username": "admin", "nickname": "SupperAdmin", "avatar": "/uploads/avatar/avatar_1_c7b7e5.png", "email": "13800000000@qq.com", "mobile": "13800000000", "login_failure": 0, "login_at": "2025-11-29 01:26:27", "login_ip": "127.0.0.1", "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzY0OTg0Mzg3fQ.6kogc16gtD9ipLIr7eqrwgBCRQvtSdkBTx5VvFJF6oQ", "status": "normal", "created_at": "2025-06-26 02:59:10", "updated_at": "2025-11-29 01:26:27", "password": "*"}'
+        sys_admin_log.ip = '127.0.0.1'
+        sys_admin_log.useragent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36'
+        sys_admin_log.created_at = datetime.fromisoformat('2025-11-29T01:53:39')
+        sys_admin_log.updated_at = datetime.fromisoformat('2025-11-29T01:53:39')
         db.add(sys_admin_log)
 
         # 插入 sys_user_rule 表数据

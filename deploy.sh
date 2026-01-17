@@ -1,334 +1,296 @@
 #!/bin/bash
 
 # 一键部署脚本 - FastAPI + Vue3 管理系统
-# 使用方法: ./deploy.sh
+# 使用方法: ./deploy.sh [选项]
 
 set -e
 
-echo "🚀 开始部署 Zayum Admin 系统..."
-echo "=========================================="
+# 颜色定义
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
 
-# 检查是否已安装系统
-echo "🔍 检查系统安装状态..."
-if [ -f "backend-fastapi-app/install.lock" ]; then
-    echo "❌ 系统已安装，检测到 install.lock 文件"
-    echo "💡 如需重新部署，请先删除 install.lock 文件："
-    echo "   rm backend-fastapi-app/install.lock"
-    echo "⚠️  注意：删除 install.lock 文件后，系统将重新执行安装流程"
-    exit 1
-fi
-echo "✅ 系统未安装，继续部署流程..."
+# 显示帮助信息
+show_help() {
+    echo -e "${BLUE}用法: $0 [选项]${NC}"
+    echo ""
+    echo -e "${YELLOW}选项:${NC}"
+    echo "  -a, --all          完整部署 (后端 + 前端)"
+    echo "  -b, --backend      仅部署后端"
+    echo "  -f, --frontend     仅部署前端"
+    echo "  -h, --help         显示此帮助信息"
+    echo "  -v, --version      显示版本信息"
+    echo ""
+    echo -e "${YELLOW}功能说明:${NC}"
+    echo "  本脚本用于自动化部署 Zayum Admin 管理系统，支持："
+    echo "  - 完整部署：后端安装 + 前端启动"
+    echo "  - 单独部署：仅后端或仅前端"
+    echo "  - 环境检查：自动检测系统环境"
+    echo "  - 配置管理：数据库、管理员等配置"
+    echo ""
+    echo -e "${YELLOW}示例:${NC}"
+    echo "  $0                    # 交互式选择部署模式"
+    echo "  $0 --all              # 完整部署系统"
+    echo "  $0 --backend          # 仅部署后端"
+    echo "  $0 --frontend         # 仅部署前端"
+    echo "  $0 --help             # 显示帮助信息"
+    echo ""
+    echo -e "${YELLOW}注意事项:${NC}"
+    echo "  • 确保系统已安装必要的开发工具"
+    echo "  • 生产环境建议使用 HTTPS 和防火墙"
+    echo "  • 定期备份数据库和配置文件"
+}
 
-# 检查必要工具
+# 显示版本信息
+show_version() {
+    echo -e "${BLUE}Zayum Admin 部署脚本 v1.0.0${NC}"
+    echo "适用于 FastAPI + Vue3 管理系统"
+    echo "项目根目录: $(pwd)"
+}
+
+# 检查命令是否存在
 check_command() {
     if ! command -v $1 &> /dev/null; then
-        echo "❌ $1 未安装，请先安装 $1"
+        echo -e "${RED}❌ $1 未安装，请先安装 $1${NC}"
         return 1
     fi
     return 0
 }
 
-echo "🔍 检查系统环境..."
-check_command python3 || exit 1
-check_command pip3 || exit 1
-check_command node || exit 1
-check_command npm || exit 1
-echo "✅ 系统环境检查通过"
+# 检查系统环境
+check_environment() {
+    echo -e "${BLUE}🔍 检查系统环境...${NC}"
+    
+    # 检查基本命令
+    check_command python3 || return 1
+    check_command pip3 || return 1
+    check_command node || return 1
+    check_command npm || return 1
+    
+    echo -e "${GREEN}✅ 系统环境检查通过${NC}"
+    return 0
+}
 
-# 安装后端依赖
-echo "📦 安装后端依赖..."
-cd backend-fastapi-app
-if [ -f "requirements.txt" ]; then
-    echo "安装 Python 依赖..."
-    pip3 install -r requirements.txt
-    if [ $? -eq 0 ]; then
-        echo "✅ 后端依赖安装成功"
+# 部署后端
+deploy_backend() {
+    echo -e "${BLUE}🚀 开始部署后端系统...${NC}"
+    echo -e "${BLUE}==========================================${NC}"
+    
+    if [ ! -d "backend-fastapi-app" ]; then
+        echo -e "${RED}❌ 后端目录 backend-fastapi-app 不存在${NC}"
+        return 1
+    fi
+    
+    if [ ! -f "backend-fastapi-app/install.sh" ]; then
+        echo -e "${RED}❌ 后端安装脚本 backend-fastapi-app/install.sh 不存在${NC}"
+        return 1
+    fi
+    
+    echo -e "${YELLOW}执行后端安装脚本...${NC}"
+    cd backend-fastapi-app
+    chmod +x install.sh
+    ./install.sh
+    local backend_result=$?
+    cd ..
+    
+    if [ $backend_result -eq 0 ]; then
+        echo -e "${GREEN}✅ 后端部署成功${NC}"
+        return 0
     else
-        echo "❌ 后端依赖安装失败"
+        echo -e "${RED}❌ 后端部署失败${NC}"
+        return 1
+    fi
+}
+
+# 部署前端
+deploy_frontend() {
+    echo -e "${BLUE}🚀 开始部署前端系统...${NC}"
+    echo -e "${BLUE}==========================================${NC}"
+    
+    if [ ! -d "frontend-vue-app" ]; then
+        echo -e "${RED}❌ 前端目录 frontend-vue-app 不存在${NC}"
+        return 1
+    fi
+    
+    if [ ! -f "frontend-vue-app/start.sh" ]; then
+        echo -e "${RED}❌ 前端启动脚本 frontend-vue-app/start.sh 不存在${NC}"
+        return 1
+    fi
+    
+    echo -e "${YELLOW}执行前端启动脚本...${NC}"
+    cd frontend-vue-app
+    chmod +x start.sh
+    ./start.sh
+    local frontend_result=$?
+    cd ..
+    
+    if [ $frontend_result -eq 0 ]; then
+        echo -e "${GREEN}✅ 前端部署成功${NC}"
+        return 0
+    else
+        echo -e "${RED}❌ 前端部署失败${NC}"
+        return 1
+    fi
+}
+
+# 完整部署
+deploy_all() {
+    echo -e "${BLUE}🚀 开始完整部署 Zayum Admin 系统...${NC}"
+    echo -e "${BLUE}==========================================${NC}"
+    
+    # 检查环境
+    if ! check_environment; then
+        echo -e "${RED}❌ 环境检查失败，请先安装必要的工具${NC}"
         exit 1
     fi
-else
-    echo "❌ 未找到 requirements.txt 文件"
-    exit 1
-fi
-cd ..
-
-# 安装前端依赖
-echo "📦 安装前端依赖..."
-cd frontend-vue-app
-if [ -f "package.json" ]; then
-    echo "安装 Node.js 依赖..."
-    npm install
-    if [ $? -eq 0 ]; then
-        echo "✅ 前端依赖安装成功"
-    else
-        echo "❌ 前端依赖安装失败"
+    
+    # 部署后端
+    if ! deploy_backend; then
+        echo -e "${RED}❌ 后端部署失败，停止部署${NC}"
         exit 1
     fi
-else
-    echo "❌ 未找到 package.json 文件"
-    exit 1
-fi
-cd ..
-
-# 数据库配置
-echo ""
-echo "🗄️  数据库配置"
-echo "=========================================="
-
-read -p "请输入 MySQL 用户名 (默认: root): " mysql_user
-mysql_user=${mysql_user:-root}
-
-read -s -p "请输入 MySQL 密码 (默认: password): " mysql_password
-mysql_password=${mysql_password:-password}
-echo ""
-
-read -p "请输入数据库名称 (默认: zayum_admin): " mysql_db
-mysql_db=${mysql_db:-zayum_admin}
-
-read -p "请输入 MySQL 主机地址 (默认: localhost): " mysql_host
-mysql_host=${mysql_host:-localhost}
-
-read -p "请输入 MySQL 端口 (默认: 3306): " mysql_port
-mysql_port=${mysql_port:-3306}
-
-read -p "请输入系统域名 (例如: demo.zayumadmin.com): " system_domain
-system_domain=${system_domain:-demo.zayumadmin.com}
-
-# 保存配置到 backend-fastapi-app/.env
-echo "💾 保存数据库配置到 .env 文件..."
-cat > backend-fastapi-app/.env << EOF
-# 项目基本配置
-PROJECT_NAME=Zayum Admin
-TIMEZONE=Asia/Shanghai
-
-#系统路由
-ARROW_ROUTES=["auth", "captcha", "admin","admin_rule", "plugins","user","general_config","general_category"]
-
-API_ADMIN_STR=/api
-SECRET_KEY=$(openssl rand -hex 32)
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=10080
-REDIS_URL=redis://localhost:6379/0
-
-BABEL_DEFAULT_LOCALE=en
-
-# MySQL 数据库配置
-MYSQL_USER=$mysql_user
-MYSQL_PASSWORD=$mysql_password
-MYSQL_DB=$mysql_db
-MYSQL_HOST=$mysql_host
-MYSQL_PORT=$mysql_port
-
-# 插件配置
-GENERATOR_ENABLED=true
-
-# 最大文件大小（单位：字节）
-MAX_FILE_SIZE=10485760
-
-# 允许的文件扩展名，多个用逗号分隔
-ALLOWED_EXTENSIONS=["jpg","png","gif","txt","pdf","webp"]
-
-# 文件保存目录
-UPLOAD_DIR=./uploads
-
-# 插件目录
-PLUGINS_DIR=./plugins
-
-# CORS 配置
-ALLOW_ORIGINS=["http://localhost:5173", "http://127.0.0.1:5173", "http://$system_domain","https://$system_domain"]
-ALLOW_CREDENTIALS=true
-ALLOW_METHODS=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
-ALLOW_HEADERS=["*", "X-Captcha-Id"]
-EXPOSE_HEADERS=["X-Captcha-Id"]
-
-# Swagger UI 配置
-SWAGGER_CSS_URL=https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.9.0/swagger-ui.css
-SWAGGER_FAVICON_URL=https://fastapi.tiangolo.com/img/favicon.png
-SWAGGER_BUNDLE_JS_URLS=["https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.9.0/swagger-ui-bundle.js", "https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"]
-SWAGGER_PRESET_JS_URLS=["https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.9.0/swagger-ui-standalone-preset.js", "https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"]
-SWAGGER_LOADING_TEXT=正在加载 API 文档...
-SWAGGER_ERROR_MESSAGE=无法加载 API 文档资源。请检查网络连接或使用 OpenAPI JSON 文件
-EOF
-
-echo "✅ .env 配置文件已创建"
-
-# 更新 alembic.ini 配置
-echo "💾 更新 alembic.ini 配置..."
-cd backend-fastapi-app
-sed -i.bak "s|mysql+pymysql://.*|mysql+pymysql://$mysql_user:$mysql_password@$mysql_host:$mysql_port/$mysql_db?charset=utf8mb4|" alembic.ini
-cd ..
-
-echo "✅ alembic.ini 配置已更新"
-
-# 管理员配置
-echo ""
-echo "👤 管理员配置"
-echo "=========================================="
-
-read -p "是否使用默认管理员信息？(y/n, 默认: y): " use_default_admin
-use_default_admin=${use_default_admin:-y}
-
-if [ "$use_default_admin" = "y" ] || [ "$use_default_admin" = "Y" ]; then
-    echo "✅ 使用默认管理员信息"
-    admin_username="admin"
-    admin_password="Admin@888"
-    admin_nickname="系统管理员"
-    admin_email="13800000000@qq.com"
-    admin_mobile="13800000000"
-else
-    echo "📝 请输入自定义管理员信息"
-    read -p "请输入管理员用户名 (默认: admin): " admin_username
-    admin_username=${admin_username:-admin}
-
-    read -s -p "请输入管理员密码 (默认: Admin@888): " admin_password
-    admin_password=${admin_password:-Admin@888}
+    
     echo ""
+    echo -e "${BLUE}==========================================${NC}"
+    echo ""
+    
+    # 部署前端
+    if ! deploy_frontend; then
+        echo -e "${RED}❌ 前端部署失败${NC}"
+        exit 1
+    fi
+    
+    echo ""
+    echo -e "${GREEN}🎉 完整部署完成！${NC}"
+    echo -e "${BLUE}==========================================${NC}"
+    echo -e "${YELLOW}📊 服务访问信息：${NC}"
+    echo "后端 API 地址: http://localhost:8000"
+    echo "前端开发服务器: http://localhost:5173"
+    echo "Swagger 文档: http://localhost:8000/docs"
+    echo ""
+    echo -e "${YELLOW}🔧 管理命令：${NC}"
+    echo "停止后端服务: cd backend-fastapi-app && kill \$(cat .backend_pid)"
+    echo "重新启动前端: cd frontend-vue-app && ./start.sh"
+    echo ""
+    echo -e "${YELLOW}💡 部署说明：${NC}"
+    echo "1. 后端服务已在后台运行"
+    echo "2. 前端开发服务器已启动"
+    echo "3. 您可以在浏览器中访问前端地址开始使用系统"
+    echo "4. 生产环境建议使用 Nginx 等 Web 服务器"
+}
 
-    read -p "请输入管理员昵称 (默认: 系统管理员): " admin_nickname
-    admin_nickname=${admin_nickname:-系统管理员}
+# 交互式选择部署模式
+select_deploy_mode() {
+    echo -e "${BLUE}请选择部署模式:${NC}"
+    echo -e "  ${GREEN}1${NC}) 完整部署 (后端 + 前端)"
+    echo -e "  ${GREEN}2${NC}) 仅部署后端"
+    echo -e "  ${GREEN}3${NC}) 仅部署前端"
+    echo -e "  ${GREEN}4${NC}) 显示帮助信息"
+    echo -e "  ${GREEN}5${NC}) 退出"
+    echo ""
+    read -p "请输入选项 [1-5] (默认: 1): " choice
+    
+    case $choice in
+        1|"")
+            MODE="all"
+            ;;
+        2)
+            MODE="backend"
+            ;;
+        3)
+            MODE="frontend"
+            ;;
+        4)
+            show_help
+            exit 0
+            ;;
+        5)
+            echo -e "${YELLOW}退出部署${NC}"
+            exit 0
+            ;;
+        *)
+            echo -e "${RED}错误: 无效选项 '$choice'${NC}"
+            select_deploy_mode
+            ;;
+    esac
+}
 
-    read -p "请输入管理员邮箱 (默认: 13800000000@qq.com): " admin_email
-    admin_email=${admin_email:-13800000000@qq.com}
+# 主函数
+main() {
+    # 解析命令行参数
+    if [[ $# -gt 0 ]]; then
+        while [[ $# -gt 0 ]]; do
+            case $1 in
+                -a|--all)
+                    MODE="all"
+                    shift
+                    ;;
+                -b|--backend)
+                    MODE="backend"
+                    shift
+                    ;;
+                -f|--frontend)
+                    MODE="frontend"
+                    shift
+                    ;;
+                -h|--help)
+                    show_help
+                    exit 0
+                    ;;
+                -v|--version)
+                    show_version
+                    exit 0
+                    ;;
+                *)
+                    echo -e "${RED}错误: 未知选项 '$1'${NC}"
+                    show_help
+                    exit 1
+                    ;;
+            esac
+        done
+    else
+        # 如果没有命令行参数，则交互式选择
+        select_deploy_mode
+    fi
+    
+    echo -e "${BLUE}========================================${NC}"
+    echo -e "${BLUE}    Zayum Admin 部署脚本${NC}"
+    echo -e "${BLUE}========================================${NC}"
+    echo -e "${YELLOW}部署模式: ${MODE}${NC}"
+    echo ""
+    
+    # 根据模式执行部署
+    case $MODE in
+        "all")
+            deploy_all
+            ;;
+        "backend")
+            if ! check_environment; then
+                echo -e "${RED}❌ 环境检查失败，请先安装必要的工具${NC}"
+                exit 1
+            fi
+            deploy_backend
+            ;;
+        "frontend")
+            if ! check_environment; then
+                echo -e "${RED}❌ 环境检查失败，请先安装必要的工具${NC}"
+                exit 1
+            fi
+            deploy_frontend
+            ;;
+        *)
+            echo -e "${RED}错误: 未知模式 '$MODE'${NC}"
+            exit 1
+            ;;
+    esac
+    
+    echo ""
+    echo -e "${BLUE}========================================${NC}"
+    echo -e "${GREEN}🎯 部署完成！${NC}"
+    echo -e "${BLUE}========================================${NC}"
+}
 
-    read -p "请输入管理员手机号 (默认: 13800000000): " admin_mobile
-    admin_mobile=${admin_mobile:-13800000000}
-fi
-
-# 更新管理员信息到 auto_insert_data.py
-echo "💾 更新管理员信息到初始数据文件..."
-cd backend-fastapi-app
-
-# 生成密码哈希
-echo "生成密码哈希..."
-hashed_password=$(python3 -c "
-import bcrypt
-pw_hash = bcrypt.hashpw(b'$admin_password', bcrypt.gensalt())
-print(pw_hash.decode('utf8'))
-")
-
-# 更新 auto_insert_data.py 文件中的管理员信息
-echo "更新 auto_insert_data.py 文件..."
-sed -i.bak "s/'username': 'admin'/'username': '$admin_username'/" alembic/versions/auto_insert_data.py
-sed -i.bak "s/'nickname': 'SupperAdmin'/'nickname': '$admin_nickname'/" alembic/versions/auto_insert_data.py
-sed -i.bak "s/'password': '[^']*'/'password': '$hashed_password'/" alembic/versions/auto_insert_data.py
-sed -i.bak "s/'email': '[^']*'/'email': '$admin_email'/" alembic/versions/auto_insert_data.py
-sed -i.bak "s/'mobile': '[^']*'/'mobile': '$admin_mobile'/" alembic/versions/auto_insert_data.py
-
-echo "✅ 管理员信息已更新到初始数据文件"
-cd ..
-
-# 数据库迁移
-echo ""
-echo "🔄 数据库迁移"
-echo "=========================================="
-
-cd backend-fastapi-app
-echo "执行数据库迁移..."
-alembic upgrade head
-if [ $? -eq 0 ]; then
-    echo "✅ 数据库迁移成功"
-else
-    echo "❌ 数据库迁移失败，请检查数据库连接"
-    exit 1
-fi
-cd ..
-
-# 插入初始数据
-echo ""
-echo "📊 插入初始数据"
-echo "=========================================="
-
-cd backend-fastapi-app
-echo "执行数据插入..."
-python3 -c "
-import sys
-sys.path.append('.')
-from alembic.auto_insert_data import upgrade
-upgrade()
-print('✅ 初始数据插入成功')
-"
-if [ $? -eq 0 ]; then
-    echo "✅ 初始数据插入成功"
-else
-    echo "❌ 初始数据插入失败"
-    exit 1
-fi
-cd ..
-
-# 启动后端服务
-echo ""
-echo "🚀 启动后端服务"
-echo "=========================================="
-
-cd backend-fastapi-app
-echo "启动 FastAPI 后端服务..."
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload &
-BACKEND_PID=$!
-cd ..
-
-echo "等待后端服务启动..."
-sleep 5
-
-# 检查后端服务是否正常
-if curl -s http://localhost:8000/health > /dev/null 2>&1; then
-    echo "✅ 后端服务启动成功 (PID: $BACKEND_PID)"
-else
-    echo "❌ 后端服务启动失败"
-    kill $BACKEND_PID 2>/dev/null || true
-    exit 1
-fi
-
-# 构建前端
-echo ""
-echo "🏗️  构建前端应用"
-echo "=========================================="
-
-cd frontend-vue-app
-echo "构建前端应用..."
-npm run build
-if [ $? -eq 0 ]; then
-    echo "✅ 前端构建成功"
-    FRONTEND_DIST="$(pwd)/dist"
-else
-    echo "❌ 前端构建失败"
-    kill $BACKEND_PID 2>/dev/null || true
-    exit 1
-fi
-cd ..
-
-# 显示部署结果
-echo ""
-echo "🎉 部署完成！"
-echo "=========================================="
-echo "📊 服务访问信息："
-echo "后端 API 地址: http://localhost:8000"
-echo "前端静态文件目录: $FRONTEND_DIST"
-echo "Swagger 文档: http://localhost:8000/docs"
-echo ""
-echo "👤 管理员登录信息："
-echo "用户名: $admin_username"
-echo "密码: $admin_password"
-echo ""
-echo "🔧 管理命令："
-echo "停止后端服务: kill $BACKEND_PID"
-echo "查看后端日志: cd backend-fastapi-app && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
-echo "重新构建前端: cd frontend-vue-app && npm run build"
-echo ""
-echo "💡 部署说明："
-echo "1. 后端服务已在后台运行 (PID: $BACKEND_PID)"
-echo "2. 前端已构建完成，静态文件位于: $FRONTEND_DIST"
-echo "3. 您可以使用 Nginx 等 Web 服务器来提供前端静态文件"
-echo "4. 数据库配置已保存到 backend-fastapi-app/.env"
-echo "=========================================="
-
-# 保存进程ID以便后续管理
-echo $BACKEND_PID > .backend_pid
-echo "后端进程ID已保存到 .backend_pid 文件"
-
-echo ""
-echo "📝 后续步骤："
-echo "1. 配置 Web 服务器 (如 Nginx) 来提供前端静态文件"
-echo "2. 配置域名和 SSL 证书"
-echo "3. 设置系统服务以确保后端服务自动重启"
-echo "4. 配置数据库备份策略"
+# 执行主函数
+main "$@"

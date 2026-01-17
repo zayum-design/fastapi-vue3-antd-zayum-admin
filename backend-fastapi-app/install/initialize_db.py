@@ -104,8 +104,8 @@ def export_alembic_migration_data(db: Session, output_path: Optional[str] = None
                     elif hasattr(val, 'name') and hasattr(type(val), '__name__'):  # Enum
                         data[col.name] = f"{type(val).__name__}.{val.name}"
                     elif isinstance(val, dict):
-                        json_str = json.dumps(val, ensure_ascii=False)
-                        data[col.name] = repr(json_str)
+                        # 对于 JSON 字段，直接使用 Python 字典，避免转义
+                        data[col.name] = repr(val)
                     else:
                         data[col.name] = repr(val)
                 dict_str = "{ " + ", ".join([f"'{k}': {v}" for k, v in data.items()]) + " }"
