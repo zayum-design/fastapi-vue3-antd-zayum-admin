@@ -4,10 +4,6 @@ from pydantic import Field, AnyUrl
 from typing import List
 
 
-class RedisURL(AnyUrl):
-    allowed_schemes = {"redis"}
-
-
 class Settings(BaseSettings):
     # ----------------------------------------
     # 以下是你已有的项目基础配置
@@ -18,7 +14,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 10080  # 7天
     
-    REDIS_URL: RedisURL = "redis://localhost:6379/0"
+    REDIS_URL: str = "redis://localhost:6379/0"
     
     ARROW_ROUTES: List[str] = []
     BABEL_DEFAULT_LOCALE: str = "ch"  # 默认值 'en'
@@ -45,7 +41,7 @@ class Settings(BaseSettings):
     # ----------------------------------------
     # CORS 配置
     # ----------------------------------------
-    ALLOW_ORIGINS: List[str] = ["http://localhost:5173", "http://127.0.0.1:5173", "http://demo.zayumadmin.com", "http://zayumadmin.com"]
+    ALLOW_ORIGINS: List[str] = ["http://localhost:5173", "http://127.0.0.1:5173", "http://demo.admin.zayumcom", "http://zayumadmin.com"]
     ALLOW_CREDENTIALS: bool = True
     ALLOW_METHODS: List[str] = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
     ALLOW_HEADERS: List[str] = ["*", "X-Captcha-Id"]
@@ -55,7 +51,6 @@ class Settings(BaseSettings):
     # 缓存配置
     # ----------------------------------------
     CACHE_TYPE: str = "simple"  # "simple" 或 "redis"
-    REDIS_URL: RedisURL = "redis://localhost:6379/0"
     
     # ----------------------------------------
     # Swagger UI 配置

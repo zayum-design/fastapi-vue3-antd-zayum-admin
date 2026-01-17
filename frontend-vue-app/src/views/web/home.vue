@@ -193,7 +193,7 @@ npm run dev</code></pre>
           </a-col>
         </a-row>
         <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-          <p>© 2025 ZayumAdmin. All rights reserved.</p>
+          <p>© 2025 zayum.com All rights reserved.</p>
           <div v-if="preferences.copyright.icp" class="mt-2">
             <a 
               :href="preferences.copyright.icpLink || 'javascript:void(0)'" 

@@ -104,6 +104,38 @@ deploy_backend() {
     fi
 }
 
+# 选择前端启动模式
+select_frontend_mode() {
+    echo -e "${BLUE}请选择前端启动模式:${NC}"
+    echo -e "  ${GREEN}1${NC}) 开发者模式 (Development) - 用于开发调试"
+    echo -e "  ${GREEN}2${NC}) 生产模式 (Production) - 生产环境"
+    echo -e "  ${GREEN}3${NC}) 构建模式 (Build) - 构建生产版本"
+    echo -e "  ${GREEN}4${NC}) 返回上级菜单"
+    echo ""
+    read -p "请输入选项 [1-4] (直接按回车选择默认值 1): " choice
+    
+    case $choice in
+        1|"")
+            FRONTEND_MODE="dev"
+            ;;
+        2)
+            FRONTEND_MODE="prod"
+            ;;
+        3)
+            FRONTEND_MODE="build"
+            ;;
+        4)
+            return 1
+            ;;
+        *)
+            echo -e "${RED}错误: 无效选项 '$choice'${NC}"
+            select_frontend_mode
+            ;;
+    esac
+    
+    return 0
+}
+
 # 部署前端
 deploy_frontend() {
     echo -e "${BLUE}🚀 开始部署前端系统...${NC}"
@@ -119,18 +151,46 @@ deploy_frontend() {
         return 1
     fi
     
-    echo -e "${YELLOW}执行前端启动脚本...${NC}"
+    # 选择前端启动模式
+    if ! select_frontend_mode; then
+        echo -e "${YELLOW}取消前端部署${NC}"
+        return 1
+    fi
+    
+    echo -e "${YELLOW}执行前端启动脚本 (模式: $FRONTEND_MODE)...${NC}"
     cd frontend-vue-app
     chmod +x start.sh
-    ./start.sh
+    
+    # 根据选择的模式执行
+    # 注意：start.sh 脚本不支持 --build 参数，构建模式只能通过交互式选择
+    # 我们将使用 echo 来模拟用户输入 "3" 选择构建模式
+    case $FRONTEND_MODE in
+        "dev")
+            ./start.sh --dev
+            ;;
+        "prod")
+            ./start.sh --prod
+            ;;
+        "build")
+            # 构建模式需要交互式选择，我们模拟输入 "3" 然后回车
+            echo -e "${YELLOW}注意: 构建模式需要交互式选择，自动选择选项 3...${NC}"
+            echo "3" | ./start.sh
+            ;;
+        *)
+            echo -e "${RED}错误: 未知前端模式 '$FRONTEND_MODE'${NC}"
+            cd ..
+            return 1
+            ;;
+    esac
+    
     local frontend_result=$?
     cd ..
     
     if [ $frontend_result -eq 0 ]; then
-        echo -e "${GREEN}✅ 前端部署成功${NC}"
+        echo -e "${GREEN}✅ 前端部署成功 (模式: $FRONTEND_MODE)${NC}"
         return 0
     else
-        echo -e "${RED}❌ 前端部署失败${NC}"
+        echo -e "${RED}❌ 前端部署失败 (模式: $FRONTEND_MODE)${NC}"
         return 1
     fi
 }
@@ -190,7 +250,7 @@ select_deploy_mode() {
     echo -e "  ${GREEN}4${NC}) 显示帮助信息"
     echo -e "  ${GREEN}5${NC}) 退出"
     echo ""
-    read -p "请输入选项 [1-5] (默认: 1): " choice
+    read -p "请输入选项 [1-5] (直接按回车选择默认值 1): " choice
     
     case $choice in
         1|"")

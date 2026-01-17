@@ -219,4 +219,35 @@ async def get_redis():
         return redis_client
     except Exception as e:
         logger.error(f"Failed to connect to Redis: {e}")
-        raise
+        # 返回一个简单的内存缓存实现，而不是抛出异常
+        logger.warning("Returning simple memory cache as fallback for Redis")
+        
+        class MemoryRedis:
+            """简单的内存Redis模拟类"""
+            def __init__(self):
+                self._store = {}
+            
+            async def get(self, key: str):
+                return self._store.get(key)
+            
+            async def set(self, key: str, value: str, ex: int = None):
+                self._store[key] = value
+                return True
+            
+            async def setex(self, key: str, expire: int, value: str):
+                self._store[key] = value
+                return True
+            
+            async def delete(self, key: str):
+                if key in self._store:
+                    del self._store[key]
+                return 1
+            
+            async def ping(self):
+                return True
+            
+            async def keys(self, pattern: str):
+                import fnmatch
+                return [k for k in self._store.keys() if fnmatch.fnmatch(k, pattern)]
+        
+        return MemoryRedis()

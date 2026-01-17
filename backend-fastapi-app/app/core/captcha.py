@@ -4,16 +4,9 @@ import string
 from io import BytesIO
 from captcha.image import ImageCaptcha
 from fastapi import HTTPException, status
-from app.core.cache import get_redis
+from app.core.cache import cache_manager
 
-# 如果没有安装 Redis，使用内存缓存
-try:
-    import redis
-    USE_REDIS = True
-except ImportError:
-    USE_REDIS = False
-
-# 内存缓存字典
+# 内存缓存字典（向后兼容）
 memory_cache = {}
 
 async def generate_captcha():
@@ -31,12 +24,8 @@ async def generate_captcha():
     # 生成唯一的 captcha_id
     captcha_id = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
     
-    # 缓存验证码
-    if USE_REDIS:
-        redis = await get_redis()
-        await redis.set(f"captcha:{captcha_id}", code, ex=300)  # 5分钟有效
-    else:
-        memory_cache[captcha_id] = code
+    # 缓存验证码 - 使用CacheManager
+    await cache_manager.set(f"captcha:{captcha_id}", code, expire=300)  # 5分钟有效
     
     return captcha_id, buffer.read()
 
@@ -45,12 +34,8 @@ async def verify_captcha(captcha_type: str, captcha: bool, captcha_id: str, capt
     if captcha_type != "code":
         return captcha
     
-    # 获取缓存的验证码
-    if USE_REDIS:
-        redis = await get_redis()
-        stored_code = await redis.get(f"captcha:{captcha_id}")
-    else:
-        stored_code = memory_cache.get(captcha_id)
+    # 获取缓存的验证码 - 使用CacheManager
+    stored_code = await cache_manager.get(f"captcha:{captcha_id}")
     
     # 验证码不存在或已过期
     if not stored_code:
@@ -61,9 +46,6 @@ async def verify_captcha(captcha_type: str, captcha: bool, captcha_id: str, capt
         return False
     
     # 验证成功后删除验证码
-    if USE_REDIS:
-        await redis.delete(f"captcha:{captcha_id}")
-    else:
-        memory_cache.pop(captcha_id, None)
+    await cache_manager.delete(f"captcha:{captcha_id}")
     
     return True

@@ -41,7 +41,7 @@
 ./deploy.sh --help
 
 # 完整部署（后端 + 前端）
-./deploy.sh --all
+./deploy.sh --all 
 
 # 仅部署后端
 ./deploy.sh --backend
