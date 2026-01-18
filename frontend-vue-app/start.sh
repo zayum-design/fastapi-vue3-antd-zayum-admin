@@ -47,10 +47,78 @@ normalize_domain() {
     fi
 }
 
+# 函数：检查环境变量是否已配置
+check_env_configured() {
+    local env_file="$1"
+    
+    if [ ! -f "$env_file" ]; then
+        return 1  # 文件不存在，未配置
+    fi
+    
+    # 检查是否包含必要的环境变量
+    if grep -q "^VITE_GLOB_URL=" "$env_file" && grep -q "^VITE_GLOB_API_URL=" "$env_file"; then
+        # 获取当前值
+        local current_url=$(grep "^VITE_GLOB_URL=" "$env_file" | cut -d'=' -f2-)
+        local current_api_url=$(grep "^VITE_GLOB_API_URL=" "$env_file" | cut -d'=' -f2-)
+        
+        # 检查值是否非空
+        if [ -n "$current_url" ] && [ -n "$current_api_url" ]; then
+            # 检查是否为确切的默认值（而不是包含默认值的子字符串）
+            # 确切的默认值：localhost:5666, http://localhost:5666, demo.zayum.com, https://demo.zayum.com
+            # 确切的默认API值：localhost:8000, http://localhost:8000, api.demo.zayum.com, https://api.demo.zayum.com
+            
+            # 去除协议部分进行比较
+            local url_without_protocol=$(echo "$current_url" | sed -e 's|^https\?://||')
+            local api_without_protocol=$(echo "$current_api_url" | sed -e 's|^https\?://||')
+            
+            # 确切的默认值列表
+            local exact_default_urls=("localhost:5666" "demo.zayum.com")
+            local exact_default_apis=("localhost:8000" "api.demo.zayum.com")
+            
+            local is_exact_default=false
+            
+            # 检查是否是确切的默认值
+            for default_url in "${exact_default_urls[@]}"; do
+                if [[ "$url_without_protocol" == "$default_url" ]]; then
+                    is_exact_default=true
+                    break
+                fi
+            done
+            
+            for default_api in "${exact_default_apis[@]}"; do
+                if [[ "$api_without_protocol" == "$default_api" ]]; then
+                    is_exact_default=true
+                    break
+                fi
+            done
+            
+            if $is_exact_default; then
+                # 这是确切的默认值，需要重新配置
+                return 1
+            else
+                # 不是确切的默认值，使用现有配置
+                echo -e "${GREEN}检测到已配置的环境变量，使用现有配置${NC}"
+                echo -e "${GREEN}VITE_GLOB_URL: $current_url${NC}"
+                echo -e "${GREEN}VITE_GLOB_API_URL: $current_api_url${NC}"
+                return 0  # 已配置
+            fi
+        fi
+    fi
+    
+    return 1  # 未配置
+}
+
 # 函数：交互式配置域名（生产环境）
 configure_domain() {
     local access_domain=""
     local api_domain=""
+    
+    # 检查 .env.production 是否已配置
+    if check_env_configured ".env.production"; then
+        ACCESS_DOMAIN=$(grep "^VITE_GLOB_URL=" .env.production | cut -d'=' -f2-)
+        API_DOMAIN=$(grep "^VITE_GLOB_API_URL=" .env.production | cut -d'=' -f2-)
+        return 0
+    fi
     
     echo -e "${BLUE}请配置生产环境域名:${NC}"
     echo ""
@@ -143,7 +211,14 @@ setup_production_env() {
     
     # 配置 VITE_GLOB_URL
     if grep -q "^VITE_GLOB_URL=" .env.production; then
-        sed -i '' "s|^VITE_GLOB_URL=.*|VITE_GLOB_URL=${ACCESS_DOMAIN}|" .env.production && \
+        # 检查操作系统类型，使用合适的 sed 语法
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS 系统
+            sed -i '' "s|^VITE_GLOB_URL=.*|VITE_GLOB_URL=${ACCESS_DOMAIN}|" .env.production
+        else
+            # Linux 和其他系统
+            sed -i "s|^VITE_GLOB_URL=.*|VITE_GLOB_URL=${ACCESS_DOMAIN}|" .env.production
+        fi
         echo -e "${GREEN}✓ 已配置 VITE_GLOB_URL=${ACCESS_DOMAIN}${NC}"
     else
         echo "VITE_GLOB_URL=${ACCESS_DOMAIN}" >> .env.production && \
@@ -152,7 +227,14 @@ setup_production_env() {
     
     # 配置 VITE_GLOB_API_URL
     if grep -q "^VITE_GLOB_API_URL=" .env.production; then
-        sed -i '' "s|^VITE_GLOB_API_URL=.*|VITE_GLOB_API_URL=${API_DOMAIN}|" .env.production && \
+        # 检查操作系统类型，使用合适的 sed 语法
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS 系统
+            sed -i '' "s|^VITE_GLOB_API_URL=.*|VITE_GLOB_API_URL=${API_DOMAIN}|" .env.production
+        else
+            # Linux 和其他系统
+            sed -i "s|^VITE_GLOB_API_URL=.*|VITE_GLOB_API_URL=${API_DOMAIN}|" .env.production
+        fi
         echo -e "${GREEN}✓ 已配置 VITE_GLOB_API_URL=${API_DOMAIN}${NC}"
     else
         echo "VITE_GLOB_API_URL=${API_DOMAIN}" >> .env.production && \
@@ -168,6 +250,16 @@ configure_dev_domain() {
     local api_domain=""
     local normalized_access_domain=""
     local normalized_api_domain=""
+    
+    # 检查 .env.development 是否已配置
+    if check_env_configured ".env.development"; then
+        normalized_access_domain=$(grep "^VITE_GLOB_URL=" .env.development | cut -d'=' -f2-)
+        normalized_api_domain=$(grep "^VITE_GLOB_API_URL=" .env.development | cut -d'=' -f2-)
+        # 设置全局变量供后续使用
+        ACCESS_DOMAIN="$normalized_access_domain"
+        API_DOMAIN="$normalized_api_domain"
+        return 0
+    fi
     
     echo -e "${BLUE}请配置开发环境域名:${NC}"
     echo ""
@@ -254,7 +346,14 @@ configure_dev_domain() {
     
     # 配置 VITE_GLOB_URL
     if grep -q "^VITE_GLOB_URL=" .env.development; then
-        sed -i '' "s|^VITE_GLOB_URL=.*|VITE_GLOB_URL=${normalized_access_domain}|" .env.development && \
+        # 检查操作系统类型，使用合适的 sed 语法
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS 系统
+            sed -i '' "s|^VITE_GLOB_URL=.*|VITE_GLOB_URL=${normalized_access_domain}|" .env.development
+        else
+            # Linux 和其他系统
+            sed -i "s|^VITE_GLOB_URL=.*|VITE_GLOB_URL=${normalized_access_domain}|" .env.development
+        fi
         echo -e "${GREEN}✓ 已配置 VITE_GLOB_URL=${normalized_access_domain}${NC}"
     else
         echo "VITE_GLOB_URL=${normalized_access_domain}" >> .env.development && \
@@ -263,7 +362,14 @@ configure_dev_domain() {
     
     # 配置 VITE_GLOB_API_URL
     if grep -q "^VITE_GLOB_API_URL=" .env.development; then
-        sed -i '' "s|^VITE_GLOB_API_URL=.*|VITE_GLOB_API_URL=${normalized_api_domain}|" .env.development && \
+        # 检查操作系统类型，使用合适的 sed 语法
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS 系统
+            sed -i '' "s|^VITE_GLOB_API_URL=.*|VITE_GLOB_API_URL=${normalized_api_domain}|" .env.development
+        else
+            # Linux 和其他系统
+            sed -i "s|^VITE_GLOB_API_URL=.*|VITE_GLOB_API_URL=${normalized_api_domain}|" .env.development
+        fi
         echo -e "${GREEN}✓ 已配置 VITE_GLOB_API_URL=${normalized_api_domain}${NC}"
     else
         echo "VITE_GLOB_API_URL=${normalized_api_domain}" >> .env.development && \

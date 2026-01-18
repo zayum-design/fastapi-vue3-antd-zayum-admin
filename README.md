@@ -44,7 +44,7 @@
 ./deploy.sh --all 
 
 # 仅部署后端
-./deploy.sh --backend
+./deploy.sh --backend 
 
 # 仅部署前端
 ./deploy.sh --frontend
