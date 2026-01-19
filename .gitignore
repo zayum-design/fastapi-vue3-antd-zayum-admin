@@ -274,6 +274,10 @@ SSH_KEY_SETUP.md
 README_PRIVATE_DEPLOY.md
 deploy-private
 
-# 忽略所有以 test_ 开头的文件
+# 忽略所有以 test_ 开头的文件（包括子目录中的）
 **/test_*
-tests
+**/test_*.*
+tests/
+
+# Analytics文件夹
+analytics/
