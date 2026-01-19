@@ -272,6 +272,7 @@ deploy-private.sh
 deploy-private.log
 SSH_KEY_SETUP.md
 README_PRIVATE_DEPLOY.md
+deploy-private
 
 # 忽略所有以 test_ 开头的文件
 **/test_*
