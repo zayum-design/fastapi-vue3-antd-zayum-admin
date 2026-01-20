@@ -7,13 +7,13 @@ source "$(dirname "$0")/config.sh"
 
 # 选择前端启动模式
 select_frontend_mode() {
-    echo -e "${BLUE}请选择前端启动模式:${NC}"
-    echo -e "  ${GREEN}1${NC}) 开发者模式 (Development) - 用于开发调试"
-    echo -e "  ${GREEN}2${NC}) 生产模式 (Production) - 生产环境"
-    echo -e "  ${GREEN}3${NC}) 构建模式 (Build) - 构建生产版本"
-    echo -e "  ${GREEN}4${NC}) 返回上级菜单"
-    echo ""
-    read -p "请输入选项 [1-4] (直接按回车选择默认值 1): " choice
+    echo -e "${BLUE}请选择前端启动模式:${NC}" >&2
+    echo -e "  ${GREEN}1${NC}) 开发者模式 (Development) - 用于开发调试" >&2
+    echo -e "  ${GREEN}2${NC}) 生产模式 (Production) - 生产环境" >&2
+    echo -e "  ${GREEN}3${NC}) 构建模式 (Build) - 构建生产版本" >&2
+    echo -e "  ${GREEN}4${NC}) 返回上级菜单" >&2
+    echo "" >&2
+    read -p "请输入选项 [1-4] (直接按回车选择默认值 1): " choice >&2
     
     case $choice in
         1|"")
@@ -29,7 +29,7 @@ select_frontend_mode() {
             echo "cancel"
             ;;
         *)
-            echo -e "${RED}错误: 无效选项 '$choice'${NC}"
+            echo -e "${RED}错误: 无效选项 '$choice'${NC}" >&2
             select_frontend_mode
             ;;
     esac

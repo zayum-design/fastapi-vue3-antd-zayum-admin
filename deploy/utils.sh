@@ -3,7 +3,8 @@
 # 工具模块 - 通用工具函数
 
 # 加载配置
-source "$(dirname "$0")/config.sh"
+SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+source "$SCRIPT_DIR/config.sh"
 
 # 显示帮助信息
 show_help() {
@@ -60,14 +61,22 @@ check_environment() {
 
 # 交互式选择部署模式
 select_deploy_mode() {
-    echo -e "${BLUE}请选择部署模式:${NC}"
-    echo -e "  ${GREEN}1${NC}) 完整部署 (后端 + 前端)"
-    echo -e "  ${GREEN}2${NC}) 仅部署后端"
-    echo -e "  ${GREEN}3${NC}) 仅部署前端"
-    echo -e "  ${GREEN}4${NC}) 显示帮助信息"
-    echo -e "  ${GREEN}5${NC}) 退出"
-    echo ""
-    read -p "请输入选项 [1-5] (直接按回车选择默认值 1): " choice
+    # 将菜单输出到标准错误，这样不会被命令替换捕获
+    echo "" >&2
+    echo -e "${BLUE}========================================${NC}" >&2
+    echo -e "${BLUE}          Zayum Admin 部署菜单          ${NC}" >&2
+    echo -e "${BLUE}========================================${NC}" >&2
+    echo "" >&2
+    echo -e "${YELLOW}请选择部署模式:${NC}" >&2
+    echo "" >&2
+    echo -e "  ${GREEN}1${NC}) 完整部署 (后端 + 前端)" >&2
+    echo -e "  ${GREEN}2${NC}) 仅部署后端" >&2
+    echo -e "  ${GREEN}3${NC}) 仅部署前端" >&2
+    echo -e "  ${GREEN}4${NC}) 显示帮助信息" >&2
+    echo -e "  ${GREEN}5${NC}) 退出" >&2
+    echo "" >&2
+    echo -e "${BLUE}----------------------------------------${NC}" >&2
+    read -p "请输入选项 [1-5] (直接按回车选择默认值 1): " choice >&2
     
     case $choice in
         1|"")
@@ -80,15 +89,15 @@ select_deploy_mode() {
             echo "$DEPLOY_MODE_FRONTEND"
             ;;
         4)
-            show_help
-            exit 0
+            # 返回特殊值表示显示帮助
+            echo "__SHOW_HELP__"
             ;;
         5)
-            echo -e "${YELLOW}退出部署${NC}"
-            exit 0
+            # 返回特殊值表示退出
+            echo "__EXIT__"
             ;;
         *)
-            echo -e "${RED}错误: 无效选项 '$choice'${NC}"
+            echo -e "${RED}错误: 无效选项 '$choice'${NC}" >&2
             select_deploy_mode
             ;;
     esac

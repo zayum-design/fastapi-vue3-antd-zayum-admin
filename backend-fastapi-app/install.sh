@@ -193,171 +193,142 @@ fi
 read -p "请输入系统域名 (例如: demo.zayum.com): " system_domain
 system_domain=${system_domain:-demo.zayum.com}
 
+# 从域名中提取纯域名部分（去掉 http:// 或 https:// 前缀）
+domain_only="$system_domain"
+# 去掉 http:// 前缀
+domain_only="${domain_only#http://}"
+# 去掉 https:// 前缀
+domain_only="${domain_only#https://}"
+# 如果 domain_only 为空，则使用原始值
+if [ -z "$domain_only" ]; then
+    domain_only="$system_domain"
+fi
+
 # 保存配置到 .env
 echo "💾 保存数据库配置到 .env 文件..."
 
+# 首先复制 .env.example 作为基础
+if [ -f ".env.example" ]; then
+    cp .env.example .env
+    echo "✅ 已复制 .env.example 作为基础配置"
+else
+    echo "⚠️  未找到 .env.example 文件，创建基础 .env 文件"
+    # 创建基础 .env 文件
+    cat > .env << ENVEOF
+# 项目基本配置
+PROJECT_NAME=Zayum Admin
+TIMEZONE=Asia/Shanghai
+
+#系统路由
+ARROW_ROUTES=["auth", "captcha", "admin","admin_rule", "plugins","user","general_config","general_category"]
+
+API_ADMIN_STR=/api
+SECRET_KEY=$(openssl rand -hex 32)
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=10080
+
+# 缓存类型配置：simple（系统内存缓存）或 redis（Redis缓存）
+CACHE_TYPE=simple
+
+# Redis缓存
+REDIS_URL=redis://localhost:6379/0
+
+BABEL_DEFAULT_LOCALE=en
+
+# 插件配置
+GENERATOR_ENABLED=true
+
+# 最大文件大小（单位：字节）
+MAX_FILE_SIZE=10485760
+
+# 允许的文件扩展名，多个用逗号分隔
+ALLOWED_EXTENSIONS=["jpg","png","gif","txt","pdf","webp"]
+
+# 文件保存目录
+UPLOAD_DIR=./uploads
+
+# 插件目录
+PLUGINS_DIR=./plugins
+
+# CORS 配置
+ALLOW_ORIGINS=["http://localhost:5173"]
+ALLOW_CREDENTIALS=true
+ALLOW_METHODS=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
+ALLOW_HEADERS=["*", "X-Captcha-Id"]
+EXPOSE_HEADERS=["X-Captcha-Id"]
+
+# Swagger UI 配置
+SWAGGER_CSS_URL=https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.9.0/swagger-ui.css
+SWAGGER_FAVICON_URL=https://fastapi.tiangolo.com/img/favicon.png
+SWAGGER_BUNDLE_JS_URLS=["https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.9.0/swagger-ui-bundle.js", "https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"]
+SWAGGER_PRESET_JS_URLS=["https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.9.0/swagger-ui-standalone-preset.js", "https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"]
+SWAGGER_LOADING_TEXT=正在加载 API 文档...
+SWAGGER_ERROR_MESSAGE=无法加载 API 文档资源。请检查网络连接或使用 OpenAPI JSON 文件
+ENVEOF
+fi
+
+# 更新 SECRET_KEY
+echo "更新 SECRET_KEY..."
+sed -i.bak "s/^SECRET_KEY=.*/SECRET_KEY=$(openssl rand -hex 32)/" .env
+
+# 更新 CORS 配置，确保包含部署域名
+echo "更新 CORS 配置..."
+sed -i.bak "s|^ALLOW_ORIGINS=.*|ALLOW_ORIGINS=[\"http://localhost:5173\", \"http://127.0.0.1:5173\", \"http://$domain_only\",\"https://$domain_only\"]|" .env
+
+# 根据数据库类型更新配置
 if [ "$db_type" = "mysql" ]; then
-    cat > .env << EOF
-# 项目基本配置
-PROJECT_NAME=Zayum Admin
-TIMEZONE=Asia/Shanghai
-
-#系统路由
-ARROW_ROUTES=["auth", "captcha", "admin","admin_rule", "plugins","user","general_config","general_category"]
-
-API_ADMIN_STR=/api
-SECRET_KEY=$(openssl rand -hex 32)
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=10080
-REDIS_URL=redis://localhost:6379/0
-
-BABEL_DEFAULT_LOCALE=en
-
-# MySQL 数据库配置
-MYSQL_USER=$db_user
-MYSQL_PASSWORD=$db_password
-MYSQL_DB=$db_name
-MYSQL_HOST=$db_host
-MYSQL_PORT=$db_port
-
-# 插件配置
-GENERATOR_ENABLED=true
-
-# 最大文件大小（单位：字节）
-MAX_FILE_SIZE=10485760
-
-# 允许的文件扩展名，多个用逗号分隔
-ALLOWED_EXTENSIONS=["jpg","png","gif","txt","pdf","webp"]
-
-# 文件保存目录
-UPLOAD_DIR=./uploads
-
-# 插件目录
-PLUGINS_DIR=./plugins
-
-# CORS 配置
-ALLOW_ORIGINS=["http://localhost:5173", "http://127.0.0.1:5173", "http://$system_domain","https://$system_domain"]
-ALLOW_CREDENTIALS=true
-ALLOW_METHODS=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
-ALLOW_HEADERS=["*", "X-Captcha-Id"]
-EXPOSE_HEADERS=["X-Captcha-Id"]
-
-# Swagger UI 配置
-SWAGGER_CSS_URL=https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.9.0/swagger-ui.css
-SWAGGER_FAVICON_URL=https://fastapi.tiangolo.com/img/favicon.png
-SWAGGER_BUNDLE_JS_URLS=["https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.9.0/swagger-ui-bundle.js", "https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"]
-SWAGGER_PRESET_JS_URLS=["https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.9.0/swagger-ui-standalone-preset.js", "https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"]
-SWAGGER_LOADING_TEXT=正在加载 API 文档...
-SWAGGER_ERROR_MESSAGE=无法加载 API 文档资源。请检查网络连接或使用 OpenAPI JSON 文件
-EOF
-
+    # 更新 MySQL 配置
+    sed -i.bak "s/^MYSQL_USER=.*/MYSQL_USER=$db_user/" .env
+    sed -i.bak "s/^MYSQL_PASSWORD=.*/MYSQL_PASSWORD=$db_password/" .env
+    sed -i.bak "s/^MYSQL_DB=.*/MYSQL_DB=$db_name/" .env
+    sed -i.bak "s/^MYSQL_HOST=.*/MYSQL_HOST=$db_host/" .env
+    sed -i.bak "s/^MYSQL_PORT=.*/MYSQL_PORT=$db_port/" .env
+    
+    # 清理可能的其他数据库配置
+    sed -i.bak "/^POSTGRES_/d" .env
+    sed -i.bak "/^SQLITE_DB=/d" .env
+    
+    echo "✅ MySQL .env 配置文件已创建"
+    
 elif [ "$db_type" = "postgresql" ]; then
-    cat > .env << EOF
-# 项目基本配置
-PROJECT_NAME=Zayum Admin
-TIMEZONE=Asia/Shanghai
-
-#系统路由
-ARROW_ROUTES=["auth", "captcha", "admin","admin_rule", "plugins","user","general_config","general_category"]
-
-API_ADMIN_STR=/api
-SECRET_KEY=$(openssl rand -hex 32)
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=10080
-REDIS_URL=redis://localhost:6379/0
-
-BABEL_DEFAULT_LOCALE=en
-
-# PostgreSQL 数据库配置
-POSTGRES_USER=$db_user
-POSTGRES_PASSWORD=$db_password
-POSTGRES_DB=$db_name
-POSTGRES_HOST=$db_host
-POSTGRES_PORT=$db_port
-
-# 插件配置
-GENERATOR_ENABLED=true
-
-# 最大文件大小（单位：字节）
-MAX_FILE_SIZE=10485760
-
-# 允许的文件扩展名，多个用逗号分隔
-ALLOWED_EXTENSIONS=["jpg","png","gif","txt","pdf","webp"]
-
-# 文件保存目录
-UPLOAD_DIR=./uploads
-
-# 插件目录
-PLUGINS_DIR=./plugins
-
-# CORS 配置
-ALLOW_ORIGINS=["http://localhost:5173", "http://127.0.0.1:5173", "http://$system_domain","https://$system_domain"]
-ALLOW_CREDENTIALS=true
-ALLOW_METHODS=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
-ALLOW_HEADERS=["*", "X-Captcha-Id"]
-EXPOSE_HEADERS=["X-Captcha-Id"]
-
-# Swagger UI 配置
-SWAGGER_CSS_URL=https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.9.0/swagger-ui.css
-SWAGGER_FAVICON_URL=https://fastapi.tiangolo.com/img/favicon.png
-SWAGGER_BUNDLE_JS_URLS=["https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.9.0/swagger-ui-bundle.js", "https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"]
-SWAGGER_PRESET_JS_URLS=["https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.9.0/swagger-ui-standalone-preset.js", "https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"]
-SWAGGER_LOADING_TEXT=正在加载 API 文档...
-SWAGGER_ERROR_MESSAGE=无法加载 API 文档资源。请检查网络连接或使用 OpenAPI JSON 文件
-EOF
-
+    # 更新 PostgreSQL 配置
+    # 先删除可能的现有配置
+    sed -i.bak "/^POSTGRES_USER=/d" .env
+    sed -i.bak "/^POSTGRES_PASSWORD=/d" .env
+    sed -i.bak "/^POSTGRES_DB=/d" .env
+    sed -i.bak "/^POSTGRES_HOST=/d" .env
+    sed -i.bak "/^POSTGRES_PORT=/d" .env
+    
+    # 添加新的配置
+    echo "POSTGRES_USER=$db_user" >> .env
+    echo "POSTGRES_PASSWORD=$db_password" >> .env
+    echo "POSTGRES_DB=$db_name" >> .env
+    echo "POSTGRES_HOST=$db_host" >> .env
+    echo "POSTGRES_PORT=$db_port" >> .env
+    
+    # 清理可能的其他数据库配置
+    sed -i.bak "/^MYSQL_/d" .env
+    sed -i.bak "/^SQLITE_DB=/d" .env
+    
+    echo "✅ PostgreSQL .env 配置文件已创建"
+    
 else
     # SQLite 配置
-    cat > .env << EOF
-# 项目基本配置
-PROJECT_NAME=Zayum Admin
-TIMEZONE=Asia/Shanghai
-
-#系统路由
-ARROW_ROUTES=["auth", "captcha", "admin","admin_rule", "plugins","user","general_config","general_category"]
-
-API_ADMIN_STR=/api
-SECRET_KEY=$(openssl rand -hex 32)
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=10080
-REDIS_URL=redis://localhost:6379/0
-
-BABEL_DEFAULT_LOCALE=en
-
-# SQLite 数据库配置
-SQLITE_DB=$db_file
-
-# 插件配置
-GENERATOR_ENABLED=true
-
-# 最大文件大小（单位：字节）
-MAX_FILE_SIZE=10485760
-
-# 允许的文件扩展名，多个用逗号分隔
-ALLOWED_EXTENSIONS=["jpg","png","gif","txt","pdf","webp"]
-
-# 文件保存目录
-UPLOAD_DIR=./uploads
-
-# 插件目录
-PLUGINS_DIR=./plugins
-
-# CORS 配置
-ALLOW_ORIGINS=["http://localhost:5173", "http://127.0.0.1:5173", "http://$system_domain","https://$system_domain"]
-ALLOW_CREDENTIALS=true
-ALLOW_METHODS=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
-ALLOW_HEADERS=["*", "X-Captcha-Id"]
-EXPOSE_HEADERS=["X-Captcha-Id"]
-
-# Swagger UI 配置
-SWAGGER_CSS_URL=https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.9.0/swagger-ui.css
-SWAGGER_FAVICON_URL=https://fastapi.tiangolo.com/img/favicon.png
-SWAGGER_BUNDLE_JS_URLS=["https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.9.0/swagger-ui-bundle.js", "https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"]
-SWAGGER_PRESET_JS_URLS=["https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.9.0/swagger-ui-standalone-preset.js", "https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"]
-SWAGGER_LOADING_TEXT=正在加载 API 文档...
-SWAGGER_ERROR_MESSAGE=无法加载 API 文档资源。请检查网络连接或使用 OpenAPI JSON 文件
-EOF
+    # 先删除可能的现有配置
+    sed -i.bak "/^SQLITE_DB=/d" .env
+    
+    # 添加新的配置
+    echo "SQLITE_DB=$db_file" >> .env
+    
+    # 清理可能的其他数据库配置
+    sed -i.bak "/^MYSQL_/d" .env
+    sed -i.bak "/^POSTGRES_/d" .env
+    
+    echo "✅ SQLite .env 配置文件已创建"
 fi
+
+# 清理备份文件
+rm -f .env.bak
 
 echo "✅ .env 配置文件已创建"
 

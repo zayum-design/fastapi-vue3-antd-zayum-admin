@@ -169,6 +169,71 @@ npm run dev</code></pre>
           </div>
         </a-card>
       </div>
+ 
+      <div class="container mx-auto px-4 flex flex-col items-center mt-6">
+        <a-card class="w-full max-w-3xl">
+          <div class="mb-6">
+            <h3 class="text-xl font-semibold mb-4 text-gray-800">使用 deploy.sh 脚本快速部署</h3>
+            <p class="text-gray-600 mb-4">
+              我们提供了自动化部署脚本，支持多种部署模式，简化部署流程：
+            </p>
+            <div class="mb-6">
+              <h4 class="text-lg font-semibold mb-2 text-gray-700">完整部署（后端 + 前端）</h4>
+              <pre class="bg-gray-800 text-gray-100 p-4 rounded-md overflow-x-auto"><code># 完整部署系统
+./deploy.sh --all
+
+# 或使用交互模式
+./deploy.sh</code></pre>
+            </div>
+            <div class="mb-6">
+              <h4 class="text-lg font-semibold mb-2 text-gray-700">单独部署</h4>
+              <pre class="bg-gray-800 text-gray-100 p-4 rounded-md overflow-x-auto"><code># 仅部署后端
+./deploy.sh --backend
+
+# 仅部署前端
+./deploy.sh --frontend</code></pre>
+            </div>
+            <div class="mb-6">
+              <h4 class="text-lg font-semibold mb-2 text-gray-700">其他选项</h4>
+              <pre class="bg-gray-800 text-gray-100 p-4 rounded-md overflow-x-auto"><code># 显示帮助信息
+./deploy.sh --help
+
+# 显示版本信息
+./deploy.sh --version
+
+# 使用模块化部署系统（默认）
+./deploy.sh --modular
+
+# 使用原始部署脚本
+./deploy.sh --original</code></pre>
+            </div>
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 class="text-lg font-semibold mb-2 text-blue-800">部署说明</h4>
+              <ul class="text-gray-700 space-y-2">
+                <li>• 确保脚本有执行权限：<code class="bg-gray-200 px-1 rounded">chmod +x deploy.sh</code></li>
+                <li>• 脚本会自动检查系统环境并安装必要的依赖</li>
+                <li>• 支持交互式选择部署模式，适合新手使用</li>
+                <li>• 模块化设计，便于维护和扩展</li>
+                <li>• 提供详细的日志输出，便于排查问题</li>
+              </ul>
+            </div>
+          </div>
+          <div class="mt-6">
+            <h3 class="text-xl font-semibold mb-4 text-gray-800">Docker 部署（可选）</h3>
+            <p class="text-gray-600 mb-4">
+              对于生产环境，我们推荐使用 Docker 进行部署：
+            </p>
+            <pre class="bg-gray-800 text-gray-100 p-4 rounded-md overflow-x-auto"><code># 使用 Docker Compose 启动所有服务
+docker-compose up -d
+
+# 查看服务状态
+docker-compose ps
+
+# 停止服务
+docker-compose down</code></pre>
+          </div>
+        </a-card>
+      </div>
     </a-layout-content>
 
     <!-- 页脚 -->

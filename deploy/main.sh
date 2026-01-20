@@ -69,14 +69,33 @@ main() {
     # 解析命令行参数
     DEPLOY_MODE=$(parse_arguments "$@")
     
+    # 交互式选择标志
+    local interactive=false
+    
     # 如果没有指定部署模式，则交互式选择
     if [ -z "$DEPLOY_MODE" ]; then
+        interactive=true
         DEPLOY_MODE=$(select_deploy_mode)
     fi
 
-    echo -e "${BLUE}========================================${NC}"
-    echo -e "${BLUE}    Zayum Admin 部署脚本${NC}"
-    echo -e "${BLUE}========================================${NC}"
+    # 处理特殊返回值
+    if [ "$DEPLOY_MODE" = "__SHOW_HELP__" ]; then
+        show_help
+        exit 0
+    fi
+    
+    if [ "$DEPLOY_MODE" = "__EXIT__" ]; then
+        echo -e "${YELLOW}退出部署${NC}"
+        exit 0
+    fi
+
+    # 只在非交互式模式下显示标题
+    if [ "$interactive" = false ]; then
+        echo -e "${BLUE}========================================${NC}"
+        echo -e "${BLUE}    Zayum Admin 部署脚本${NC}"
+        echo -e "${BLUE}========================================${NC}"
+    fi
+    
     echo -e "${YELLOW}部署模式: ${DEPLOY_MODE}${NC}"
     echo ""
     
