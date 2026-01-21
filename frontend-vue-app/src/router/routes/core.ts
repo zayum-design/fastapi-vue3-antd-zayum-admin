@@ -1,6 +1,6 @@
 import type { RouteRecordRaw } from "vue-router";
 
-import { DEFAULT_ADMIN_PATH, ADMIN_LOGIN_PATH,DEFAULT_HOME_PATH } from "@/constants";
+import { DEFAULT_ADMIN_PATH, ADMIN_LOGIN_PATH, DEFAULT_HOME_PATH, ADMIN_ROUTE_PREFIX, USER_ROUTE_PREFIX, WEB_ROUTE_PREFIX } from "@/constants";
 
 import { AuthPageLayout, BasicLayout, FullLayout } from "@/layouts";
 
@@ -71,7 +71,7 @@ const coreRoutes: RouteRecordRaw[] = [
       title: "Home",
     },
     name: "web",
-    path: "/web",
+    path: `/${WEB_ROUTE_PREFIX}`,
     children: [
       {
         name: "Home",
@@ -89,7 +89,7 @@ const coreRoutes: RouteRecordRaw[] = [
       title: $t("user.user"),
     },
     name: "User",
-    path: "/user",
+    path: `/${USER_ROUTE_PREFIX}`,
     component: UserPageLayout,
     children: [
       {
@@ -143,7 +143,7 @@ const coreRoutes: RouteRecordRaw[] = [
       title: $t("user.center"),
     },
     name: "UserCenter",
-    path: "/user",
+    path: `/${USER_ROUTE_PREFIX}`,
     component: UserBasicLayout,
     children: [
       {
@@ -173,7 +173,7 @@ const coreRoutes: RouteRecordRaw[] = [
       title: "Admin",
     },
     name: "admin",
-    path: "/admin",
+    path: `/${ADMIN_ROUTE_PREFIX}`,
     redirect: DEFAULT_ADMIN_PATH,
     children: [],
   },
@@ -184,7 +184,7 @@ const coreRoutes: RouteRecordRaw[] = [
       title: "Authentication",
     },
     name: "Authentication",
-    path: "/admin",
+    path: `/${ADMIN_ROUTE_PREFIX}`,
     redirect: ADMIN_LOGIN_PATH,
     children: [
       {

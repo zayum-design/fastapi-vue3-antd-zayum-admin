@@ -1,6 +1,7 @@
 import type { RouteRecordRaw } from "vue-router";
 
 import { $t } from "@/locales";
+import { USER_ROUTE_PREFIX } from "@/constants";
 
 const userRoutes: RouteRecordRaw[] = [
   {
@@ -9,7 +10,7 @@ const userRoutes: RouteRecordRaw[] = [
       title: $t("user.user"),
     },
     name: "User",
-    path: "/user",
+    path: `/${USER_ROUTE_PREFIX}`,
     children: [
       {
         name: "UserLogin",
@@ -56,7 +57,7 @@ const userRoutes: RouteRecordRaw[] = [
       },
       {
         name: "UserManage",
-        path: "/user/user",
+        path: `/${USER_ROUTE_PREFIX}/user`,
         component: () => import("@/views/_core/user/user.vue"),
         meta: {
           icon: "lucide:area-chart",
@@ -65,7 +66,7 @@ const userRoutes: RouteRecordRaw[] = [
       },
       {
         name: "UserGroup",
-        path: "/user/group",
+        path: `/${USER_ROUTE_PREFIX}/group`,
         component: () => import("@/views/_core/user/group.vue"),
         meta: {
           icon: "lucide:area-chart",
@@ -74,7 +75,7 @@ const userRoutes: RouteRecordRaw[] = [
       },
       {
         name: "UserRule",
-        path: "/user/rule",
+        path: `/${USER_ROUTE_PREFIX}/rule`,
         component: () => import("@/views/_core/user/rule.vue"),
         meta: {
           icon: "lucide:area-chart",

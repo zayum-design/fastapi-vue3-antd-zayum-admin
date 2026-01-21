@@ -11,18 +11,18 @@
           <a-menu-item key="home" class="hover:text-white-200 bg-transparent">首页</a-menu-item>
           <a-menu-item key="features" class="hover:text-white-200 bg-transparent">功能</a-menu-item>
           <a-menu-item key="demo" class="hover:text-white-200 bg-transparent">
-            <a href="http://demo.zayumadmin.com" target="_blank">Demo</a>
+            <a href="https://demo.admin.zayum.com" target="_blank">Demo</a>
           </a-menu-item>
           <a-menu-item key="docs" class="hover:text-white-200 bg-transparent">
-            <a href="http://doc.zayumadmin.com" target="_blank">文档</a>
+            <a href="http://doc.admin.zayum.com" target="_blank">文档</a>
           </a-menu-item>
           <a-menu-item key="github" class="hover:text-white-200 bg-transparent">
             <a href="https://github.com/zayum-design/fastapi-vue3-antd-zayum-admin" target="_blank">GitHub</a>
           </a-menu-item>
         </a-menu>
         <a-space wrap>
-          <a-button type="primary" @click="$router.push('/user/login')" class="h-10">登录</a-button>
-          <a-button @click="$router.push('/register')" class="h-10 ml-4">免费试用</a-button>
+          <a-button type="primary" @click="$router.push(`/${userRoutePrefix}/login`)" class="h-10">登录</a-button>
+          <a-button @click="$router.push(`/${adminRoutePrefix}`)" class="h-10 ml-4">后台登录</a-button>
         </a-space>
       </div>
     </a-layout-header>
@@ -285,6 +285,7 @@ import {
   DeploymentUnitOutlined
 } from '@ant-design/icons-vue'
 import { preferences } from '@/_core/preferences'
+import { ADMIN_ROUTE_PREFIX, USER_ROUTE_PREFIX } from '@/constants'
 
 export default defineComponent({
   name: 'HomePage',
@@ -321,7 +322,9 @@ export default defineComponent({
 
     return {
       header,
-      preferences
+      preferences,
+      adminRoutePrefix: ADMIN_ROUTE_PREFIX,
+      userRoutePrefix: USER_ROUTE_PREFIX
     }
   }
 })

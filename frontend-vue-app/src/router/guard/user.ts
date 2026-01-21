@@ -1,6 +1,6 @@
 import type { Router } from "vue-router";
 import type { RouteRecordStringComponent } from '@/_core/types';
-import { USER_LOGIN_PATH, DEFAULT_USER_PATH } from "@/constants";
+import { USER_LOGIN_PATH, DEFAULT_USER_PATH, USER_ROUTE_PREFIX } from "@/constants";
 import { useUserAccessStore } from "@/stores/user/access";
 import { useUserAuthStore } from "@/stores/user/auth";
 import { generateAccess } from "../access";
@@ -40,7 +40,7 @@ export function setupUserGuard(router: Router) {
     }
 
     // 非用户路由直接放行
-    if (!to.path.startsWith('/user')) {
+    if (!to.path.startsWith(`/${USER_ROUTE_PREFIX}`)) {
       return true;
     }
 

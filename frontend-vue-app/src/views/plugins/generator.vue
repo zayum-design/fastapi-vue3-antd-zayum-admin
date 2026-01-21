@@ -175,11 +175,11 @@ const showGeneratedCode = computed(() => !!generatedCode.value);
 const fetchTables = async () => {
   try {
     const response = await requestClient.get<string[]>(
-      `${import.meta.env.VITE_GLOB_URL}/plugins/generator/tables`
+      `${import.meta.env.VITE_GLOB_API_URL}/plugins/generator/tables`
     );
     tables.value = response.map(table => ({ label: table, value: table }));
   } catch (error) {
-    console.error("获取表名列表失败:", error);
+    console.error("获取表名列表失败:==="+`${import.meta.env.VITE_GLOB_API_URL}/plugins/generator/tables`, error);
   }
 };
 
@@ -197,7 +197,7 @@ const updateSelectedFieldsAndCode = async (isInitialLoadForTable: boolean = fals
       : operationPermissions.value.join(",");
 
     const response = await requestClient.get<GeneratedCodeResponse>( // Use the interface
-      `${import.meta.env.VITE_GLOB_URL}/plugins/generator/code/${selectedTable.value}`,
+      `${import.meta.env.VITE_GLOB_API_URL}/plugins/generator/code/${selectedTable.value}`,
       {
         params: {
           fields: fieldsParam,

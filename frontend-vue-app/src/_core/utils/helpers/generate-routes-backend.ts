@@ -11,6 +11,9 @@ import type {
 // 引入工具函数 mapTree，用于对树形结构数据进行遍历和映射转换
 import { mapTree } from '@/_core/shared/utils';
 
+// 引入路由前缀常量
+import { ADMIN_ROUTE_PREFIX } from '@/constants';
+
 /**
  * 动态生成路由 - 后端方式
  * 
@@ -72,6 +75,7 @@ async function generateRoutesByBackend(
  * 3. 根据节点中的 component 属性判断：
  *    - 若 component 在 layoutMap 中存在，则替换为对应的布局组件；
  *    - 否则，视为普通页面组件，根据规范化的路径从 pageMap 中查找对应组件。
+ * 4. 为路由路径添加 ADMIN_ROUTE_PREFIX 前缀。
  *
  * @param routes - 后端返回的字符串形式的路由组件数组
  * @param layoutMap - 布局组件映射对象，用于将路由中的 component 转换为实际布局组件
@@ -88,11 +92,23 @@ function convertRoutes(
     // 将当前节点强制转换为 RouteRecordRaw 类型，以便后续赋值操作
     const route = node as unknown as RouteRecordRaw;
     // 从节点中解构出 component 和 name 属性
-    const { component, name } = node;
+    const { component, name, path } = node;
 
     // 如果路由节点缺少必需的 name 属性，打印错误信息，提示开发者该路由配置存在问题
     if (!name) {
       console.error('route name is required', route);
+    }
+
+    // 处理路由路径：添加 ADMIN_ROUTE_PREFIX 前缀
+    if (path) {
+      // 确保路径以 / 开头
+      const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+      // 添加前缀，避免重复添加
+      if (!normalizedPath.startsWith(`/${ADMIN_ROUTE_PREFIX}/`)) {
+        route.path = `/${ADMIN_ROUTE_PREFIX}${normalizedPath}`;
+      } else {
+        route.path = normalizedPath;
+      }
     }
 
     // 如果节点的 component 属性存在，并且在布局组件映射 layoutMap 中存在对应的组件

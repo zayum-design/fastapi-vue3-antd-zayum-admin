@@ -228,20 +228,6 @@ const handleSubmit = async (formData: any) => {
       :loading="authStore.loginLoading"
       @submit="handleSubmit"
     />
-
-    <div v-if="activeTab !== 'social'" class="social-login">
-      <ZayumDivider>{{ $t('authentication.socialLogin') }}</ZayumDivider>
-      <div class="social-buttons">
-        <ZayumButton @click="activeTab = 'social'">
-          <template #icon><WechatOutlined /></template>
-          {{ $t('authentication.wechatLogin') }}
-        </ZayumButton>
-        <ZayumButton @click="activeTab = 'social'">
-          <template #icon><QqOutlined /></template>
-          {{ $t('authentication.qqLogin') }}
-        </ZayumButton>
-      </div>
-    </div>
   </div>
 </template>
 
