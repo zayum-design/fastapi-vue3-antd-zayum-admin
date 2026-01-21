@@ -27,8 +27,10 @@ FRONTEND_MODE_BUILD="build"
 # 默认域名配置
 DEFAULT_DEV_ACCESS_DOMAIN="localhost:5666"
 DEFAULT_DEV_API_DOMAIN="localhost:8000"
+DEFAULT_DEV_ATTACHMENT_DOMAIN="localhost:8000/api/common"
 DEFAULT_PROD_ACCESS_DOMAIN="demo.zayum.com"
 DEFAULT_PROD_API_DOMAIN="api.demo.zayum.com"
+DEFAULT_PROD_ATTACHMENT_DOMAIN="https://api.demo.zayum.com/api/common"
 
 # 获取时间戳
 get_timestamp() {

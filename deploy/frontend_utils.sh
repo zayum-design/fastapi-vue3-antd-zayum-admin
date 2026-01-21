@@ -40,15 +40,18 @@ configure_domain_interactive() {
     local mode="$1"  # dev 或 prod
     local default_access_domain=""
     local default_api_domain=""
+    local default_attachment_domain=""
     local protocol="http"
     
     if [ "$mode" = "prod" ]; then
         default_access_domain="$DEFAULT_PROD_ACCESS_DOMAIN"
         default_api_domain="$DEFAULT_PROD_API_DOMAIN"
+        default_attachment_domain="$DEFAULT_PROD_ATTACHMENT_DOMAIN"
         protocol="https"
     else
         default_access_domain="$DEFAULT_DEV_ACCESS_DOMAIN"
         default_api_domain="$DEFAULT_DEV_API_DOMAIN"
+        default_attachment_domain="$DEFAULT_DEV_ATTACHMENT_DOMAIN"
         protocol="http"
     fi
     
@@ -107,8 +110,33 @@ configure_domain_interactive() {
     echo -e "${GREEN}规范化后的 API 域名: $api_domain${NC}" >&2
     echo "" >&2
     
+    # 配置附件域名（用于头像、上传文件等）
+    echo -e "${YELLOW}3. 附件域名 (VITE_GLOB_ATTACHMENT_URL) - 用于头像、上传文件等${NC}" >&2
+    echo -e "${YELLOW}默认值: ${default_attachment_domain}${NC}" >&2
+    echo -e "${YELLOW}提示: 可以输入完整 URL (如 ${protocol}://api.example.com/api/common) 或裸域名${NC}" >&2
+    echo "" >&2
+    
+    read -p "请输入附件域名 (直接回车使用默认值): " attachment_domain >&2
+    
+    if [ -z "$attachment_domain" ]; then
+        attachment_domain="$default_attachment_domain"
+        echo -e "${GREEN}使用默认附件域名: $attachment_domain${NC}" >&2
+    else
+        # 去除可能的前后空格
+        attachment_domain=$(echo "$attachment_domain" | xargs)
+        echo -e "${GREEN}使用自定义附件域名: $attachment_domain${NC}" >&2
+    fi
+    
+    # 规范化域名
+    if [[ ! "$attachment_domain" =~ ^https?:// ]]; then
+        attachment_domain="${protocol}://$attachment_domain"
+    fi
+    
+    echo -e "${GREEN}规范化后的附件域名: $attachment_domain${NC}" >&2
+    echo "" >&2
+    
     # 返回结果（只包含域名，不包含颜色代码）
-    echo "$access_domain $api_domain"
+    echo "$access_domain $api_domain $attachment_domain"
 }
 
 # 函数：更新环境变量文件
@@ -116,6 +144,7 @@ update_env_file() {
     local env_file="$1"
     local access_domain="$2"
     local api_domain="$3"
+    local attachment_domain="$4"
     
     # 创建临时文件
     local temp_file="${env_file}.tmp"
@@ -128,6 +157,7 @@ update_env_file() {
     # 检查是否已经包含正确的环境变量
     local url_found=false
     local api_found=false
+    local attachment_found=false
     
     # 读取文件并检查
     while IFS= read -r line; do
@@ -154,10 +184,20 @@ update_env_file() {
                 api_found=true
             fi
         fi
+        
+        # 检查 VITE_GLOB_ATTACHMENT_URL
+        if [[ "$line" =~ ^VITE_GLOB_ATTACHMENT_URL=(.*)$ ]]; then
+            local value="${BASH_REMATCH[1]}"
+            # 去除可能的引号和空格
+            value=$(echo "$value" | sed -e 's/^["'\'']//' -e 's/["'\'']$//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+            if [[ "$value" == "$attachment_domain" ]]; then
+                attachment_found=true
+            fi
+        fi
     done < "$env_file"
     
     # 如果环境变量已经正确设置，直接返回成功
-    if $url_found && $api_found; then
+    if $url_found && $api_found && $attachment_found; then
         echo -e "${GREEN}✅ 环境变量已正确配置${NC}"
         return 0
     fi
@@ -208,35 +248,72 @@ VITE_GLOB_API_URL='"${api_domain}"'
         echo "VITE_GLOB_API_URL=${api_domain}" >> "${temp_file}2"
     fi
     
+    # 处理附件 URL
+    grep -v "^VITE_GLOB_ATTACHMENT_URL=" "${temp_file}2" > "${temp_file}3"
+    
+    # 在适当的位置插入 VITE_GLOB_ATTACHMENT_URL
+    # 查找 "# 附件域名配置（用于头像、上传文件等）" 注释，并在其下一行插入
+    if grep -q "# 附件域名配置（用于头像、上传文件等）" "${temp_file}3"; then
+        # 使用 sed 在注释后插入
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS 系统
+            sed -i '' '/# 附件域名配置（用于头像、上传文件等）/a\
+VITE_GLOB_ATTACHMENT_URL='"${attachment_domain}"'
+' "${temp_file}3"
+        else
+            # Linux 和其他系统
+            sed -i '/# 附件域名配置（用于头像、上传文件等）/a\VITE_GLOB_ATTACHMENT_URL='"${attachment_domain}" "${temp_file}3"
+        fi
+    else
+        # 如果找不到注释，查找 "# API 配置" 注释，并在其下一行插入
+        if grep -q "# API 配置" "${temp_file}3"; then
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                # macOS 系统
+                sed -i '' '/# API 配置/a\
+# 附件域名配置（用于头像、上传文件等）
+VITE_GLOB_ATTACHMENT_URL='"${attachment_domain}"'
+' "${temp_file}3"
+            else
+                # Linux 和其他系统
+                sed -i '/# API 配置/a\# 附件域名配置（用于头像、上传文件等）\nVITE_GLOB_ATTACHMENT_URL='"${attachment_domain}" "${temp_file}3"
+            fi
+        else
+            # 如果找不到注释，直接追加
+            echo "" >> "${temp_file}3"
+            echo "# 附件域名配置（用于头像、上传文件等）" >> "${temp_file}3"
+            echo "VITE_GLOB_ATTACHMENT_URL=${attachment_domain}" >> "${temp_file}3"
+        fi
+    fi
+    
     # 确保路由前缀配置存在
     # 检查并添加 VITE_ADMIN_ROUTE_PREFIX
-    if ! grep -q "^VITE_ADMIN_ROUTE_PREFIX=" "${temp_file}2"; then
+    if ! grep -q "^VITE_ADMIN_ROUTE_PREFIX=" "${temp_file}3"; then
         # 查找 "# 路由配置" 注释，并在其下一行插入
-        if grep -q "# 路由配置" "${temp_file}2"; then
+        if grep -q "# 路由配置" "${temp_file}3"; then
             if [[ "$OSTYPE" == "darwin"* ]]; then
                 # macOS 系统
                 sed -i '' '/# 路由配置/a\
 VITE_ADMIN_ROUTE_PREFIX=admin
 VITE_USER_ROUTE_PREFIX=user
 VITE_WEB_ROUTE_PREFIX=web
-' "${temp_file}2"
+' "${temp_file}3"
             else
                 # Linux 和其他系统
-                sed -i '/# 路由配置/a\VITE_ADMIN_ROUTE_PREFIX=admin\nVITE_USER_ROUTE_PREFIX=user\nVITE_WEB_ROUTE_PREFIX=web' "${temp_file}2"
+                sed -i '/# 路由配置/a\VITE_ADMIN_ROUTE_PREFIX=admin\nVITE_USER_ROUTE_PREFIX=user\nVITE_WEB_ROUTE_PREFIX=web' "${temp_file}3"
             fi
         else
             # 如果找不到注释，直接追加
-            echo "" >> "${temp_file}2"
-            echo "# 路由配置" >> "${temp_file}2"
-            echo "VITE_ADMIN_ROUTE_PREFIX=admin" >> "${temp_file}2"
-            echo "VITE_USER_ROUTE_PREFIX=user" >> "${temp_file}2"
-            echo "VITE_WEB_ROUTE_PREFIX=web" >> "${temp_file}2"
+            echo "" >> "${temp_file}3"
+            echo "# 路由配置" >> "${temp_file}3"
+            echo "VITE_ADMIN_ROUTE_PREFIX=admin" >> "${temp_file}3"
+            echo "VITE_USER_ROUTE_PREFIX=user" >> "${temp_file}3"
+            echo "VITE_WEB_ROUTE_PREFIX=web" >> "${temp_file}3"
         fi
     fi
     
     # 替换原文件
-    mv "${temp_file}2" "$env_file"
-    rm -f "$temp_file"
+    mv "${temp_file}3" "$env_file"
+    rm -f "$temp_file" "${temp_file}2"
     
     # 确保环境变量文件有正确的权限
     chmod 644 "$env_file"
@@ -302,13 +379,15 @@ deploy_frontend() {
             domain_config=$(configure_domain_interactive "dev")
             # 使用更可靠的方法解析结果，避免awk处理特殊字符
             access_domain=$(echo "$domain_config" | cut -d' ' -f1)
-            api_domain=$(echo "$domain_config" | cut -d' ' -f2-)
+            api_domain=$(echo "$domain_config" | cut -d' ' -f2)
+            attachment_domain=$(echo "$domain_config" | cut -d' ' -f3)
             
             echo -e "${GREEN}使用访问域名: $access_domain${NC}"
             echo -e "${GREEN}使用 API 域名: $api_domain${NC}"
+            echo -e "${GREEN}使用附件域名: $attachment_domain${NC}"
             
             # 更新 .env.development 文件
-            if update_env_file ".env.development" "$access_domain" "$api_domain"; then
+            if update_env_file ".env.development" "$access_domain" "$api_domain" "$attachment_domain"; then
                 echo -e "${GREEN}✓ 开发环境配置完成${NC}"
             else
                 echo -e "${RED}✗ 开发环境配置失败${NC}"
@@ -340,13 +419,15 @@ deploy_frontend() {
             domain_config=$(configure_domain_interactive "prod")
             # 使用更可靠的方法解析结果，避免awk处理特殊字符
             access_domain=$(echo "$domain_config" | cut -d' ' -f1)
-            api_domain=$(echo "$domain_config" | cut -d' ' -f2-)
+            api_domain=$(echo "$domain_config" | cut -d' ' -f2)
+            attachment_domain=$(echo "$domain_config" | cut -d' ' -f3)
             
             echo -e "${GREEN}使用访问域名: $access_domain${NC}"
             echo -e "${GREEN}使用 API 域名: $api_domain${NC}"
+            echo -e "${GREEN}使用附件域名: $attachment_domain${NC}"
             
             # 更新 .env.production 文件
-            if update_env_file ".env.production" "$access_domain" "$api_domain"; then
+            if update_env_file ".env.production" "$access_domain" "$api_domain" "$attachment_domain"; then
                 echo -e "${GREEN}✓ 生产环境配置完成${NC}"
             else
                 echo -e "${RED}✗ 生产环境配置失败${NC}"
@@ -359,6 +440,7 @@ deploy_frontend() {
             # 设置环境变量，这样 start.sh 可以检测到已经配置
             export VITE_GLOB_URL="$access_domain"
             export VITE_GLOB_API_URL="$api_domain"
+            export VITE_GLOB_ATTACHMENT_URL="$attachment_domain"
             ./start.sh --prod
             ;;
         "$FRONTEND_MODE_BUILD")
@@ -381,13 +463,15 @@ deploy_frontend() {
             domain_config=$(configure_domain_interactive "prod")
             # 使用更可靠的方法解析结果，避免awk处理特殊字符
             access_domain=$(echo "$domain_config" | cut -d' ' -f1)
-            api_domain=$(echo "$domain_config" | cut -d' ' -f2-)
+            api_domain=$(echo "$domain_config" | cut -d' ' -f2)
+            attachment_domain=$(echo "$domain_config" | cut -d' ' -f3)
             
             echo -e "${GREEN}使用访问域名: $access_domain${NC}"
             echo -e "${GREEN}使用 API 域名: $api_domain${NC}"
+            echo -e "${GREEN}使用附件域名: $attachment_domain${NC}"
             
             # 更新 .env.production 文件
-            if update_env_file ".env.production" "$access_domain" "$api_domain"; then
+            if update_env_file ".env.production" "$access_domain" "$api_domain" "$attachment_domain"; then
                 echo -e "${GREEN}✓ 构建环境配置完成${NC}"
             else
                 echo -e "${RED}✗ 构建环境配置失败${NC}"
