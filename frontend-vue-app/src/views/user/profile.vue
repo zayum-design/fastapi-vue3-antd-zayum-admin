@@ -43,7 +43,7 @@
                   <a-flex gap="middle" vertical align="center">
                     <a-avatar
                       :size="128"
-                      :src="profile.avatar || '/uploads/avatar/avatar.png'"
+                      :src="displayAvatar(profile.avatar)"
                     ></a-avatar>
                     <a-button
                       @click="triggerAvatarUpload"
@@ -93,8 +93,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { message } from "ant-design-vue";
+import { useAppConfig } from "@/_core/hooks";
 import { getProfileApi } from "@/api/user/auth";
 import { saveProfileApi, uploadApi } from "@/api/user/profile";
+
+const { attachmentURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
 
 interface Profile {
   username: string;
@@ -209,6 +212,28 @@ function cancelCrop() {
   }
 }
 
+function displayAvatar(avatar: string): string {
+  const defaultAvatar = "/src/assets/avatar.png";
+  
+  // 如果头像为空或无效，使用默认头像
+  if (!avatar || avatar.trim() === "") {
+    return defaultAvatar;
+  }
+  
+  // 如果头像已经是完整 URL（http/https）或本地 assets 路径，直接返回
+  if (avatar.startsWith("http://") || avatar.startsWith("https://") || avatar.startsWith("/src/assets/")) {
+    return avatar;
+  }
+  
+  // 如果头像路径以 /uploads/ 开头，使用附件域名配置
+  if (avatar.startsWith("/uploads/")) {
+    return attachmentURL + avatar;
+  }
+  
+  // 否则，添加附件域名前缀
+  return attachmentURL + (avatar.startsWith("/") ? avatar : "/" + avatar);
+}
+
 async function saveProfile() {
   try {
     await form.value.validateFields();
@@ -221,7 +246,7 @@ async function saveProfile() {
       payload.email = profile.value.email;
       payload.mobile = profile.value.mobile;
     } else if (tab.value === "password") {
-      payload.password = profile.value.password || undefined;
+      payload.password = profile.value.password || "";
     } else if (tab.value === "avatar") {
       payload.avatar = profile.value.avatar;
     }

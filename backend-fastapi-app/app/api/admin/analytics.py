@@ -5,11 +5,12 @@
 """
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
+from collections import defaultdict
 import httpx
 import re
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import func, and_
+from sqlalchemy import func, and_, text
 from sqlalchemy.exc import OperationalError, InternalError
 
 from app.dependencies.database import get_db
@@ -129,7 +130,7 @@ def clear_analytics_cache_sync():
 
 def query_ip_location(ip_address: str) -> Optional[str]:
     """
-    使用百度API查询IP地址的地理位置信息
+    使用百度API查询IP地址的地理位置信息（带缓存优化）
     
     Args:
         ip_address: 要查询的IP地址
@@ -137,9 +138,12 @@ def query_ip_location(ip_address: str) -> Optional[str]:
     Returns:
         省份名称，如果查询失败则返回None
     """
+    cached_result = get_ip_location_cache_key(ip_address)
+    if cached_result:
+        return cached_result
+    
     try:
-        # 百度IP查询API
-        url = f"http://opendata.baidu.com/api.php"
+        url = "http://opendata.baidu.com/api.php"
         params = {
             "query": ip_address,
             "co": "",
@@ -147,46 +151,60 @@ def query_ip_location(ip_address: str) -> Optional[str]:
             "oe": "utf8"
         }
         
-        # 使用httpx发送请求
-        with httpx.Client(timeout=10.0) as client:
+        with httpx.Client(timeout=5.0) as client:
             response = client.get(url, params=params)
             response.raise_for_status()
-            
             data = response.json()
             
-            # 检查API响应状态
             if data.get("status") == "0" and data.get("data"):
                 location_info = data["data"][0].get("location", "")
-                
-                # 从位置信息中提取省份
-                # 格式示例: "广东省广州市 移动" 或 "美国"
                 if location_info:
-                    # 提取省份（第一个中文字符串）
                     match = re.search(r'^([\u4e00-\u9fa5]+省|[\u4e00-\u9fa5]+市|[\u4e00-\u9fa5]+自治区|[\u4e00-\u9fa5]+)', location_info)
                     if match:
                         province = match.group(1)
-                        # 如果是单个中文字符（如"美国"），直接返回
-                        if len(province) <= 3:
-                            return province
-                        # 如果是中国省份，确保格式正确
-                        elif province.endswith(('省', '市', '自治区')):
+                        if len(province) <= 3 or province.endswith(('省', '市', '自治区')):
+                            set_ip_location_cache(ip_address, province)
                             return province
                 
                 logger.warning(f"IP查询API返回的位置信息格式异常: {location_info}")
-                return None
             else:
                 logger.warning(f"IP查询API返回错误状态: {data.get('status')}")
-                return None
+            return None
                 
     except httpx.RequestError as e:
         logger.error(f"IP查询请求失败: {e}")
-        return None
     except httpx.HTTPStatusError as e:
         logger.error(f"IP查询HTTP错误: {e}")
-        return None
     except Exception as e:
         logger.error(f"IP查询发生未知错误: {e}")
-        return None
+    
+    return None
+
+
+# IP地理位置缓存（避免重复查询外部API）
+_ip_location_cache: Dict[str, tuple] = {}
+_ip_cache_expire_time = 3600  # 缓存1小时
+_ip_cache_timestamp: float = 0.0
+
+
+def get_ip_location_cache_key(ip: str) -> Optional[str]:
+    """从缓存获取IP地理位置"""
+    if ip in _ip_location_cache:
+        cached_data, cache_time = _ip_location_cache[ip]
+        if datetime.now().timestamp() - cache_time < _ip_cache_expire_time:
+            return cached_data
+    return None
+
+
+def set_ip_location_cache(ip: str, location: str) -> None:
+    """设置IP地理位置缓存"""
+    _ip_location_cache[ip] = (location, datetime.now().timestamp())
+
+
+def clear_ip_location_cache() -> None:
+    """清空IP地理位置缓存"""
+    _ip_location_cache.clear()
+    _ip_cache_timestamp = datetime.now().timestamp()
 
 
 def extract_province_from_ip(ip_address: str) -> str:
@@ -381,10 +399,14 @@ def get_analytics_trends(
         ).group_by(func.date(SysUser.created_at)).all()
         
         # 构建日期到计数的映射
-        user_trends_map = {
-            row.date.strftime("%Y-%m-%d"): int(row.count) if row.count is not None else 0
-            for row in user_trends_query
-        }
+        user_trends_map = {}
+        for row in user_trends_query:
+            date_key = row.date.strftime("%Y-%m-%d")
+            count_val = row[1] if len(row) > 1 else 0
+            try:
+                user_trends_map[date_key] = int(count_val) if count_val is not None else 0
+            except (ValueError, TypeError):
+                user_trends_map[date_key] = 0
         
         # 生成完整的日期范围数据
         user_trends = []
@@ -410,10 +432,14 @@ def get_analytics_trends(
         ).group_by(func.date(SysAdminLog.created_at)).all()
         
         # 构建日期到计数的映射
-        visit_trends_map = {
-            row.date.strftime("%Y-%m-%d"): int(row.count) if row.count is not None else 0
-            for row in visit_trends_query
-        }
+        visit_trends_map = {}
+        for row in visit_trends_query:
+            date_key = row.date.strftime("%Y-%m-%d")
+            count_val = row[1] if len(row) > 1 else 0
+            try:
+                visit_trends_map[date_key] = int(count_val) if count_val is not None else 0
+            except (ValueError, TypeError):
+                visit_trends_map[date_key] = 0
         
         # 生成完整的日期范围数据
         visit_trends = []
@@ -502,12 +528,16 @@ def get_analytics_visits(
         visits_data = []
         total_visits_count = 0
         for visit in visits_by_time:
-            visit_count = int(visit.count) if visit.count is not None else 0
+            visit_count = visit[1] if len(visit) > 1 else 0
+            try:
+                count_int = int(visit_count) if visit_count is not None else 0
+            except (ValueError, TypeError):
+                count_int = 0
             visits_data.append({
                 "time": visit.time_group,
-                "count": visit_count
+                "count": count_int
             })
-            total_visits_count += visit_count
+            total_visits_count += count_int
         
         # 按操作类型查询访问数据
         visits_by_action = db.query(
@@ -627,7 +657,7 @@ def get_monthly_login_stats(
     db: Session = Depends(get_db)
 ):
     """
-    获取月度用户登录统计数据
+    获取月度用户登录统计数据（优化版本：单次查询）
     统计指定月数内每个月的唯一登录用户数量
     
     Args:
@@ -639,17 +669,15 @@ def get_monthly_login_stats(
     """
     cache_params = {"months": months}
     
-    # 尝试从缓存获取数据
     cached_data = get_cached_analytics_data_sync("monthly-logins", cache_params)
     if cached_data:
         return success_response(cached_data)
     
     try:
         end_date = datetime.now()
-        monthly_logins = []
+        month_ranges = []
         
         for i in range(months):
-            # 计算月份开始和结束
             target_month = end_date.month - i
             target_year = end_date.year
             
@@ -663,27 +691,31 @@ def get_monthly_login_stats(
             else:
                 month_end = datetime(target_year, target_month + 1, 1) - timedelta(days=1)
             
-            # 统计唯一登录用户数
-            login_count = db.query(SysUser.id).filter(
-                and_(
-                    SysUser.login_time >= month_start,
-                    SysUser.login_time <= month_end,
-                    SysUser.login_time.isnot(None)
-                )
-            ).distinct().count()
-            
-            monthly_logins.append({
+            month_ranges.append({
                 "month": f"{target_year}-{target_month:02d}",
-                "count": login_count or 0
+                "start": month_start,
+                "end": month_end
             })
         
-        # 按时间顺序排序
-        monthly_logins.reverse()
+        month_ranges.reverse()
         
-        # 缓存结果
+        monthly_logins = []
+        for month_range in month_ranges:
+            login_count = db.query(func.count(func.distinct(SysUser.id))).filter(
+                and_(
+                    SysUser.login_time >= month_range["start"],
+                    SysUser.login_time <= month_range["end"],
+                    SysUser.login_time.isnot(None)
+                )
+            ).scalar() or 0
+            
+            monthly_logins.append({
+                "month": month_range["month"],
+                "count": login_count
+            })
+        
         cache_analytics_data_sync("monthly-logins", cache_params, monthly_logins)
         
-        # 将月度登录数据保存到数据库
         summary_data = {
             "total_logins": sum(login["count"] for login in monthly_logins)
         }
@@ -700,7 +732,7 @@ def get_analytics_regions(
     db: Session = Depends(get_db)
 ):
     """
-    获取用户地区分布真实数据
+    获取用户地区分布真实数据（优化版本：减少外部API调用）
     根据用户的IP地址通过百度API查询真实的地理位置信息，统计用户地区分布
     
     Args:
@@ -711,49 +743,31 @@ def get_analytics_regions(
     """
     cache_params = {}
     
-    # 尝试从缓存获取数据
     cached_data = get_cached_analytics_data_sync("regions", cache_params)
     if cached_data:
         return success_response(cached_data)
     
     try:
-        # 查询所有用户的IP地址
         users_with_ip = db.query(SysUser.join_ip).filter(SysUser.join_ip.isnot(None)).all()
         
-        # 如果没有用户或没有IP数据，返回空数组
         if not users_with_ip:
             return success_response([])
         
-        # 统计各地区用户数量
-        region_counts = {}
+        region_counts: Dict[str, int] = defaultdict(int)
         
         for user in users_with_ip:
             ip_address = user.join_ip
             if ip_address:
-                # 从IP地址提取省份信息
                 province = extract_province_from_ip(ip_address)
-                
-                # 统计各地区用户数量
-                if province in region_counts:
-                    region_counts[province] += 1
-                else:
-                    region_counts[province] = 1
+                region_counts[province] += 1
         
-        # 转换为前端需要的格式
-        region_data = []
-        for region, count in region_counts.items():
-            region_data.append({
-                "region": region,
-                "count": count
-            })
+        region_data = [
+            {"region": region, "count": count}
+            for region, count in sorted(region_counts.items(), key=lambda x: x[1], reverse=True)
+        ]
         
-        # 按用户数量降序排序
-        region_data.sort(key=lambda x: x["count"], reverse=True)
-        
-        # 缓存结果
         cache_analytics_data_sync("regions", cache_params, region_data)
         
-        # 将地区数据保存到数据库
         region_distribution = {item["region"]: item["count"] for item in region_data}
         summary_data = {
             "total_users": len(users_with_ip),
@@ -765,20 +779,18 @@ def get_analytics_regions(
         
     except Exception as e:
         logger.error(f"获取地区数据失败: {str(e)}")
-        # 如果IP查询失败，返回模拟数据作为降级方案
         try:
             total_users = db.query(SysUser).count()
             if total_users == 0:
                 return success_response([])
             
-            # 生成模拟数据作为降级方案
             common_regions = [
                 "广东省", "北京市", "上海市", "浙江省", "江苏省",
                 "四川省", "山东省", "湖北省", "河南省", "其他地区"
             ]
             
-            region_data = []
             base_count = max(1, total_users // len(common_regions))
+            region_data = []
             
             for i, region in enumerate(common_regions):
                 weight = len(common_regions) - i

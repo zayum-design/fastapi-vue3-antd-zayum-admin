@@ -63,5 +63,10 @@
     "web": "Web",
     "pc": "PC",
     "other": "其他"
-  }
+  },
+  "upload": "上传",
+  "complete": "完成",
+  "upload_success": "上传成功",
+  "upload_failed": "上传失败"
+
 }

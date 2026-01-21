@@ -18,7 +18,12 @@
     "sha1": "Sha1",
     "general_attachment_col": "General Attachment Col",
     "created_at": "Created At",
-    "updated_at": "Updated At"
+    "updated_at": "Updated At",
+    "upload": "File Upload"
+  },
+  "upload": {
+    "click_or_drag": "Click or drag file to this area to upload",
+    "support_types": "Support image, document, PDF, text and other file formats, size not exceeding 10MB"
   },
   "rules": {
     "admin_id": {

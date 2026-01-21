@@ -208,6 +208,32 @@ VITE_GLOB_API_URL='"${api_domain}"'
         echo "VITE_GLOB_API_URL=${api_domain}" >> "${temp_file}2"
     fi
     
+    # 确保路由前缀配置存在
+    # 检查并添加 VITE_ADMIN_ROUTE_PREFIX
+    if ! grep -q "^VITE_ADMIN_ROUTE_PREFIX=" "${temp_file}2"; then
+        # 查找 "# 路由配置" 注释，并在其下一行插入
+        if grep -q "# 路由配置" "${temp_file}2"; then
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                # macOS 系统
+                sed -i '' '/# 路由配置/a\
+VITE_ADMIN_ROUTE_PREFIX=admin
+VITE_USER_ROUTE_PREFIX=user
+VITE_WEB_ROUTE_PREFIX=web
+' "${temp_file}2"
+            else
+                # Linux 和其他系统
+                sed -i '/# 路由配置/a\VITE_ADMIN_ROUTE_PREFIX=admin\nVITE_USER_ROUTE_PREFIX=user\nVITE_WEB_ROUTE_PREFIX=web' "${temp_file}2"
+            fi
+        else
+            # 如果找不到注释，直接追加
+            echo "" >> "${temp_file}2"
+            echo "# 路由配置" >> "${temp_file}2"
+            echo "VITE_ADMIN_ROUTE_PREFIX=admin" >> "${temp_file}2"
+            echo "VITE_USER_ROUTE_PREFIX=user" >> "${temp_file}2"
+            echo "VITE_WEB_ROUTE_PREFIX=web" >> "${temp_file}2"
+        fi
+    fi
+    
     # 替换原文件
     mv "${temp_file}2" "$env_file"
     rm -f "$temp_file"
@@ -240,6 +266,19 @@ deploy_frontend() {
     echo -e "${YELLOW}执行前端启动脚本 (模式: $frontend_mode)...${NC}"
     cd "$FRONTEND_DIR"
     chmod +x start.sh
+    
+    # 检查是否已安装
+    if [ -f "install.lock" ]; then
+        echo -e "${RED}❌ 前端系统已安装，检测到 install.lock 文件${NC}"
+        echo -e "${YELLOW}📁 install.lock 文件位置: $(pwd)/install.lock${NC}"
+        echo -e "${YELLOW}📄 install.lock 文件内容:${NC}"
+        cat install.lock
+        echo ""
+        echo -e "${RED}如需重新安装，请先删除 install.lock 文件:${NC}"
+        echo -e "${YELLOW}  rm -f $(pwd)/install.lock${NC}"
+        cd "$PROJECT_ROOT"
+        return 1
+    fi
     
     # 根据选择的模式执行
     case $frontend_mode in
@@ -368,13 +407,25 @@ deploy_frontend() {
     esac
     
     local frontend_result=$?
-    cd "$PROJECT_ROOT"
     
+    # 验证安装是否成功
     if [ $frontend_result -eq 0 ]; then
-        echo -e "${GREEN}✅ 前端部署成功 (模式: $frontend_mode)${NC}"
+        # 检查是否在前端目录中
+        if [ -d "$FRONTEND_DIR" ]; then
+            cd "$FRONTEND_DIR"
+            # 创建 install.lock 文件
+            echo "Frontend installation completed at: $(date)" > install.lock
+            echo "Frontend mode: $frontend_mode" >> install.lock
+            echo -e "${GREEN}✅ 前端部署成功 (模式: $frontend_mode)${NC}"
+            echo -e "${YELLOW}📁 install.lock 文件位置: $(pwd)/install.lock${NC}"
+            echo -e "${BLUE}📄 install.lock 文件内容:${NC}"
+            cat install.lock
+        fi
+        cd "$PROJECT_ROOT"
         return 0
     else
         echo -e "${RED}❌ 前端部署失败 (模式: $frontend_mode)${NC}"
+        cd "$PROJECT_ROOT"
         return 1
     fi
 }
@@ -384,20 +435,71 @@ show_frontend_info() {
     local frontend_mode="$1"
     
     echo -e "${YELLOW}📊 前端服务信息：${NC}"
+    
+    # 根据模式确定环境文件
+    local env_file=""
     case $frontend_mode in
         "$FRONTEND_MODE_DEV")
+            env_file=".env.development"
             echo "前端开发服务器: http://localhost:5173"
-            echo "访问域名: 根据 .env.development 配置"
             ;;
-        "$FRONTEND_MODE_PROD")
+        "$FRONTEND_MODE_PROD"|"$FRONTEND_MODE_BUILD")
+            env_file=".env.production"
             echo "前端生产服务器: 根据 .env.production 配置"
-            echo "访问域名: 根据 .env.production 配置"
-            ;;
-        "$FRONTEND_MODE_BUILD")
-            echo "构建输出目录: $FRONTEND_DIR/dist"
-            echo "访问域名: 根据 .env.production 配置"
             ;;
     esac
+    
+    # 读取环境变量并输出后台登录地址
+    if [ -n "$env_file" ] && [ -f "$FRONTEND_DIR/$env_file" ]; then
+        # 切换到前端目录读取环境变量
+        cd "$FRONTEND_DIR"
+        
+        # 读取 VITE_GLOB_URL
+        local vite_glob_url=""
+        if [ -f "$env_file" ]; then
+            vite_glob_url=$(grep -E "^VITE_GLOB_URL=" "$env_file" | cut -d'=' -f2- | sed -e 's/^["'\'']//' -e 's/["'\'']$//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+        fi
+        
+        # 读取 VITE_ADMIN_ROUTE_PREFIX
+        local admin_prefix="admin"  # 默认值
+        if [ -f "$env_file" ]; then
+            admin_prefix=$(grep -E "^VITE_ADMIN_ROUTE_PREFIX=" "$env_file" | cut -d'=' -f2- | sed -e 's/^["'\'']//' -e 's/["'\'']$//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+            # 如果没找到，使用默认值
+            if [ -z "$admin_prefix" ]; then
+                admin_prefix="admin"
+            fi
+        fi
+        
+        # 构建后台登录地址
+        local admin_login_url=""
+        if [ -n "$vite_glob_url" ]; then
+            # 确保 URL 以 / 结尾
+            if [[ "$vite_glob_url" != */ ]]; then
+                vite_glob_url="$vite_glob_url/"
+            fi
+            admin_login_url="${vite_glob_url}${admin_prefix}/login"
+        else
+            # 如果 VITE_GLOB_URL 不存在，使用默认地址
+            case $frontend_mode in
+                "$FRONTEND_MODE_DEV")
+                    admin_login_url="http://localhost:5666/${admin_prefix}/login"
+                    ;;
+                "$FRONTEND_MODE_PROD"|"$FRONTEND_MODE_BUILD")
+                    admin_login_url="https://${DEFAULT_PROD_ACCESS_DOMAIN}/${admin_prefix}/login"
+                    ;;
+            esac
+        fi
+        
+        echo "访问域名: ${vite_glob_url:-根据 $env_file 配置}"
+        echo "后台登录地址: $admin_login_url"
+        
+        # 返回项目根目录
+        cd "$PROJECT_ROOT"
+    else
+        echo "访问域名: 根据 $env_file 配置"
+        echo "后台登录地址: 请检查 $env_file 文件是否存在并正确配置"
+    fi
+    
     echo "前端目录: $FRONTEND_DIR"
     echo ""
     echo -e "${YELLOW}🔧 前端管理命令：${NC}"

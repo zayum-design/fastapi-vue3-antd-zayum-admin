@@ -15,10 +15,8 @@ from .core.types import TablesResponse, CodeGenerationResponse
 
 
 # 初始化路由和服务
-router = APIRouter()
+router = APIRouter(tags=["generator"], dependencies=[Depends(get_current_admin)])
 code_generation_service = CodeGenerationService()
-
-
 @router.get("/", tags=["generator"])
 def read_generator():
     """代码生成器主页"""
@@ -88,7 +86,7 @@ def register(api_router: APIRouter):
     """
     api_router.include_router(
         router,
-        prefix="/plugins/generator",
+        prefix="/api/plugins/generator",
         tags=["generator"],
         dependencies=[Depends(get_current_admin)],
     )

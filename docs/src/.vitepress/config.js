@@ -5,8 +5,8 @@ import { prismjsPlugin } from '@vuepress/plugin-prismjs'
 export default defineConfig({
   title: 'Zayum Admin 文档',
   description: 'FastAPI + Vue3 后台管理系统文档',
+  ignoreDeadLinks: true,
   themeConfig: {
-    ignoreDeadLinks: true,
     nav: [
       { text: '首页', link: '/' },
       { text: 'GitHub', link: 'https://github.com/zayum-design/fastapi-vue3-antd-zayum-admin' }

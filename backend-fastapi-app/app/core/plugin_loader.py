@@ -1,4 +1,5 @@
 import importlib
+import importlib.util
 import json
 import re
 import shutil
@@ -238,6 +239,11 @@ class PluginLoader:
             raise FileNotFoundError(f"后端入口文件不存在: {backend_entry}")
 
         spec = importlib.util.spec_from_file_location(f"{plugin_id}_backend", backend_entry)
+        if spec is None:
+            raise ImportError(f"无法为插件 {plugin_id} 创建模块规范")
+        if spec.loader is None:
+            raise ImportError(f"插件 {plugin_id} 的模块加载器为空")
+        
         plugin_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(plugin_module)
 

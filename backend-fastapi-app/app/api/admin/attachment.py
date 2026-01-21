@@ -1,4 +1,5 @@
 from typing import Optional
+import os
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_babel import _
 from sqlalchemy.orm import Session
@@ -10,6 +11,75 @@ from app.schemas.sys_attachment import SysAttachmentCreate, SysAttachmentUpdate
 from app.utils.responses import success_response
 from app.utils.response_handlers import ErrorCode
 from app.models.sys_attachment import SysAttachment as SysAttachmentModel
+from app.core.config import settings
+from app.utils.log_utils import logger
+
+def safe_delete_file(file_path: str) -> bool:
+    """
+    安全删除文件，防止路径遍历攻击
+    
+    Args:
+        file_path: 文件路径（可以是相对路径或绝对路径）
+    
+    Returns:
+        bool: 是否成功删除文件（如果文件不存在也返回True）
+    
+    Raises:
+        HTTPException: 如果检测到路径遍历攻击
+    """
+    try:
+        # 获取上传目录的绝对路径
+        upload_dir = os.path.abspath(settings.UPLOAD_DIR)
+        
+        # 处理文件路径
+        if os.path.isabs(file_path):
+            # 如果是绝对路径，确保它在UPLOAD_DIR内
+            abs_path = os.path.abspath(file_path)
+        else:
+            # 如果是相对路径，转换为基于UPLOAD_DIR的绝对路径
+            abs_path = os.path.abspath(os.path.join(upload_dir, file_path))
+        
+        # 安全检查：确保文件路径在UPLOAD_DIR内
+        if not abs_path.startswith(upload_dir):
+            logger.warning(f"尝试删除UPLOAD_DIR之外的文件: {abs_path}")
+            raise HTTPException(
+                status_code=400,
+                detail="无效的文件路径"
+            )
+        
+        # 检查文件是否存在
+        if not os.path.exists(abs_path):
+            logger.info(f"文件不存在，跳过删除: {abs_path}")
+            return True
+        
+        # 删除文件
+        os.remove(abs_path)
+        logger.info(f"成功删除文件: {abs_path}")
+        
+        # 尝试删除空目录（最多向上追溯3级）
+        current_dir = os.path.dirname(abs_path)
+        for _ in range(3):
+            if current_dir == upload_dir or not current_dir.startswith(upload_dir):
+                break
+            try:
+                if os.path.exists(current_dir) and not os.listdir(current_dir):
+                    os.rmdir(current_dir)
+                    logger.info(f"删除空目录: {current_dir}")
+                    current_dir = os.path.dirname(current_dir)
+                else:
+                    break
+            except Exception as e:
+                logger.debug(f"无法删除目录 {current_dir}: {e}")
+                break
+        
+        return True
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"删除文件失败 {file_path}: {e}")
+        return False
+
 
 # Initialize the API router for sys_attachment endpoints
 router = APIRouter(
@@ -161,7 +231,22 @@ def delete_sys_attachment(id: int, db: Session = Depends(get_db)):
     if db_obj is None:
         # Raise a 404 Not Found error if the record does not exist
         raise HTTPException(status_code=ErrorCode.NOT_FOUND.value, detail=_("SysAttachment not found."))
-    # Remove the record from the database
+    
+    # 获取文件路径
+    file_path = db_obj.path_file
+    if file_path:
+        try:
+            # 安全删除物理文件
+            safe_delete_file(file_path)
+        except HTTPException as e:
+            # 如果文件删除出现安全问题，仍然继续删除数据库记录
+            logger.warning(f"文件删除安全检查失败，继续删除数据库记录: {e}")
+        except Exception as e:
+            # 文件删除失败，记录错误但继续删除数据库记录
+            logger.error(f"删除物理文件失败，继续删除数据库记录: {e}")
+    
+    # 删除数据库记录
     crud_sys_attachment.remove(db, id=id)
-    # Return an empty success response
+    
+    # 返回成功响应
     return success_response({})

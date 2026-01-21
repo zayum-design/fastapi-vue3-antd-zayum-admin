@@ -63,5 +63,9 @@
     "web": "Web",
     "pc": "PC",
     "other": "Other"
-  }
+  },
+  "upload": "Upload",
+  "complete": "Complete",
+  "upload_success": "Upload Success",
+  "upload_failed": "Upload Failed"
 }

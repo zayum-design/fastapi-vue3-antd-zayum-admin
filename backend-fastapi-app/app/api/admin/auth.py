@@ -1,10 +1,11 @@
-from typing import Annotated, Dict, List
+from typing import Annotated, Dict, List, Optional
 from fastapi import APIRouter, HTTPException, status, Request, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_babel import _
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta, timezone
+from collections import defaultdict
 from app.models.sys_admin_group import SysAdminGroup
 from app.models.sys_admin_rule import SysAdminRule
 from app.models.sys_admin_log import SysAdminLog
@@ -54,13 +55,18 @@ class TokenForm(BaseModel):
 
 
 class ProfileInput(BaseModel):
-    nickname: str | None = None
-    email: str | None = None
-    mobile: str | None = None
-    avatar: str | None = None
+    nickname: Optional[str] = None
+    email: Optional[str] = None
+    mobile: Optional[str] = None
+    avatar: Optional[str] = None
 
 
 # Helper functions
+def get_client_ip(request: Request) -> str:
+    """安全地获取客户端IP地址"""
+    return getattr(request.client, 'host', 'unknown') if request.client else 'unknown'
+
+
 def handle_failed_login(admin, username: str, client_ip: str, db: Session):
     if admin:
         admin.login_failure += 1
@@ -103,26 +109,30 @@ def handle_successful_login(admin, username: str, client_ip: str, db: Session):
 
 
 def transform_items(items: List[SysAdminRule]) -> List[Dict]:
+    """优化后的树形结构转换函数，使用字典提高查找性能"""
+    items_by_parent = defaultdict(list)
+    root_items = []
+    
+    for item in items:
+        if item.parent_id == 0:
+            root_items.append(item)
+        items_by_parent[item.parent_id].append(item)
+    
     def build_tree(parent_id: int) -> List[Dict]:
-        children = []
-        for item in items:
-            if item.parent_id == parent_id:
-                child = {
-                    "id": item.id,
-                    "name": item.name,
-                    "path": f"/admin{item.path}",
-                    "component": item.component,
-                    "meta": item.meta,
-                }
-                child_children = build_tree(item.id)
-                if child_children:
-                    child["children"] = child_children
-                children.append(child)
-        return children
-
-    result = []
-    for item in (item for item in items if item.parent_id == 0):
-        layout = {
+        return [
+            {
+                "id": item.id,
+                "name": item.name,
+                "path": f"{item.path}",
+                "component": item.component,
+                "meta": item.meta,
+                **({"children": build_tree(item.id)} if items_by_parent[item.id] else {})
+            }
+            for item in items_by_parent[parent_id]
+        ]
+    
+    return [
+        {
             "id": item.id,
             "meta": item.meta,
             "name": item.name,
@@ -130,8 +140,8 @@ def transform_items(items: List[SysAdminRule]) -> List[Dict]:
             "redirect": item.redirect if item.redirect else None,
             "children": build_tree(item.id),
         }
-        result.append(layout)
-    return result
+        for item in root_items
+    ]
 
 
 # Routes
@@ -141,37 +151,26 @@ async def login(
     request: Request,
     db: Session = Depends(get_db),
 ):
-    # 如果 captcha_type 不是 "code"，则不需要验证码验证
-    if login_data.captcha_type != "code":
-        pass
-    else:
-        # 确保 captcha_id 和 captcha_code 不为 None
-        if login_data.captcha_id is None or login_data.captcha_code is None:
+    client_ip = get_client_ip(request)
+    
+    if login_data.captcha_type == "code":
+        if not login_data.captcha_id or not login_data.captcha_code:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="验证码参数缺失"
             )
         
-        # 验证验证码
         captcha_valid = await verify_captcha(
             login_data.captcha_type,
             login_data.captcha,
             login_data.captcha_id,
             login_data.captcha_code,
         )
-        
-        # if not captcha_valid:
-        #     raise HTTPException(
-        #         status_code=status.HTTP_400_BAD_REQUEST,
-        #         detail="验证码错误"
-        #     )
 
     admin = crud_sys_auth_admin.get_by_name(db, username=login_data.username)
     if not admin or not admin.check_password(login_data.password):
-        client_ip = getattr(request.client, 'host', 'unknown') if request.client else 'unknown'
         handle_failed_login(admin, login_data.username, client_ip, db)
 
-    client_ip = getattr(request.client, 'host', 'unknown') if request.client else 'unknown'
     access_token = handle_successful_login(
         admin, login_data.username, client_ip, db
     )
@@ -184,12 +183,12 @@ async def login_form(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Session = Depends(get_db),
 ):
+    client_ip = get_client_ip(request)
+    
     admin = crud_sys_auth_admin.get_by_name(db, username=form_data.username)
     if not admin or not admin.check_password(form_data.password):
-        client_ip = getattr(request.client, 'host', 'unknown') if request.client else 'unknown'
         handle_failed_login(admin, form_data.username, client_ip, db)
 
-    client_ip = getattr(request.client, 'host', 'unknown') if request.client else 'unknown'
     access_token = handle_successful_login(
         admin, form_data.username, client_ip, db
     )
@@ -202,16 +201,18 @@ async def get_profile(
     db: Session = Depends(get_db),
 ):
     group = db.query(SysAdminGroup).filter(SysAdminGroup.id == admin.group_id).first()
-    admin_dict = admin.to_dict()
-    admin_dict["roles"] = [group.name] if group else []
     
+    base_query = db.query(SysAdminLog).filter(SysAdminLog.admin_id == admin.id)
     log_items = crud_sys_admin_log.get_multi(
         db, 
         page=1, 
         per_page=8, 
-        orderby = 'id_desc',
-        base_query=db.query(SysAdminLog)
+        orderby='id_desc',
+        base_query=base_query
     )
+    
+    admin_dict = admin.to_dict()
+    admin_dict["roles"] = [group.name] if group else []
     admin_dict["logs"] = [item.to_dict() for item in log_items]
 
     return success_response(admin_dict)

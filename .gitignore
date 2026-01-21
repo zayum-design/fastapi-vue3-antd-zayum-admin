@@ -281,3 +281,6 @@ tests/
 
 # Analytics文件夹
 analytics/
+
+# 版本修改记录文件夹
+changelog/

@@ -14,6 +14,15 @@
                 {{ $t("common.add_item") }}
               </a-button>
             </AccessControl>
+              <AccessControl :codes="['attachment.add','all']" type="code">
+                <a-button
+                  type="primary"
+                  @click="openUploadDialog"
+                >
+                  <UploadOutlined />
+                  {{ $t("common.upload") }}
+                </a-button>
+              </AccessControl>
               <AccessControl :codes="['attachment.delete','all']" type="code">
                 <a-popconfirm
                   :title="$t('common.confirm_delete')"
@@ -232,6 +241,63 @@
             
       </a-form>
     </a-modal>
+
+    <!-- Upload Dialog -->
+    <a-modal
+      v-model:open="isUploadDialogVisible"
+      :title="$t('common.upload')"
+      @cancel="closeUploadDialog"
+      :footer="null"
+      :destroyOnClose="true"
+      :maskClosable="false"
+      width="600px"
+    >
+      <div class="upload-dialog-content">
+        <!-- 文件上传区域 -->
+        <a-upload-dragger
+          name="file"
+          :multiple="false"
+          :show-upload-list="false"
+          :before-upload="beforeUpload"
+          :custom-request="handleUpload"
+          class="upload-dragger"
+        >
+          <p class="ant-upload-drag-icon">
+            <InboxOutlined />
+          </p>
+          <p class="ant-upload-text">
+            {{ $t('attachment.upload.click_or_drag') }}
+          </p>
+          <p class="ant-upload-hint">
+            {{ $t('attachment.upload.support_types') }}
+          </p>
+        </a-upload-dragger>
+        
+        <div v-if="uploading" class="mt-4">
+          <a-progress :percent="uploadPercent" :status="uploadStatus" />
+        </div>
+        
+        <div v-if="uploadedFile" class="mt-4 p-4 border rounded">
+          <h4 class="font-medium mb-2">{{ $t('common.upload_success') }}</h4>
+          <p>{{ $t('attachment.field.file_name') }}: {{ uploadedFile.name }}</p>
+          <p>{{ $t('attachment.field.file_size') }}: {{ formatFileSize(uploadedFile.size) }}</p>
+          <p>{{ $t('attachment.field.mimetype') }}: {{ uploadedFile.type }}</p>
+        </div>
+        
+        <div class="mt-6 flex justify-end">
+          <a-button @click="closeUploadDialog" class="mr-2">
+            {{ $t('common.cancel') }}
+          </a-button>
+          <a-button 
+            type="primary" 
+            @click="completeUpload"
+            :disabled="!uploadedFile"
+          >
+            {{ $t('common.complete') }}
+          </a-button>
+        </div>
+      </div>
+    </a-modal>
   </div>
 </template>
 
@@ -244,12 +310,15 @@ import {
   deleteAttachment,
 } from "@/api/admin/attachment";
 import { fetchAttachmentCategoryItems } from "@/api/admin/attachment_category";
+import { uploadApi } from "@/api/admin/upload";
 import { $t } from "@/locales";
 import {
   FileAddOutlined,
   DeleteOutlined,
   EyeOutlined,
   EditOutlined,
+  UploadOutlined,
+  InboxOutlined,
 } from "@ant-design/icons-vue";
 import { message, type FormInstance } from "ant-design-vue";
 
@@ -257,7 +326,7 @@ import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import { useAppConfig } from "@/_core/hooks";
-const { webURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
+const { attachmentURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
 
 // Setup dayjs plugins
 dayjs.extend(utc);
@@ -317,6 +386,7 @@ const currentItem: UnwrapRef<Attachment> = reactive({
 
 const isDialogVisible = ref(false);
 const confirmLoading = ref(false);
+const isUploadDialogVisible = ref(false);
 const dialogTitle = computed(() => {
   switch (mode.value) {
     case "view":
@@ -709,18 +779,18 @@ const getAttachmentUrl = (path: string): string => {
     return '';
   }
   
-  // 如果路径已经是完整 URL 或本地 assets 路径，直接返回
-  if (path.startsWith(webURL) || path.startsWith("/src/assets/")) {
+  // 如果路径已经是完整 URL（http/https）或本地 assets 路径，直接返回
+  if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("/src/assets/")) {
     return path;
   }
   
-  // 如果路径以 /uploads/ 开头，转换为 API 路径
+  // 如果路径以 /uploads/ 开头，使用附件域名配置
   if (path.startsWith("/uploads/")) {
-    return webURL + "/api/common" + path;
+    return attachmentURL + path;
   }
   
-  // 否则，添加 webURL 前缀
-  return webURL + path;
+  // 否则，添加附件域名前缀
+  return attachmentURL + (path.startsWith("/") ? path : "/" + path);
 };
 
 // 在新窗口打开附件
@@ -750,6 +820,120 @@ const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 MB';
   const mb = bytes / (1024 * 1024);
   return `${mb.toFixed(2)} MB`;
+};
+
+// 上传相关变量
+const uploading = ref(false);
+const uploadPercent = ref(0);
+const uploadStatus = ref<'active' | 'success' | 'exception' | 'normal'>('active');
+const uploadedFile = ref<File | null>(null);
+const uploadResponseData = ref<any>(null);
+
+// 打开上传对话框
+const openUploadDialog = () => {
+  isUploadDialogVisible.value = true;
+  resetUploadState();
+};
+
+// 关闭上传对话框
+const closeUploadDialog = () => {
+  isUploadDialogVisible.value = false;
+  resetUploadState();
+};
+
+// 重置上传状态
+const resetUploadState = () => {
+  uploading.value = false;
+  uploadPercent.value = 0;
+  uploadStatus.value = 'active';
+  uploadedFile.value = null;
+  uploadResponseData.value = null;
+};
+
+// 上传前验证
+const beforeUpload = (file: File) => {
+  const isAllowedType = [
+    'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+    'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'text/plain', 'text/csv'
+  ].includes(file.type);
+  
+  const isLt10M = file.size / 1024 / 1024 < 10;
+  
+  if (!isAllowedType) {
+    message.error($t('attachment.upload.unsupported_file_type'));
+    return false;
+  }
+  
+  if (!isLt10M) {
+    message.error($t('attachment.upload.file_too_large'));
+    return false;
+  }
+  
+  return true;
+};
+
+// 处理上传
+const handleUpload = async (options: any) => {
+  const { file, onSuccess, onError, onProgress } = options;
+  
+  try {
+    uploading.value = true;
+    uploadPercent.value = 0;
+    uploadStatus.value = 'active';
+    uploadedFile.value = file;
+    
+    // 模拟上传进度
+    const interval = setInterval(() => {
+      if (uploadPercent.value < 90) {
+        uploadPercent.value += 10;
+        onProgress?.({ percent: uploadPercent.value });
+      }
+    }, 200);
+    
+    // 实际调用上传API
+    const response = await uploadApi(file, 'images');
+    
+    clearInterval(interval);
+    uploadPercent.value = 100;
+    uploadStatus.value = 'success';
+    onProgress?.({ percent: 100 });
+    
+    // 保存上传响应数据
+    uploadResponseData.value = response;
+    
+    // 延迟一点时间显示成功状态
+    setTimeout(() => {
+      onSuccess?.(response);
+      message.success($t('common.upload_success'));
+      uploading.value = false;
+    }, 500);
+    
+  } catch (error: any) {
+    uploading.value = false;
+    uploadPercent.value = 0;
+    uploadStatus.value = 'exception';
+    uploadedFile.value = null;
+    onError?.(error);
+    message.error(error.message || $t('common.upload_failed'));
+  }
+};
+
+// 完成上传
+const completeUpload = async () => {
+  if (!uploadedFile.value || !uploadResponseData.value) {
+    message.warning($t('attachment.upload.please_upload_first'));
+    return;
+  }
+  
+  // 关闭对话框
+  closeUploadDialog();
+  
+  // 刷新页面数据
+  fetchItems();
+  
+  message.success($t('common.upload_success'));
 };
 
 onMounted(() => {

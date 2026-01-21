@@ -144,7 +144,7 @@ import { ref, onMounted } from "vue";
 import { Cropper } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 import { useAppConfig } from "@/_core/hooks";
-const { webURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
+const { webURL, attachmentURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
 
 import { getProfileApi, uploadApi, saveProfileApi } from "@/api/admin";
 import { $t } from "@/locales";
@@ -293,18 +293,18 @@ function displayAvatar(avatar: string): string {
     return defaultAvatar;
   }
   
-  // 如果头像已经是完整 URL 或本地 assets 路径，直接返回
-  if (avatar.startsWith(webURL) || avatar.startsWith("/src/assets/")) {
+  // 如果头像已经是完整 URL（http/https）或本地 assets 路径，直接返回
+  if (avatar.startsWith("http://") || avatar.startsWith("https://") || avatar.startsWith("/src/assets/")) {
     return avatar;
   }
   
-  // 如果头像路径以 /uploads/ 开头，转换为 API 路径
+  // 如果头像路径以 /uploads/ 开头，使用附件域名配置
   if (avatar.startsWith("/uploads/")) {
-    return webURL + "/api/common" + avatar;
+    return attachmentURL + avatar;
   }
   
-  // 否则，添加 webURL 前缀
-  return webURL + avatar;
+  // 否则，添加附件域名前缀
+  return attachmentURL + (avatar.startsWith("/") ? avatar : "/" + avatar);
 }
 
 async function saveProfile() {
@@ -324,8 +324,8 @@ async function saveProfile() {
         payload.password = profile.value.password;
       }
     } else if (tab.value === "avatar") {
-      payload.avatar = profile.value.avatar.startsWith(webURL)
-        ? profile.value.avatar.replace(webURL, "")
+      payload.avatar = profile.value.avatar.startsWith(attachmentURL)
+        ? profile.value.avatar.replace(attachmentURL, "")
         : profile.value.avatar;
     }
 

@@ -19,7 +19,12 @@
     "sha1": "SHA1值",
     "general_attachment_col": "通用附件列",
     "created_at": "创建时间",
-    "updated_at": "更新时间"
+    "updated_at": "更新时间",
+    "upload": "文件上传"
+  },
+  "upload": {
+    "click_or_drag": "点击或拖动文件到此区域上传",
+    "support_types": "支持图片、文档、PDF、文本等文件格式，大小不超过10MB"
   },
   "rules": {
     "admin_id": {

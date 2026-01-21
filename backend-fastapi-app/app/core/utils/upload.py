@@ -2,6 +2,7 @@ import os
 import uuid
 import hashlib
 from datetime import datetime
+from typing import Optional
 
 from fastapi import HTTPException, UploadFile
 from app.core.config import settings
@@ -33,7 +34,12 @@ class Upload:
             )
         return file_size
 
-    def _check_file_extension(self, filename: str):
+    def _check_file_extension(self, filename: Optional[str]) -> None:
+        if filename is None:
+            raise HTTPException(
+                status_code=400,
+                detail="文件名不能为空"
+            )
         extension = filename.split(".")[-1].lower()
         if extension not in self.allowed_extensions:
             raise HTTPException(
@@ -87,12 +93,16 @@ class Upload:
 
         # 3. 如果指定了文件名，则使用指定的文件名，否则按 "时间戳 + 随机字符串" 生成文件名
         if filename:
+            if file.filename is None:
+                raise HTTPException(status_code=400, detail="上传的文件没有文件名")
             extension = file.filename.split(".")[-1].lower()
             saved_filename = f"{filename}.{extension}"
         else:
             now = datetime.now()
             time_str = now.strftime('%Y%m%d%H%M%S')  # 20250305121035
             random_str = uuid.uuid4().hex[:6]        # abc123
+            if file.filename is None:
+                raise HTTPException(status_code=400, detail="上传的文件没有文件名")
             extension = file.filename.split(".")[-1].lower()
             saved_filename = f"{time_str}{random_str}.{extension}"
 
@@ -107,13 +117,15 @@ class Upload:
         # 5. 写入文件
         self._write_file(file, save_path)
 
-        # 6. 是否图片
-        image_extensions = {"jpg", "jpeg", "png", "gif", "bmp", "webp"}
-        is_image = extension in image_extensions
+        # 6. 是否图片（根据允许的扩展名中的图片类型判断）
+        image_extensions = {"jpg", "jpeg", "png", "gif", "bmp", "webp", "svg"}
+        # 只考虑在 allowed_extensions 中的图片扩展名
+        allowed_image_extensions = [ext for ext in image_extensions if ext in self.allowed_extensions]
+        is_image = extension in allowed_image_extensions
 
         # 7. 返回信息
         return {
-            "file_name": file.filename,
+            "file_name": file.filename or "",
             "saved_filename": saved_filename,  # 供访问接口使用
             "absolute_path": os.path.abspath(save_path),
             # 返回完整路径，包括 UPLOAD_DIR

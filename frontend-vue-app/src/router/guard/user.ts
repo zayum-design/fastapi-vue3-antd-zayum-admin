@@ -1,5 +1,4 @@
 import type { Router } from "vue-router";
-import type { RouteRecordStringComponent } from '@/_core/types';
 import { USER_LOGIN_PATH, DEFAULT_USER_PATH, USER_ROUTE_PREFIX } from "@/constants";
 import { useUserAccessStore } from "@/stores/user/access";
 import { useUserAuthStore } from "@/stores/user/auth";
@@ -7,14 +6,6 @@ import { generateAccess } from "../access";
 import { accessRoutes } from "@/router/routes";
 import { getAllUserRouterApi } from "@/api/user/user_router";
 
-interface UserMenu {
-  name: string;
-  path: string;
-  meta?: {
-    title: string;
-    icon?: string;
-  };
-}
 
 /**
  * 用户路由守卫配置

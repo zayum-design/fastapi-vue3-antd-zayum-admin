@@ -2,6 +2,8 @@
 from pydantic_settings import BaseSettings
 from pydantic import Field, AnyUrl
 from typing import List
+import os
+from pathlib import Path
 
 
 class Settings(BaseSettings):
@@ -13,6 +15,9 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "your_secret_key_here"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 10080  # 7天
+    
+    # 项目版本号，从 VERSION 文件读取
+    VERSION: str = ""
     
     REDIS_URL: str = "redis://localhost:6379/0"
     
@@ -77,6 +82,23 @@ class Settings(BaseSettings):
         env_file = ".env"
         env_file_encoding = "utf-8"
         extra = "forbid"  # 禁止额外的字段
+        
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # 尝试从 VERSION 文件读取版本号
+        try:
+            version_file = Path(__file__).parent.parent.parent.parent / "VERSION"
+            if version_file.exists():
+                with open(version_file, 'r') as f:
+                    version = f.read().strip()
+                    if version:
+                        self.VERSION = version
+                    else:
+                        self.VERSION = "unknown"
+            else:
+                self.VERSION = "unknown"
+        except Exception:
+            self.VERSION = "unknown"  # 如果读取失败，使用 unknown
 
 
 # 实例化设置

@@ -14,8 +14,36 @@ import {
 import { preferences } from '@/_core/preferences';
 import { useAdminStore } from '@/stores';
 import { openWindow } from '@/_core/utils';
+import { useAppConfig } from '@/_core/hooks';
 
 const adminStore = useAdminStore();
+const { attachmentURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
+
+// 处理头像URL
+const displayAvatar = (avatarUrl: string | null | undefined): string => {
+  const defaultAvatar = preferences.app.defaultAvatar;
+  
+  // 如果头像为空或无效，使用默认头像
+  if (!avatarUrl || avatarUrl.trim() === "") {
+    return defaultAvatar;
+  }
+  
+  // 如果头像已经是完整 URL（http/https）或本地 assets 路径，直接返回
+  if (avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://") || avatarUrl.startsWith("/src/assets/")) {
+    return avatarUrl;
+  }
+  
+  // 如果头像路径以 /uploads/ 开头，使用附件域名配置
+  if (avatarUrl.startsWith("/uploads/")) {
+    return attachmentURL + avatarUrl;
+  }
+  
+  // 否则，添加附件域名前缀
+  return attachmentURL + (avatarUrl.startsWith("/") ? avatarUrl : "/" + avatarUrl);
+};
+
+// 头像计算属性
+const avatar = displayAvatar(adminStore.adminInfo?.avatar);
 
 // 同样，这里的 url 也可以使用以 http 开头的外部链接
 const quickNavItems: WorkbenchQuickNavItem[] = [
@@ -92,7 +120,7 @@ console.log(adminStore.adminInfo?.logs)
 <template>
   <div class="">
     <WorkbenchHeader
-      :avatar="adminStore.adminInfo?.avatar || preferences.app.defaultAvatar"
+      :avatar="avatar"
     >
       <template #title>
         {{ $t('dashboard.workspace.morningGreeting', { name: adminStore.adminInfo?.nickname }) }} {{ $t('dashboard.workspace.startWorkPrompt') }}

@@ -10,11 +10,13 @@ declare module 'vue-router' {
 export interface ZayumProAppConfigRaw {
   VITE_GLOB_API_URL: string;
   VITE_GLOB_URL: string;
+  VITE_GLOB_ATTACHMENT_URL: string;
 }
 
 export interface ApplicationConfig {
   apiURL: string;
   webURL: string;
+  attachmentURL: string;
 }
 
 declare global {

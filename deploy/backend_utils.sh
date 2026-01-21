@@ -23,17 +23,48 @@ deploy_backend() {
     echo -e "${YELLOW}执行后端安装脚本...${NC}"
     cd "$BACKEND_DIR"
     chmod +x install.sh
-    ./install.sh
-    local backend_result=$?
-    cd "$PROJECT_ROOT"
     
-    if [ $backend_result -eq 0 ]; then
-        echo -e "${GREEN}✅ 后端部署成功${NC}"
-        return 0
-    else
-        echo -e "${RED}❌ 后端部署失败${NC}"
+    # 检查是否已安装
+    if [ -f "install.lock" ]; then
+        echo -e "${RED}❌ 后端系统已安装，检测到 install.lock 文件${NC}"
+        echo -e "${YELLOW}📁 install.lock 文件位置: $(pwd)/install.lock${NC}"
+        echo -e "${YELLOW}📄 install.lock 文件内容:${NC}"
+        cat install.lock
+        echo ""
+        echo -e "${RED}如需重新安装，请先删除 install.lock 文件:${NC}"
+        echo -e "${YELLOW}  rm -f $(pwd)/install.lock${NC}"
+        cd "$PROJECT_ROOT"
         return 1
     fi
+    
+    # 执行安装脚本
+    ./install.sh
+    local backend_result=$?
+    
+    # 验证安装是否成功
+    if [ $backend_result -eq 0 ]; then
+        # 检查 install.lock 文件是否已创建
+        if [ -f "install.lock" ]; then
+            echo -e "${GREEN}✅ 后端部署成功 - install.lock 文件已创建${NC}"
+            echo -e "${YELLOW}📁 install.lock 文件位置: $(pwd)/install.lock${NC}"
+            
+            # 显示 install.lock 文件内容
+            echo -e "${BLUE}📄 install.lock 文件内容:${NC}"
+            cat install.lock
+        else
+            echo -e "${YELLOW}⚠️  后端安装脚本执行成功，但未检测到 install.lock 文件${NC}"
+            echo -e "${YELLOW}手动创建 install.lock 文件...${NC}"
+            echo "Installation completed by deploy script at: $(date)" > install.lock
+            echo -e "${GREEN}✅ 已手动创建 install.lock 文件${NC}"
+        fi
+    else
+        echo -e "${RED}❌ 后端部署失败${NC}"
+        cd "$PROJECT_ROOT"
+        return 1
+    fi
+    
+    cd "$PROJECT_ROOT"
+    return 0
 }
 
 # 显示后端部署信息

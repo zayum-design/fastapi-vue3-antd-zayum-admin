@@ -495,7 +495,7 @@ def transform_items(items: List[SysUserRule]) -> List[Dict]:
             "id": item.id,
             "meta": item.meta,
             "name": item.name,
-            "path": f"/admin{item.path}",
+            "path": f"/{item.path}",
             "redirect": item.redirect if item.redirect else None,
             "children": build_tree(item.id),
         }

@@ -15,10 +15,11 @@ export function useAppConfig(
     ? window._ZAYUM_ADMIN_PRO_APP_CONF_
     : (env as ZayumProAppConfigRaw);
 
-  const { VITE_GLOB_API_URL,VITE_GLOB_URL } = config;
+  const { VITE_GLOB_API_URL, VITE_GLOB_URL, VITE_GLOB_ATTACHMENT_URL } = config;
 
   return {
     apiURL: VITE_GLOB_API_URL,
-    webURL:VITE_GLOB_URL
+    webURL: VITE_GLOB_URL,
+    attachmentURL: VITE_GLOB_ATTACHMENT_URL
   };
 }
