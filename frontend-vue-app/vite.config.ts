@@ -52,7 +52,8 @@ function injectMetadata(env: Record<string, string>) {
           };
           window._ZAYUM_ADMIN_PRO_APP_CONF_ = {
             VITE_GLOB_API_URL: '${env.VITE_GLOB_API_URL}',
-            VITE_GLOB_URL: '${env.VITE_GLOB_URL}'
+            VITE_GLOB_URL: '${env.VITE_GLOB_URL}',
+            VITE_GLOB_ATTACHMENT_URL: '${env.VITE_GLOB_ATTACHMENT_URL}'
           };
         </script>`
       )

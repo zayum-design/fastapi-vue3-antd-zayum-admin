@@ -67,6 +67,7 @@
   "upload": "上传",
   "complete": "完成",
   "upload_success": "上传成功",
+  "upload_success_multiple": "成功上传 {count} 个文件",
   "upload_failed": "上传失败"
 
 }

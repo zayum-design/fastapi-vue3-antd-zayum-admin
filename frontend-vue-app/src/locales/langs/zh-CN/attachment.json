@@ -24,7 +24,27 @@
   },
   "upload": {
     "click_or_drag": "点击或拖动文件到此区域上传",
-    "support_types": "支持图片、文档、PDF、文本等文件格式，大小不超过10MB"
+    "click_or_drag_multiple": "点击或拖动多个文件到此区域上传",
+    "support_types": "支持图片、文档、PDF、文本等文件格式，大小不超过10MB",
+    "support_types_multiple": "支持图片、文档、PDF、文本等文件格式，大小不超过10MB",
+    "unsupported_file_type": "不支持的文件类型",
+    "file_too_large": "文件大小不能超过10MB",
+    "please_upload_first": "请先上传文件",
+    "upload_queue": "上传队列",
+    "waiting": "等待中",
+    "queue_summary": "总计: {total}，成功: {success}，失败: {failed}，等待: {pending}",
+    "start_upload": "开始上传",
+    "stop_upload": "停止上传",
+    "clear_completed": "清除已完成",
+    "clear_all": "清除全部",
+    "no_completed_files": "没有已完成的文件",
+    "overall_progress": "整体进度: {percent}%，已完成: {completed}/{total}",
+    "status": {
+      "pending": "等待中",
+      "uploading": "上传中",
+      "success": "成功",
+      "error": "失败"
+    }
   },
   "rules": {
     "admin_id": {

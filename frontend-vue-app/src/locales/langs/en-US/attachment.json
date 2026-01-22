@@ -23,7 +23,27 @@
   },
   "upload": {
     "click_or_drag": "Click or drag file to this area to upload",
-    "support_types": "Support image, document, PDF, text and other file formats, size not exceeding 10MB"
+    "click_or_drag_multiple": "Click or drag multiple files to this area to upload",
+    "support_types": "Support image, document, PDF, text and other file formats, size not exceeding 10MB",
+    "support_types_multiple": "Support image, document, PDF, text and other file formats, size not exceeding 10MB",
+    "unsupported_file_type": "Unsupported file type",
+    "file_too_large": "File size cannot exceed 10MB",
+    "please_upload_first": "Please upload file first",
+    "upload_queue": "Upload Queue",
+    "waiting": "Waiting",
+    "queue_summary": "Total: {total}, Success: {success}, Failed: {failed}, Pending: {pending}",
+    "start_upload": "Start Upload",
+    "stop_upload": "Stop Upload",
+    "clear_completed": "Clear Completed",
+    "clear_all": "Clear All",
+    "no_completed_files": "No completed files",
+    "overall_progress": "Overall Progress: {percent}%, Completed: {completed}/{total}",
+    "status": {
+      "pending": "Pending",
+      "uploading": "Uploading",
+      "success": "Success",
+      "error": "Error"
+    }
   },
   "rules": {
     "admin_id": {

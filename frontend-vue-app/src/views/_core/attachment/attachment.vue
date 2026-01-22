@@ -250,38 +250,169 @@
       :footer="null"
       :destroyOnClose="true"
       :maskClosable="false"
-      width="600px"
+      width="800px"
     >
       <div class="upload-dialog-content">
         <!-- 文件上传区域 -->
         <a-upload-dragger
           name="file"
-          :multiple="false"
+          :multiple="true"
           :show-upload-list="false"
-          :before-upload="beforeUpload"
-          :custom-request="handleUpload"
+          :before-upload="beforeUploadMultiple"
+          @change="handleFileChange"
           class="upload-dragger"
         >
           <p class="ant-upload-drag-icon">
             <InboxOutlined />
           </p>
           <p class="ant-upload-text">
-            {{ $t('attachment.upload.click_or_drag') }}
+            {{ $t('attachment.upload.click_or_drag_multiple') }}
           </p>
           <p class="ant-upload-hint">
-            {{ $t('attachment.upload.support_types') }}
+            {{ $t('attachment.upload.support_types_multiple') }}
           </p>
         </a-upload-dragger>
         
-        <div v-if="uploading" class="mt-4">
-          <a-progress :percent="uploadPercent" :status="uploadStatus" />
+        <!-- 上传队列 -->
+        <div v-if="uploadQueue.length > 0" class="mt-6">
+          <h4 class="font-medium mb-3">{{ $t('attachment.upload.upload_queue') }} ({{ uploadQueue.length }})</h4>
+          <div class="max-h-60 overflow-y-auto border rounded">
+            <div 
+              v-for="(item, index) in uploadQueue" 
+              :key="item.id"
+              class="p-3 border-b last:border-b-0 hover:bg-gray-50"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center flex-1 min-w-0">
+                  <div class="mr-3">
+                    <img 
+                      v-if="item.file.type.startsWith('image/')" 
+                      :src="getFilePreview(item.file)"
+                      class="w-10 h-10 object-cover rounded border"
+                      alt="preview"
+                    />
+                    <div 
+                      v-else 
+                      class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded border"
+                    >
+                      <FileOutlined class="text-gray-500" />
+                    </div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="font-medium truncate">{{ item.file.name }}</div>
+                    <div class="text-sm text-gray-500">
+                      {{ formatFileSize(item.file.size) }} • 
+                      <span :class="{
+                        'text-blue-500': item.status === 'pending',
+                        'text-green-500': item.status === 'success',
+                        'text-red-500': item.status === 'error',
+                        'text-yellow-500': item.status === 'uploading'
+                      }">
+                        {{ getStatusText(item.status) }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="ml-4 w-32">
+                  <a-progress 
+                    v-if="item.status === 'uploading' || item.status === 'success' || item.status === 'error'"
+                    :percent="item.progress"
+                    :status="item.status === 'error' ? 'exception' : (item.status === 'success' ? 'success' : 'active')"
+                    size="small"
+                  />
+                  <span v-else class="text-gray-400 text-sm">{{ $t('attachment.upload.waiting') }}</span>
+                </div>
+                
+                <div class="ml-4">
+                  <a-button
+                    v-if="item.status === 'pending' || item.status === 'error'"
+                    size="small"
+                    type="link"
+                    danger
+                    @click="removeFromQueue(index)"
+                  >
+                    <DeleteOutlined />
+                  </a-button>
+                  <a-button
+                    v-if="item.status === 'error'"
+                    size="small"
+                    type="link"
+                    @click="retryUpload(index)"
+                  >
+                    <RedoOutlined />
+                  </a-button>
+                </div>
+              </div>
+              
+              <div v-if="item.error" class="mt-2 text-sm text-red-500">
+                {{ item.error }}
+              </div>
+            </div>
+          </div>
+          
+          <!-- 队列控制按钮 -->
+          <div class="mt-4 flex justify-between items-center">
+            <div>
+              <span class="text-sm text-gray-600">
+                {{ $t('attachment.upload.queue_summary', { 
+                  total: uploadQueue.length, 
+                  success: completedCount,
+                  failed: failedCount,
+                  pending: pendingCount
+                }) }}
+              </span>
+            </div>
+            <div class="space-x-2">
+              <a-button
+                v-if="!isUploadingQueue"
+                type="primary"
+                :disabled="pendingCount === 0"
+                @click="startQueueUpload"
+              >
+                <UploadOutlined />
+                {{ $t('attachment.upload.start_upload') }} ({{ pendingCount }})
+              </a-button>
+              <a-button
+                v-else
+                type="primary"
+                danger
+                @click="stopQueueUpload"
+              >
+                <PauseOutlined />
+                {{ $t('attachment.upload.stop_upload') }}
+              </a-button>
+              <a-button
+                @click="clearCompleted"
+                :disabled="completedCount === 0 && failedCount === 0"
+              >
+                {{ $t('attachment.upload.clear_completed') }}
+              </a-button>
+              <a-button
+                danger
+                @click="clearQueue"
+                :disabled="uploadQueue.length === 0"
+              >
+                {{ $t('attachment.upload.clear_all') }}
+              </a-button>
+            </div>
+          </div>
         </div>
         
-        <div v-if="uploadedFile" class="mt-4 p-4 border rounded">
-          <h4 class="font-medium mb-2">{{ $t('common.upload_success') }}</h4>
-          <p>{{ $t('attachment.field.file_name') }}: {{ uploadedFile.name }}</p>
-          <p>{{ $t('attachment.field.file_size') }}: {{ formatFileSize(uploadedFile.size) }}</p>
-          <p>{{ $t('attachment.field.mimetype') }}: {{ uploadedFile.type }}</p>
+        <!-- 上传统计 -->
+        <div v-if="uploadQueue.length > 0" class="mt-6">
+          <a-progress 
+            :percent="overallProgress" 
+            :status="overallStatus"
+            size="large"
+          />
+          <div class="mt-2 text-center text-sm text-gray-600">
+            {{ $t('attachment.upload.overall_progress', { 
+              percent: overallProgress,
+              completed: completedCount,
+              total: uploadQueue.length
+            }) }}
+          </div>
         </div>
         
         <div class="mt-6 flex justify-end">
@@ -291,9 +422,9 @@
           <a-button 
             type="primary" 
             @click="completeUpload"
-            :disabled="!uploadedFile"
+            :disabled="completedCount === 0"
           >
-            {{ $t('common.complete') }}
+            {{ $t('common.complete') }} ({{ completedCount }})
           </a-button>
         </div>
       </div>
@@ -319,6 +450,9 @@ import {
   EditOutlined,
   UploadOutlined,
   InboxOutlined,
+  FileOutlined,
+  PauseOutlined,
+  RedoOutlined,
 } from "@ant-design/icons-vue";
 import { message, type FormInstance } from "ant-design-vue";
 
@@ -829,6 +963,45 @@ const uploadStatus = ref<'active' | 'success' | 'exception' | 'normal'>('active'
 const uploadedFile = ref<File | null>(null);
 const uploadResponseData = ref<any>(null);
 
+// 队列上传相关变量
+interface UploadQueueItem {
+  id: string;
+  file: File;
+  status: 'pending' | 'uploading' | 'success' | 'error';
+  progress: number;
+  error?: string;
+  response?: any;
+}
+
+const uploadQueue = ref<UploadQueueItem[]>([]);
+const isUploadingQueue = ref(false);
+const currentUploadIndex = ref(-1);
+
+// 计算属性
+const completedCount = computed(() => {
+  return uploadQueue.value.filter(item => item.status === 'success').length;
+});
+
+const failedCount = computed(() => {
+  return uploadQueue.value.filter(item => item.status === 'error').length;
+});
+
+const pendingCount = computed(() => {
+  return uploadQueue.value.filter(item => item.status === 'pending').length;
+});
+
+const overallProgress = computed(() => {
+  if (uploadQueue.value.length === 0) return 0;
+  const totalProgress = uploadQueue.value.reduce((sum, item) => sum + item.progress, 0);
+  return Math.round(totalProgress / uploadQueue.value.length);
+});
+
+const overallStatus = computed(() => {
+  if (failedCount.value > 0) return 'exception';
+  if (completedCount.value === uploadQueue.value.length) return 'success';
+  return 'active';
+});
+
 // 打开上传对话框
 const openUploadDialog = () => {
   isUploadDialogVisible.value = true;
@@ -848,6 +1021,9 @@ const resetUploadState = () => {
   uploadStatus.value = 'active';
   uploadedFile.value = null;
   uploadResponseData.value = null;
+  uploadQueue.value = [];
+  isUploadingQueue.value = false;
+  currentUploadIndex.value = -1;
 };
 
 // 上传前验证
@@ -920,10 +1096,202 @@ const handleUpload = async (options: any) => {
   }
 };
 
-// 完成上传
-const completeUpload = async () => {
-  if (!uploadedFile.value || !uploadResponseData.value) {
-    message.warning($t('attachment.upload.please_upload_first'));
+// ========== 队列上传相关方法 ==========
+
+// 多文件上传前验证
+const beforeUploadMultiple = (file: File) => {
+  const isAllowedType = [
+    'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+    'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'text/plain', 'text/csv'
+  ].includes(file.type);
+  
+  const isLt10M = file.size / 1024 / 1024 < 10;
+  
+  if (!isAllowedType) {
+    message.error($t('attachment.upload.unsupported_file_type'));
+    return false;
+  }
+  
+  if (!isLt10M) {
+    message.error($t('attachment.upload.file_too_large'));
+    return false;
+  }
+  
+  return true;
+};
+
+// 处理文件选择变化
+const handleFileChange = (info: any) => {
+  const { fileList } = info;
+  
+  // 过滤掉已经上传完成的文件
+  const newFiles = fileList.filter((file: any) => file.status === 'done' || file.status === 'uploading');
+  
+  // 将新文件添加到队列
+  newFiles.forEach((file: any) => {
+    if (file.originFileObj && !uploadQueue.value.some(item => item.file === file.originFileObj)) {
+      const queueItem: UploadQueueItem = {
+        id: Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+        file: file.originFileObj,
+        status: 'pending',
+        progress: 0
+      };
+      uploadQueue.value.push(queueItem);
+    }
+  });
+};
+
+// 获取文件预览URL
+const getFilePreview = (file: File): string => {
+  if (file.type.startsWith('image/')) {
+    return URL.createObjectURL(file);
+  }
+  return '';
+};
+
+// 获取状态文本
+const getStatusText = (status: string): string => {
+  switch (status) {
+    case 'pending': return $t('attachment.upload.status.pending');
+    case 'uploading': return $t('attachment.upload.status.uploading');
+    case 'success': return $t('attachment.upload.status.success');
+    case 'error': return $t('attachment.upload.status.error');
+    default: return status;
+  }
+};
+
+// 从队列中移除文件
+const removeFromQueue = (index: number) => {
+  if (index >= 0 && index < uploadQueue.value.length) {
+    const item = uploadQueue.value[index];
+    // 如果正在上传，先停止
+    if (item.status === 'uploading') {
+      stopQueueUpload();
+    }
+    uploadQueue.value.splice(index, 1);
+  }
+};
+
+// 重试上传
+const retryUpload = (index: number) => {
+  if (index >= 0 && index < uploadQueue.value.length) {
+    const item = uploadQueue.value[index];
+    item.status = 'pending';
+    item.progress = 0;
+    item.error = undefined;
+    
+    // 如果队列没有在上传，开始上传
+    if (!isUploadingQueue.value) {
+      startQueueUpload();
+    }
+  }
+};
+
+// 开始队列上传
+const startQueueUpload = async () => {
+  if (uploadQueue.value.length === 0 || pendingCount.value === 0) {
+    return;
+  }
+  
+  isUploadingQueue.value = true;
+  currentUploadIndex.value = -1;
+  
+  // 开始上传第一个待上传的文件
+  await uploadNextFile();
+};
+
+// 停止队列上传
+const stopQueueUpload = () => {
+  isUploadingQueue.value = false;
+  if (currentUploadIndex.value >= 0 && currentUploadIndex.value < uploadQueue.value.length) {
+    const currentItem = uploadQueue.value[currentUploadIndex.value];
+    if (currentItem.status === 'uploading') {
+      currentItem.status = 'pending';
+      currentItem.progress = 0;
+    }
+  }
+  currentUploadIndex.value = -1;
+};
+
+// 上传下一个文件
+const uploadNextFile = async () => {
+  if (!isUploadingQueue.value) {
+    return;
+  }
+  
+  // 查找下一个待上传的文件
+  const nextIndex = uploadQueue.value.findIndex((item, index) => 
+    item.status === 'pending' && index > currentUploadIndex.value
+  );
+  
+  if (nextIndex === -1) {
+    // 没有更多待上传的文件
+    isUploadingQueue.value = false;
+    currentUploadIndex.value = -1;
+    return;
+  }
+  
+  currentUploadIndex.value = nextIndex;
+  const queueItem = uploadQueue.value[nextIndex];
+  
+  try {
+    // 更新状态为上传中
+    queueItem.status = 'uploading';
+    queueItem.progress = 0;
+    
+    // 模拟上传进度
+    const progressInterval = setInterval(() => {
+      if (queueItem.status === 'uploading' && queueItem.progress < 90) {
+        queueItem.progress += 10;
+      }
+    }, 200);
+    
+    // 实际调用上传API
+    const response = await uploadApi(queueItem.file, 'images');
+    
+    clearInterval(progressInterval);
+    queueItem.progress = 100;
+    queueItem.status = 'success';
+    queueItem.response = response;
+    
+    // 延迟一点时间，然后上传下一个文件
+    setTimeout(() => {
+      if (isUploadingQueue.value) {
+        uploadNextFile();
+      }
+    }, 500);
+    
+  } catch (error: any) {
+    queueItem.status = 'error';
+    queueItem.progress = 0;
+    queueItem.error = error.message || $t('common.upload_failed');
+    
+    // 停止上传队列
+    stopQueueUpload();
+    
+    message.error($t('common.upload_failed') + ': ' + queueItem.file.name);
+  }
+};
+
+// 清除已完成的项目
+const clearCompleted = () => {
+  uploadQueue.value = uploadQueue.value.filter(item => 
+    item.status !== 'success' && item.status !== 'error'
+  );
+};
+
+// 清除整个队列
+const clearQueue = () => {
+  stopQueueUpload();
+  uploadQueue.value = [];
+};
+
+// 完成队列上传
+const completeQueueUpload = async () => {
+  if (completedCount.value === 0) {
+    message.warning($t('attachment.upload.no_completed_files'));
     return;
   }
   
@@ -933,7 +1301,24 @@ const completeUpload = async () => {
   // 刷新页面数据
   fetchItems();
   
-  message.success($t('common.upload_success'));
+  message.success($t('common.upload_success_multiple', { count: completedCount.value }));
+};
+
+// 修改completeUpload以支持队列
+const completeUpload = () => {
+  if (uploadQueue.value.length > 0) {
+    completeQueueUpload();
+  } else {
+    // 保持原有的单文件上传逻辑
+    if (!uploadedFile.value || !uploadResponseData.value) {
+      message.warning($t('attachment.upload.please_upload_first'));
+      return;
+    }
+    
+    closeUploadDialog();
+    fetchItems();
+    message.success($t('common.upload_success'));
+  }
 };
 
 onMounted(() => {
