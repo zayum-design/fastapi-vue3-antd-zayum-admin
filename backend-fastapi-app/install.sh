@@ -467,7 +467,7 @@ python3 -c "
 import sys
 import os
 sys.path.append('.')
-from app.models import Base
+from app.core.models import Base
 from app.core.config import settings
 from sqlalchemy import create_engine
 

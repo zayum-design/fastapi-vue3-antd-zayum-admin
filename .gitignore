@@ -261,6 +261,9 @@ logs/*
 backend-fastapi-app/alembic-README.md
 backend-fastapi-app/tests
 backend-fastapi-app/uploads
+backend-fastapi-app/install
+backend-fastapi-app/install.sh
+backend-fastapi-app/README_INSTALL.md
 
 # 前端
 frontend-vue-app/tests

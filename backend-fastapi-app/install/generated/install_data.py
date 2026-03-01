@@ -1,11 +1,42 @@
 """按模型逐步导入数据（含表结构检查），每个模型一个函数"""
+import importlib
+from pathlib import Path
 from datetime import datetime, date
 from decimal import Decimal
 from sqlalchemy import inspect, create_engine, select
 from sqlalchemy.orm import Session
 from app.dependencies.database import SessionLocal
 from app.core.config import settings
-from app.models import *
+
+
+def _load_models():
+    """动态加载所有模型类到全局命名空间（扫描 app/modules 下所有模块）"""
+    modules_dir = Path(__file__).parent.parent / "app" / "modules"
+    
+    # 遍历所有模块（admin, common, user 等）
+    for module_dir in modules_dir.iterdir():
+        if not module_dir.is_dir() or module_dir.name.startswith("."):
+            continue
+        
+        for model_file in module_dir.glob("**/models/*.py"):
+            if model_file.name == "__init__.py":
+                continue
+            rel_path = model_file.relative_to(Path(__file__).parent.parent / "app")
+            module_path = str(rel_path).replace("/", ".").replace("\\", ".").replace(".py", "")
+            try:
+                module = importlib.import_module(f"app.{module_path}")
+                for attr_name in dir(module):
+                    if attr_name.startswith("_"):
+                        continue
+                    attr = getattr(module, attr_name)
+                    if isinstance(attr, type):
+                        globals()[attr_name] = attr
+            except Exception:
+                continue
+
+
+# 动态加载所有模型
+_load_models()
 
 engine = create_engine(settings.DATABASE_URL)
 inspector = inspect(engine)

@@ -11,24 +11,57 @@ from app.dependencies.database import SessionLocal
  
 def get_sys_models() -> Dict[str, Any]:
     """获取所有sys_开头的模型类"""
-    # 修正路径，因为文件现在在 install 目录中
-    models_dir = os.path.join(os.path.dirname(__file__), "..", "app", "models")
-    model_files = [f for f in os.listdir(models_dir)
-                   if f.startswith("sys_") and f.endswith(".py")]
-    print(f"📁 Found model files: {model_files}")
-
+    # 获取 app/modules 目录的绝对路径
+    modules_dir = os.path.join(os.path.dirname(__file__), "..", "app", "modules")
+    
+    # 递归查找所有以 sys_ 开头且以 .py 结尾的文件
+    model_files = []
+    for root, dirs, files in os.walk(modules_dir):
+        for file in files:
+            if file.startswith("sys_") and file.endswith(".py"):
+                model_files.append(os.path.join(root, file))
+    
+    print(f"📁 Found {len(model_files)} model files in app/modules/")
+    
     models = {}
-    for model_file in model_files:
-        module_name = f"app.models.{model_file[:-3]}"
+    imported_modules = set()  # 跟踪已导入的模块，避免重复
+    
+    for model_file_path in model_files:
+        # 将文件路径转换为模块导入路径
+        # 例如: /path/to/app/modules/admin/sys_admin/models/sys_admin.py
+        # 转换为: app.modules.admin.sys_admin.models.sys_admin
+        rel_path = os.path.relpath(model_file_path, os.path.join(os.path.dirname(__file__), ".."))
+        # 移除 .py 扩展名
+        module_path = rel_path[:-3].replace(os.path.sep, '.')
+        
+        # 跳过已经处理过的模块
+        if module_path in imported_modules:
+            continue
+            
         try:
-            module = importlib.import_module(module_name)
+            module = importlib.import_module(module_path)
+            imported_modules.add(module_path)
+            
             for attr_name in dir(module):
                 attr = getattr(module, attr_name)
-                if isinstance(attr, type) and hasattr(attr, "__tablename__") and not attr.__name__.startswith("_"):
-                    print(f"✅ Found model: {attr.__name__} (from {module_name})")
-                    models[attr.__name__] = attr
+                # 检查是否是 SQLAlchemy 模型类
+                if (isinstance(attr, type) and 
+                    hasattr(attr, "__tablename__") and 
+                    not attr.__name__.startswith("_") and
+                    attr.__name__.startswith("Sys")):
+                    
+                    # 避免重复添加相同的模型
+                    if attr.__name__ not in models:
+                        print(f"✅ Found model: {attr.__name__} (from {module_path})")
+                        models[attr.__name__] = attr
+                    else:
+                        print(f"ℹ️  Skipping duplicate model: {attr.__name__} (already imported)")
         except ImportError as e:
-            print(f"❌ Error importing {module_name}: {e}")
+            print(f"❌ Error importing {module_path}: {e}")
+        except Exception as e:
+            print(f"⚠️  Unexpected error processing {model_file_path}: {e}")
+    
+    print(f"📊 Total unique models found: {len(models)}")
     return models
 
 
@@ -145,7 +178,6 @@ def export_model_data_as_python_script(db: Session, output_path: Optional[str] =
         "from decimal import Decimal",
         "from sqlalchemy.orm import Session",
         "from app.dependencies.database import SessionLocal",
-        "from app.models import *",
         "",
         "def import_data():",
         "    db = SessionLocal()",
@@ -416,7 +448,6 @@ def export_step_install_data_script(db: Session, output_path: Optional[str] = No
         "from sqlalchemy.orm import Session",
         "from app.dependencies.database import SessionLocal",
         "from app.core.config import settings",
-        "from app.models import *",
         "",
         "engine = create_engine(settings.DATABASE_URL)",
         "inspector = inspect(engine)",

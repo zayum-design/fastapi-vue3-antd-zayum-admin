@@ -12,9 +12,9 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.utils.responses import error_response, success_response
-from app.core.crud import crud_sys_auth_admin
+from app.modules.admin.auth.crud.sys_auth_admin import crud_sys_auth_admin
 from app.utils.utils import modify_env_value
-from app.core.crud import crud_sys_admin
+from app.modules.admin.sys_admin.crud.sys_admin import crud_sys_admin
 
 # 创建安装路由
 router = APIRouter(tags=["installation"])
