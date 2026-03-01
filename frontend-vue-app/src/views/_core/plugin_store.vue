@@ -29,6 +29,15 @@
 
           <a-divider />
 
+          <!-- Tab切换 -->
+          <a-tabs v-model:activeKey="activeTab" @change="handleTabChange">
+            <a-tab-pane key="all" :tab="$t('plugin_store.plugin.all_plugins')" />
+            <a-tab-pane key="store" :tab="$t('plugin_store.plugin.store_plugins')" />
+            <a-tab-pane key="local" :tab="$t('plugin_store.plugin.local_plugins')" />
+          </a-tabs>
+
+          <a-divider />
+
           <a-table
             :columns="columns"
             :dataSource="items"
@@ -170,6 +179,7 @@ interface Plugin {
   created_at: string | null;
   updated_at: string | null;
   status: string;
+  is_local?: boolean; // 新增字段，标记是否为本地插件
 }
 
 const currentItem: UnwrapRef<Plugin> = reactive({
@@ -213,6 +223,9 @@ const dialogTitle = computed(() => {
 
 const mode = ref<"add" | "edit" | "view">("add");
 
+// Tab切换相关
+const activeTab = ref("all");
+
 type Key = string | number;
 const state = reactive<{
   selectedRowIds: Key[];
@@ -229,12 +242,26 @@ const items = ref([]);
 const pagination = ref({ current: 1, pageSize: 10, total: 0 });
 const search = ref("");
 
+// 表单验证规则
+const formRules = reactive({
+  title: [
+    { required: true, message: $t("plugin_store.plugin.title_required"), trigger: "blur" },
+  ],
+});
+
 const labelCol = { style: { width: "150px" } };
 const wrapperCol = { span: 14 };
 
 const columns = computed(() => [
   { title: $t("plugin_store.plugin.id"), dataIndex: "id", key: "id" },
-  { title: $t("plugin_store.plugin.title"), dataIndex: "title", key: "title" },
+  { 
+    title: $t("plugin_store.plugin.title"), 
+    dataIndex: "title", 
+    key: "title",
+    customRender: ({ text, record }: { text: string, record: Plugin }) => {
+      return record.is_local ? `${text} (本地)` : text;
+    }
+  },
   { title: $t("plugin_store.plugin.author"), dataIndex: "author", key: "author" },
   { title: $t("plugin_store.plugin.uuid"), dataIndex: "uuid", key: "uuid" },
   {
@@ -379,7 +406,9 @@ const onSubmit = async () => {
 
 const saveItem = async () => {
   try {
-    await installPlugin(currentItem);
+    // 注意：installPlugin 函数需要插件ID，而不是整个插件对象
+    // 这里需要根据实际情况调整
+    await installPlugin(currentItem.id);
     message.success($t("plugin_store.plugin.save_success"));
   } catch (error) {
     console.error($t("plugin_store.plugin.save_item_failed"), error);
@@ -388,11 +417,20 @@ const saveItem = async () => {
 
 const updateItem = async () => {
   try {
-    await installPlugin(currentItem);
+    // 注意：installPlugin 函数需要插件ID，而不是整个插件对象
+    // 这里需要根据实际情况调整
+    await installPlugin(currentItem.id);
     message.success($t("plugin_store.plugin.update_success"));
   } catch (error) {
     console.error($t("plugin_store.plugin.update_item_failed"), error);
   }
+};
+
+// Tab切换处理函数
+const handleTabChange = () => {
+  // 切换tab时重置到第一页
+  pagination.value.current = 1;
+  fetchItems();
 };
 
 const fetchItems = async () => {
@@ -402,6 +440,7 @@ const fetchItems = async () => {
       page: pagination.value.current,
       perPage: pagination.value.pageSize,
       search: search.value,
+      type: activeTab.value, // 根据当前tab传递type参数
     });
     items.value = response.items;
     pagination.value.total = response.total;
@@ -441,7 +480,7 @@ const toggleInstall = async (record: Plugin) => {
         currentItem.id = record.id;
         currentItem.price = record.price;
       } else {
-        await installPlugin(record);
+        await installPlugin(record.id);
         message.success($t("plugin_store.plugin.install_success"));
       }
     }

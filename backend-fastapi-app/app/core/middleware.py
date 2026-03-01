@@ -5,8 +5,8 @@ from typing import Callable, Awaitable
 from fastapi import Request, HTTPException
 from requests import Session
 from starlette.middleware.base import BaseHTTPMiddleware
-from app.crud.sys_admin_log import crud_sys_admin_log
-from app.schemas.sys_admin_log import SysAdminLogCreate
+from app.modules.admin.sys_admin_log.crud.sys_admin_log import crud_sys_admin_log
+from app.modules.admin.sys_admin_log.schemas.sys_admin_log import SysAdminLogCreate
 from app.core.security import get_current_admin
 from app.dependencies.database import get_db
 

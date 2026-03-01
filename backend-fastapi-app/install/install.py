@@ -12,9 +12,9 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.utils.responses import error_response, success_response
-from app.crud.sys_auth_admin import crud_sys_auth_admin
+from app.core.crud import crud_sys_auth_admin
 from app.utils.utils import modify_env_value
-from app.crud.sys_admin import crud_sys_admin
+from app.core.crud import crud_sys_admin
 
 # 创建安装路由
 router = APIRouter(tags=["installation"])
@@ -160,20 +160,20 @@ async def import_database(request: ImportRequest):
     db = next(get_db())
 
     # 导入所有需要的模型类
-    from app.models.sys_admin import SysAdmin
-    from app.models.sys_admin_group import SysAdminGroup
-    from app.models.sys_admin_log import SysAdminLog
-    from app.models.sys_admin_rule import SysAdminRule
-    from app.models.sys_attachment import SysAttachment
-    from app.models.sys_attachment_category import SysAttachmentCategory
-    from app.models.sys_general_category import SysGeneralCategory
-    from app.models.sys_general_config import SysGeneralConfig
-    from app.models.sys_plugin import SysPlugin
-    from app.models.sys_user import SysUser
-    from app.models.sys_user_balance_log import SysUserBalanceLog
-    from app.models.sys_user_group import SysUserGroup
-    from app.models.sys_user_rule import SysUserRule
-    from app.models.sys_user_score_log import SysUserScoreLog
+    from app.modules.admin.sys_admin.schemas.sys_admin import SysAdmin
+    from app.modules.admin.sys_admin_group.schemas.sys_admin_group import SysAdminGroup
+    from app.modules.admin.sys_admin_log.schemas.sys_admin_log import SysAdminLog
+    from app.modules.admin.sys_admin_rule.schemas.sys_admin_rule import SysAdminRule
+    from app.modules.admin.sys_attachment.schemas.sys_attachment import SysAttachment
+    from app.modules.admin.sys_attachment_category.schemas.sys_attachment_category import SysAttachmentCategory
+    from app.modules.admin.sys_general_category.schemas.sys_general_category import SysGeneralCategory
+    from app.modules.admin.sys_general_config.schemas.sys_general_config import SysGeneralConfig
+    from app.modules.admin.sys_plugin.schemas.sys_plugin import SysPlugin
+    from app.modules.admin.sys_user.schemas.sys_user import SysUser
+    from app.modules.admin.sys_user_balance_log.schemas.sys_user_balance_log import SysUserBalanceLog
+    from app.modules.admin.sys_user_group.schemas.sys_user_group import SysUserGroup
+    from app.modules.admin.sys_user_rule.schemas.sys_user_rule import SysUserRule
+    from app.modules.admin.sys_user_score_log.schemas.sys_user_score_log import SysUserScoreLog
 
     from install.generated.install_data import (
         import_SysAdmin,
@@ -363,8 +363,8 @@ async def complete_installation(request: Request, admin_data: AdminCreate):
 
     db = next(get_db())
     try:
-        # 创建初始管理员账户（ID为1）
-        from app.schemas.sys_admin import SysAdminCreate
+        # 创建初始管理员账户（ID为1） 
+        from app.modules.admin.sys_admin.schemas.sys_admin import SysAdminCreate
 
         client_ip = request.client.host if request.client else "127.0.0.1"  # 获取客户端 IP 地址
         obj_in = SysAdminCreate(

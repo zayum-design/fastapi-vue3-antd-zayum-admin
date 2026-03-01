@@ -172,10 +172,20 @@ const coreRoutes: RouteRecordRaw[] = [
       hideInBreadcrumb: true,
       title: "Admin",
     },
-    name: "admin",
+    name: "admin-language-manager",
     path: `/${ADMIN_ROUTE_PREFIX}`,
     redirect: DEFAULT_ADMIN_PATH,
-    children: [],
+    children: [
+      {
+        name: "LanguageManager",
+        path: "language-manager",
+        component: () => import("@/views/_core/general/language-manager.vue"),
+        meta: {
+          icon: "mdi:translate",
+          title: $t("general.language_manager"),
+        },
+      },
+    ],
   },
   {
     component: AuthPageLayout,

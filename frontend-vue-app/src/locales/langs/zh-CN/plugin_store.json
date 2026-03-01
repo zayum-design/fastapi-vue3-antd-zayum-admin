@@ -44,6 +44,10 @@
         "toggle_install_failed": "切换安装状态失败",
         "uninstall_success": "卸载成功",
         "install_success": "安装成功",
-        "form_validation_failed": "表单验证失败"
+        "form_validation_failed": "表单验证失败",
+        "all_plugins": "全部插件",
+        "store_plugins": "插件商城",
+        "local_plugins": "本地插件",
+        "title_required": "请输入标题"
     }
 }

@@ -2,13 +2,13 @@ import subprocess
 from xmlrpc.client import ServerProxy
 
 class SupervisorManager:
-    def __init__(self, service_name):
-        self.service_name = service_name
+    def __init__(self, modules_name):
+        self.modules_name = modules_name
         
     def via_command(self):
         """通过命令行重启"""
         try:
-            subprocess.run(["supervisorctl", "restart", self.service_name], check=True)
+            subprocess.run(["supervisorctl", "restart", self.modules_name], check=True)
             return True
         except subprocess.CalledProcessError:
             return False
@@ -17,8 +17,8 @@ class SupervisorManager:
         """通过 XML-RPC 重启"""
         try:
             server = ServerProxy('http://localhost:8000')
-            server.supervisor.stopProcess(self.service_name)
-            server.supervisor.startProcess(self.service_name)
+            server.supervisor.stopProcess(self.modules_name)
+            server.supervisor.startProcess(self.modules_name)
             return True
         except Exception:
             return False

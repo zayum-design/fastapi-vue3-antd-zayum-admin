@@ -44,6 +44,10 @@
         "toggle_install_failed": "Failed to Toggle Install",
         "uninstall_success": "Uninstall Successful",
         "install_success": "Install Successful",
-        "form_validation_failed": "Form Validation Failed"
+        "form_validation_failed": "Form Validation Failed",
+        "all_plugins": "All Plugins",
+        "store_plugins": "Plugin Store",
+        "local_plugins": "Local Plugins",
+        "title_required": "Please enter title"
     }
 }

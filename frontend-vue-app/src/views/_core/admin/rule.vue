@@ -1211,7 +1211,12 @@ const openDialog = (item: any, modeText: "add" | "edit" | "view") => {
   if (mode.value === "add") {
     resetCurrentItem();
   } else {
-    Object.assign(currentItem, item);
+    // 使用原始名称（如果存在），否则使用当前名称
+    const itemToUse = { ...item };
+    if (itemToUse.originalName !== undefined) {
+      itemToUse.name = itemToUse.originalName;
+    }
+    Object.assign(currentItem, itemToUse);
 
     // 初始化 metaItems
     if (currentItem.meta) {
@@ -1398,13 +1403,17 @@ function addPrefixForTree(treeData: any[], level = 0) {
       const space = "&nbsp;&nbsp;&nbsp;&nbsp;".repeat(level - 1);
       prefix = space + (isLast ? "└ " : "├ ");
     }
-    // 给 name 加上前缀
-    node.name = prefix + node.name;
+    // 创建新对象，不修改原始数据
+    const newNode = { ...node };
+    // 保存原始名称
+    newNode.originalName = node.name;
+    // 给 name 加上前缀（用于显示）
+    newNode.name = prefix + node.name;
     // 如果有 children，则递归处理
     if (node.children && node.children.length > 0) {
-      node.children = addPrefixForTree(node.children, level + 1);
+      newNode.children = addPrefixForTree(node.children, level + 1);
     }
-    return node;
+    return newNode;
   });
 }
 

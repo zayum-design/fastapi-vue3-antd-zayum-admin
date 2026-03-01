@@ -1,0 +1,45 @@
+{
+  "name": "generator",
+  "title": "代码生成器",
+  "author": "System Admin",
+  "uuid": "generator",
+  "description": "数据库表到代码的自动生成插件，支持模型、CRUD、Schema、API和前端代码生成",
+  "version": "1.0.0",
+  "downloads": 0,
+  "download_url": "",
+  "md5_hash": "",
+  "price": 0.0,
+  "paid": 0,
+  "installed": 1,
+  "enabled": 1,
+  "setting_menu": "",
+  "status": "normal",
+  "display_name": "代码生成器",
+  "entry": {
+    "backend": "plugin.py",
+    "frontend": ""
+  },
+  "permissions": ["admin"],
+  "dependencies": [],
+  "auto_enable": true,
+  "menus": [
+    {
+      "id": 29,
+      "rule_type": "menu",
+      "parent_id": 9,
+      "name": "Generator",
+      "path": "/plugin/generator",
+      "component": "/plugins/generator",
+      "redirect": "",
+      "meta": {
+        "icon": "mdi:code",
+        "title": "Generator"
+      },
+      "permission": {},
+      "menu_display_type": "ajax",
+      "model_name": "generator",
+      "weigh": 0,
+      "status": "normal"
+    }
+  ]
+}

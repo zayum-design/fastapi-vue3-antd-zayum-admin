@@ -2,7 +2,7 @@
 
 ## 概述
 
-`install_backend.sh` 是一个专门用于安装和配置 Zayum Admin 系统后端的自动化脚本。该脚本提供了完整的后端安装流程，包括环境检查、依赖安装、数据库配置、管理员设置等功能。
+`install.sh` 是一个专门用于安装和配置 Zayum Admin 系统后端的自动化脚本。该脚本提供了完整的后端安装流程，包括环境检查、依赖安装、数据库配置、管理员设置等功能。
 
 ## 功能特性
 
@@ -21,7 +21,7 @@
 
 ```bash
 cd backend-fastapi-app
-./install_backend.sh
+./install.sh
 ```
 
 ### 2. 安装流程

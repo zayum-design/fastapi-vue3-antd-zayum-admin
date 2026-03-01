@@ -3,8 +3,8 @@
 """
 from fastapi import FastAPI
 from app.dependencies.database import SessionLocal, engine
-from app.models import Base
-from app.plugins.plugin_manager import PluginManager
+from app.core.models import Base
+from plugins.plugin_manager import PluginManager
 from app.utils.log_utils import logger
 
 

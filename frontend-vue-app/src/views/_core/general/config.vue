@@ -517,12 +517,12 @@ async function handleFormSubmit() {
       created_at: moment().tz("Asia/Shanghai").format("YYYY-MM-DD HH:mm:ss"),
       updated_at: moment().tz("Asia/Shanghai").format("YYYY-MM-DD HH:mm:ss"),
     };
-    console.log($t("config.submit_form_data"), payload);
+    console.log($t("general.config.submit_form_data"), payload);
     await createGeneralConfig(payload);
     emit("formSubmitted");
-    message.success($t("config.save_successful"));
+    message.success($t("general.config.save_successful"));
   } catch (error: any) {
-    console.error($t("config.error_on_submit"), error);
+    console.error($t("general.config.error_on_submit"), error);
     handleError(error);
   } finally {
     fetchItems();
@@ -627,21 +627,25 @@ async function submitForm() {
     if (isKeyValueForm(item)) {
       const arrayData = keyValueData.value[item.id] || [];
       arrayData.forEach((kv, idx) => {
-        payload[`row[${item.name}][${idx}][key]`] = kv.key;
-        payload[`row[${item.name}][${idx}][value]`] = kv.value;
+        // 确保key和value不是undefined，使用空字符串代替
+        payload[`row[${item.name}][${idx}][key]`] = kv.key || "";
+        payload[`row[${item.name}][${idx}][value]`] = kv.value || "";
       });
     } else {
       // Otherwise, it's plain text
-      payload[`row[${item.name}]`] = item.value;
+      payload[`row[${item.name}]`] = item.value || "";
     }
   });
 
   try {
     await saveGeneralConfig(payload);
+    // 显示成功消息
+    message.success($t("general.config.save_successful"));
     loading.value = false;
   } catch (error: any) {
-    console.error($t("config.error_on_submit"), error);
+    console.error($t("general.config.error_on_submit"), error);
     handleError(error);
+    loading.value = false;
   }
 }
 

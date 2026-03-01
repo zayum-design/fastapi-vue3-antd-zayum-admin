@@ -1,0 +1,25 @@
+{
+  "name": "demo-plugin",
+  "title": "示例插件",
+  "author": "System Admin",
+  "uuid": "demo-plugin",
+  "description": "这是一个简单的示例插件，显示Hello World",
+  "version": "1.0.0",
+  "downloads": 0,
+  "download_url": "",
+  "md5_hash": "",
+  "price": 0.0,
+  "paid": 0,
+  "installed": 0,
+  "enabled": 0,
+  "setting_menu": "",
+  "status": "normal",
+  "display_name": "示例插件",
+  "entry": {
+    "backend": "main.py",
+    "frontend": "view/index.js"
+  },
+  "permissions": [],
+  "dependencies": [],
+  "auto_enable": true
+}

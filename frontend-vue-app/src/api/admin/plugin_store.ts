@@ -5,16 +5,19 @@ export async function fetchPluginStore({
   page = 1,
   perPage = 10,
   search = '',
+  type = 'all', // all, store, local
 }: {
   page?: number;
   perPage?: number;
   search?: string;
+  type?: string;
 }) {
-  return requestClient.get<SuccessItemsData>('/admin/plugin/list', {
+  return requestClient.get<SuccessItemsData>('/admin/plugin_store/list', {
     params: {
       page,
       per_page: perPage,
       search,
+      type,
     },
   });
 }

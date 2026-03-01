@@ -3,7 +3,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.dependencies.database import get_db
-from app.models.sys_plugin import SysPlugin
+from app.modules.admin.sys_plugin.schemas.sys_plugin import SysPlugin
 from fastapi import Depends
 from app.utils.log_utils import logger
 from app.core.config import settings

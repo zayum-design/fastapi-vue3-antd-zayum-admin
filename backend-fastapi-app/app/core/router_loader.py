@@ -14,24 +14,74 @@ def load_api_routes(app: FastAPI):
     Args:
         app: FastAPI 应用实例
     """
-    api_directory = os.path.join(os.path.dirname(__file__), '..', 'api')
+    # 加载admin相关的API路由
+    load_module_api_routes(app, "admin", "/api/admin")
     
-    if not os.path.isdir(api_directory):
-        raise Exception(f"API目录不存在: {api_directory}")
-
-    for root, dirs, files in os.walk(api_directory):
-        for file in files:
+    # 加载common相关的API路由
+    load_module_api_routes(app, "common", "/api/common")
+    
+    # 加载user相关的API路由  
+    load_module_api_routes(app, "user", "/api/user")
+def load_module_api_routes(app: FastAPI, module_type: str, prefix: str):
+    """
+    加载指定模块类型的API路由
+    
+    Args:
+        app: FastAPI 应用实例
+        module_type: 模块类型 (admin/common/user)
+        prefix: 路由前缀
+    """
+    if module_type == "admin":
+        # admin模块有特殊的目录结构
+        modules_dir = os.path.join(os.path.dirname(__file__), '..', 'modules', 'admin')
+        
+        if not os.path.isdir(modules_dir):
+            logger.warning(f"Admin服务目录不存在: {modules_dir}")
+            return
+        
+        # 遍历所有sys_*目录和auth目录
+        for item in os.listdir(modules_dir):
+            item_path = os.path.join(modules_dir, item)
+            if os.path.isdir(item_path) and (item.startswith('sys_') or item == 'auth'):
+                api_dir = os.path.join(item_path, 'api')
+                if os.path.isdir(api_dir):
+                    # 加载api目录下的所有.py文件
+                    for file in os.listdir(api_dir):
+                        if file.endswith('.py') and file != '__init__.py':
+                            module_name = file[:-3]
+                            module_path = f"app.modules.admin.{item}.api.{module_name}"
+                            try:
+                                module = importlib.import_module(module_path)
+                                if hasattr(module, "router"):
+                                    router = getattr(module, "router")
+                                    app.include_router(router, prefix=prefix)
+                                    logger.info(f"已加载API路由: {module_path}")
+                            except ModuleNotFoundError as e:
+                                logger.info(f"模块导入失败: {module_path}, 错误信息: {e}")
+                            except Exception as e:
+                                logger.error(f"加载API路由时出错: {module_path}, 错误: {e}")
+    else:
+        # common和user模块有简单的目录结构
+        api_dir = os.path.join(os.path.dirname(__file__), '..', 'modules', module_type, 'api')
+        
+        if not os.path.isdir(api_dir):
+            logger.warning(f"{module_type.capitalize()} API目录不存在: {api_dir}")
+            return
+        
+        for file in os.listdir(api_dir):
             if file.endswith('.py') and file != '__init__.py':
-                module_path = os.path.relpath(os.path.join(root, file), api_directory).replace(os.sep, '.')[:-3]
-                logger.info(f"正在导入模块: {module_path}")
+                module_name = file[:-3]
+                module_path = f"app.modules.{module_type}.api.{module_name}"
                 try:
-                    module = importlib.import_module(f"app.api.{module_path}")
+                    module = importlib.import_module(module_path)
                     if hasattr(module, "router"):
                         router = getattr(module, "router")
-                        prefix = module_path.split('.')[-2] if len(module_path.split('.')) > 1 else module_path.split('.')[0]
-                        app.include_router(router, prefix=f"/api/{prefix}")
+                        app.include_router(router, prefix=prefix)
+                        logger.info(f"已加载{module_type.capitalize()} API路由: {module_path}")
                 except ModuleNotFoundError as e:
-                    logger.info(f"模块导入失败: {module_path}, 错误信息: {e}")
+                    logger.info(f"{module_type.capitalize()}模块导入失败: {module_path}, 错误信息: {e}")
+                except Exception as e:
+                    logger.error(f"加载{module_type.capitalize()} API路由时出错: {module_path}, 错误: {e}")
 
 
 def load_installation_routes(app: FastAPI):
@@ -54,3 +104,4 @@ def load_install_routes(app: FastAPI):
     """
     from install.install import router as install_router
     app.include_router(install_router, prefix="/api/install", tags=["installation"])
+

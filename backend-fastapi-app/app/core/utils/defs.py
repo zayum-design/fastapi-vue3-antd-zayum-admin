@@ -1,18 +1,15 @@
 from datetime import datetime, timedelta
-import imghdr
 from app.core.utils.logger import logger
 import os
 import random
 import string
 from PIL import Image
 import zipfile
-from flask import current_app
 import pytz
 import requests
 from urllib.parse import urlparse
 from webob.multidict import MultiDict
-from app.models.common_ems import CommonEms
-from app.models.common_sms import CommonSms
+
 
 def print_object_properties(obj):
     """
@@ -98,12 +95,14 @@ def is_image(file_path):
     :param file_path: 文件路径
     :return: 如果是图片返回 True，否则返回 False
     """
-    with open(file_path, 'rb') as f:
-        file_content = f.read(1024)
-
-    file_type = imghdr.what(file_path, file_content)
-
-    return file_type is not None
+    try:
+        with Image.open(file_path) as img:
+            # 验证图像是否可以被PIL打开
+            img.verify()  # 验证图像完整性
+            return True
+    except (IOError, SyntaxError, Exception):
+        # 如果无法打开或验证失败，说明不是有效的图像文件
+        return False
 
 def get_image_info(image_path):
     """
@@ -121,8 +120,8 @@ def now():
 
     :return: 带时区信息的当前时间对象
     """
-    app_instance = current_app._get_current_object()
-    timezone = app_instance.config.get('TIMEZONE', 'UTC')
+    from app.core.config import settings
+    timezone = settings.TIMEZONE
     default_timezone = pytz.timezone(timezone)
     return datetime.now(default_timezone)
 
@@ -174,152 +173,6 @@ def ip(request):
     else:
         client_ip = request.environ['REMOTE_ADDR']
     return client_ip
-
-def generate_ems_code(request, event, email):
-    """
-    生成邮箱验证码并保存到数据库。
-
-    :param request: Flask 请求对象
-    :param event: 事件类型
-    :param email: 邮箱地址
-    :return: 生成的验证码
-    """
-    code = ''.join(random.choices(string.digits, k=6))
-    existing_ems = request.dbsession.query(CommonEms).filter_by(email=email).first()
-    current_time = now()
-    if existing_ems:
-        existing_ems.code = code
-        existing_ems.created_at = current_time
-    else:
-        ems = CommonEms(
-            event=event,
-            email=email,
-            code=code,
-            ip=ip(request),
-            created_at=current_time
-        )
-        request.dbsession.add(ems)
-    request.dbsession.flush()
-    return code
-
-def check_ems_code(request, event, email, code):
-    """
-    校验邮箱验证码的有效性。
-
-    :param request: Flask 请求对象
-    :param event: 事件类型
-    :param email: 邮箱地址
-    :param code: 验证码
-    :return: 验证结果，"1" 表示成功，其他表示失败原因
-    """
-    existing_ems = request.dbsession.query(CommonEms).filter_by(email=email, event=event).first()
-    delete_expired_ems_codes(request)
-    if existing_ems and existing_ems.times > 5:
-        return "-3"  # 超过最大尝试次数
-
-    if existing_ems:
-        if existing_ems.code == code:
-            current_time = now()
-            if existing_ems.created_at < current_time - timedelta(minutes=30):
-                request.dbsession.delete(existing_ems)
-                request.dbsession.flush()
-                return "-2"  # 验证码已过期
-            else:
-                request.dbsession.delete(existing_ems)
-                return "1"  # 验证成功
-        else:
-            logger.info('existing_ems.times += 1')
-            existing_ems.times += 1
-            return "0"  # 验证码不匹配
-    else:
-        return "0"  # 验证码不存在
-
-def delete_expired_ems_codes(request):
-    """
-    删除过期的邮箱验证码记录（超过30分钟）。
-
-    :param request: Flask 请求对象
-    """
-    thirty_minutes_ago = now() - timedelta(minutes=30)
-    expired_ems = request.dbsession.query(CommonEms).filter(CommonEms.created_at < thirty_minutes_ago).all()
-    for ems in expired_ems:
-        request.dbsession.delete(ems)
-    request.dbsession.flush()
-
-def generate_sms_code(request, event, mobile):
-    """
-    生成短信验证码并保存到数据库。
-
-    :param request: Flask 请求对象
-    :param event: 事件类型
-    :param mobile: 手机号码
-    :return: 生成的验证码
-    """
-    code = ''.join(random.choices(string.digits, k=6))
-    existing_sms = request.dbsession.query(CommonSms).filter_by(mobile=mobile).first()
-    current_time = now()
-    if existing_sms:
-        existing_sms.code = code
-        existing_sms.ip = ip(request)
-        existing_sms.created_at = current_time
-    else:
-        sms = CommonSms(
-            event=event,
-            mobile=mobile,
-            code=code,
-            ip=ip(request),
-            created_at=current_time
-        )
-        request.dbsession.add(sms)
-    return code
-
-def check_sms_code(request, event, mobile, code):
-    """
-    校验短信验证码的有效性。
-
-    :param request: Flask 请求对象
-    :param event: 事件类型
-    :param mobile: 手机号码
-    :param code: 验证码
-    :return: 验证结果，"1" 表示成功，其他表示失败原因
-    """
-    existing_sms = request.dbsession.query(CommonSms).filter_by(mobile=mobile, event=event).first()
-    delete_expired_sms_codes(request)
-    if existing_sms and existing_sms.times > 5:
-        return "-3"  # 超过最大尝试次数
-
-    if existing_sms:
-        if existing_sms.code == code:
-            current_time = now()
-            if existing_sms.created_at < current_time - timedelta(minutes=30):
-                request.dbsession.delete(existing_sms)
-                request.dbsession.flush()
-                return "-2"  # 验证码已过期
-            else:
-                request.dbsession.delete(existing_sms)
-                return "1"  # 验证成功
-        else:
-            existing_sms.times += 1
-            return "0"  # 验证码不匹配
-    else:
-        return "0"  # 验证码不存在
-
-def delete_expired_sms_codes(request):
-    """
-    删除过期的短信验证码记录（超过30分钟）。
-
-    :param request: Flask 请求对象
-    """
-    thirty_minutes_ago = now() - timedelta(minutes=30)
-    expired_sms = request.dbsession.query(CommonSms).filter(CommonSms.created_at < thirty_minutes_ago).all()
-    for sms in expired_sms:
-        request.dbsession.delete(sms)
-    request.dbsession.flush()
-
-
-from PIL import Image
-import os
-from datetime import datetime
 
 def generate_thumbnail(image_path, base_path, relative_path,size=(128, 128)):
     """

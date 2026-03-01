@@ -5,8 +5,8 @@ from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status
 from app.core.config import settings
-from app.models.sys_admin import SysAdmin
-from app.models.sys_user import SysUser
+from app.modules.admin.sys_admin.models.sys_admin import SysAdmin
+from app.modules.admin.sys_user.models.sys_user import SysUser
 from app.dependencies.database import get_db
 from sqlalchemy.orm import Session
 from app.utils.log_utils import logger

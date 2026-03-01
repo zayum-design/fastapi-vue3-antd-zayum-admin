@@ -8,21 +8,22 @@ from alembic import context
 import os
 import importlib
 import sys
-from app.models import Base
-from app.models.sys_admin import SysAdmin
-from app.models.sys_admin_group import SysAdminGroup
-from app.models.sys_admin_log import SysAdminLog
-from app.models.sys_admin_rule import SysAdminRule
-from app.models.sys_attachment import SysAttachment
-from app.models.sys_attachment_category import SysAttachmentCategory
-from app.models.sys_general_category import SysGeneralCategory
-from app.models.sys_general_config import SysGeneralConfig
-from app.models.sys_plugin import SysPlugin
-from app.models.sys_user import SysUser
-from app.models.sys_user_balance_log import SysUserBalanceLog
-from app.models.sys_user_group import SysUserGroup
-from app.models.sys_user_rule import SysUserRule
-from app.models.sys_user_score_log import SysUserScoreLog
+from app.core.models import Base
+
+from app.modules.admin.sys_admin.models.sys_admin import SysAdmin
+from app.modules.admin.sys_admin_group.models.sys_admin_group import SysAdminGroup
+from app.modules.admin.sys_admin_log.models.sys_admin_log import SysAdminLog
+from app.modules.admin.sys_admin_rule.models.sys_admin_rule import SysAdminRule
+from app.modules.admin.sys_attachment.models.sys_attachment import SysAttachment
+from app.modules.admin.sys_attachment_category.models.sys_attachment_category import SysAttachmentCategory
+from app.modules.admin.sys_general_category.models.sys_general_category import SysGeneralCategory
+from app.modules.admin.sys_general_config.models.sys_general_config import SysGeneralConfig
+from app.modules.admin.sys_plugin.models.sys_plugin import SysPlugin
+from app.modules.admin.sys_user.models.sys_user import SysUser
+from app.modules.admin.sys_user_balance_log.models.sys_user_balance_log import SysUserBalanceLog
+from app.modules.admin.sys_user_group.models.sys_user_group import SysUserGroup
+from app.modules.admin.sys_user_rule.models.sys_user_rule import SysUserRule
+from app.modules.admin.sys_user_score_log.models.sys_user_score_log import SysUserScoreLog
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

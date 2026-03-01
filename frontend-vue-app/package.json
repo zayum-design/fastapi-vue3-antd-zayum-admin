@@ -66,6 +66,7 @@
   },
   "devDependencies": {
     "@types/axios-mock-adapter": "^1.10.4",
+    "@types/file-saver": "^2.0.7",
     "@types/lodash.clonedeep": "^4.5.9",
     "@types/lodash.get": "^4.4.9",
     "@types/lodash.isequal": "^4.5.8",
