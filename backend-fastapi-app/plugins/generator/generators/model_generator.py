@@ -3,16 +3,13 @@
 生成SQLAlchemy模型代码
 """
 
-from typing import List, Literal, Optional, Set
+from typing import List, Optional, Set
 import logging
-from datetime import date, datetime
 from sqlalchemy import (
-    DECIMAL, SMALLINT, TEXT, DATE, DATETIME, UniqueConstraint, JSON, text, Table, 
-    FetchedValue, String, Enum as SqlEnum
+    DECIMAL, SMALLINT, TEXT, DATE, DATETIME, UniqueConstraint, JSON, Table, 
+    FetchedValue, Enum as SqlEnum
 )
-from sqlalchemy.types import BOOLEAN, INTEGER, SMALLINT, VARCHAR, TypeEngine
-from sqlalchemy.orm import Mapped, mapped_column, validates
-from fastapi_babel import _
+from sqlalchemy.types import BOOLEAN, INTEGER, VARCHAR
 
 from ..core.config import GeneratorConfig
 
@@ -215,11 +212,11 @@ class ModelGenerator:
         if not address:
             raise ValueError(_("Email is required"))
         if "@" not in address:
-            logger.error(f"Invalid email address provided: {{address}}")
+            logger.error("Invalid email address provided: {{address}}")
             raise ValueError(_("Invalid email address"))
         if len(address) > {col_type.length}:
-            logger.error(f"Email too long: {{address}} (max {col_type.length} chars)")
-            raise ValueError(_(f"Email too long (max {col_type.length} characters)"))
+            logger.error("Email too long: {{address}} (max {col_type.length} chars)")
+            raise ValueError(_("Email too long (max {col_type.length} characters)"))
         return address
             """
         elif any(field in lower_col_name for field in self.config.MOBILE_FIELDS) and col_type.length == 11:
@@ -229,10 +226,10 @@ class ModelGenerator:
         if not mobile:
             raise ValueError(_("Mobile number is required"))
         if not mobile.isdigit():
-            logger.error(f"Mobile number contains non-digit characters: {{mobile}}")
+            logger.error("Mobile number contains non-digit characters: {{mobile}}")
             raise ValueError(_("Mobile number must contain only digits"))
         if len(mobile) != 11:
-            logger.error(f"Mobile number length is not 11 digits: {{mobile}}")
+            logger.error("Mobile number length is not 11 digits: {{mobile}}")
             raise ValueError(_("Mobile number must be 11 digits long"))
         return mobile
             """
@@ -243,11 +240,11 @@ class ModelGenerator:
         if not username:
             raise ValueError(_("Username is required"))
         if not username.isalnum():
-            logger.error(f"Username contains non-alphanumeric characters: {{username}}")
+            logger.error("Username contains non-alphanumeric characters: {{username}}")
             raise ValueError(_("Username must be alphanumeric"))
         if len(username) > {col_type.length}:
-            logger.error(f"Username too long: {{username}} (max {col_type.length} chars)")
-            raise ValueError(_(f"Username too long (max {col_type.length} characters)"))
+            logger.error("Username too long: {{username}} (max {col_type.length} chars)")
+            raise ValueError(_("Username too long (max {col_type.length} characters)"))
         return username
             """
         elif any(field in lower_col_name for field in self.config.URL_FIELDS):
@@ -257,11 +254,11 @@ class ModelGenerator:
         if not url:
             raise ValueError(_("URL is required"))
         if not (url.startswith('http://') or url.startswith('https://')):
-            logger.error(f"Invalid URL format: {{url}}")
+            logger.error("Invalid URL format: {{url}}")
             raise ValueError(_("URL must start with http:// or https://"))
         if len(url) > {col_type.length}:
-            logger.error(f"URL too long: {{url}} (max {col_type.length} chars)")
-            raise ValueError(_(f"URL too long (max {col_type.length} characters)"))
+            logger.error("URL too long: {{url}} (max {col_type.length} chars)")
+            raise ValueError(_("URL too long (max {col_type.length} characters)"))
         return url
             """
         elif any(field in lower_col_name for field in self.config.NAME_FIELDS):
@@ -271,11 +268,11 @@ class ModelGenerator:
         if not name:
             raise ValueError(_("Name is required"))
         if not re.match(r'^[\\w\\s\\-\\.]+$', name):
-            logger.error(f"Invalid characters in name: {{name}}")
+            logger.error("Invalid characters in name: {{name}}")
             raise ValueError(_("Name contains invalid characters"))
         if len(name) > {col_type.length}:
-            logger.error(f"Name too long: {{name}} (max {col_type.length} chars)")
-            raise ValueError(_(f"Name too long (max {col_type.length} characters)"))
+            logger.error("Name too long: {{name}} (max {col_type.length} chars)")
+            raise ValueError(_("Name too long (max {col_type.length} characters)"))
         return name
             """
         elif any(field in lower_col_name for field in self.config.ID_FIELDS):
@@ -285,11 +282,11 @@ class ModelGenerator:
         if not id_number:
             raise ValueError(_("ID is required"))
         if not re.match(r'^[\\w\\d\\-]+$', id_number):
-            logger.error(f"Invalid characters in ID: {{id_number}}")
+            logger.error("Invalid characters in ID: {{id_number}}")
             raise ValueError(_("ID contains invalid characters"))
         if len(id_number) > {col_type.length}:
-            logger.error(f"ID too long: {{id_number}} (max {col_type.length} chars)")
-            raise ValueError(_(f"ID too long (max {col_type.length} characters)"))
+            logger.error("ID too long: {{id_number}} (max {col_type.length} chars)")
+            raise ValueError(_("ID too long (max {col_type.length} characters)"))
         return id_number
             """
         else:
@@ -301,8 +298,8 @@ class ModelGenerator:
         if not value:
             raise ValueError(_("Value is required"))
         if len(value) > {col_type.length}:
-            logger.error(f"Value too long for {{key}}: {{value}} (max {col_type.length} chars)")
-            raise ValueError(_(f"Value too long (max {col_type.length} characters)"))
+            logger.error("Value too long for {{key}}: {{value}} (max {col_type.length} chars)")
+            raise ValueError(_("Value too long (max {col_type.length} characters)"))
         return value
                 """
         return ""

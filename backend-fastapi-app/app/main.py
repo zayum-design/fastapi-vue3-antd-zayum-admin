@@ -2,9 +2,19 @@
 FastAPI 应用主入口
 模块化重构版本 - 简化代码结构
 """
+
 from fastapi.responses import HTMLResponse
 
-from app.core.application import create_fastapi_app, configure_middleware, configure_exception_handlers
+# 初始化日志系统（必须在其他导入之前）
+from app.core.logging import setup_logging
+
+setup_logging()
+
+from app.core.application import (
+    configure_exception_handlers,
+    configure_middleware,
+    create_fastapi_app,
+)
 from app.core.environment import is_application_installed
 from app.core.lifespan import lifespan
 from app.core.swagger import get_custom_swagger_ui
@@ -20,6 +30,7 @@ configure_middleware(app, is_installed=is_installed)
 
 # 配置异常处理器
 configure_exception_handlers(app)
+
 
 # 自定义 Swagger UI 路由，使用多重 CDN 备用方案
 @app.get("/docs", response_class=HTMLResponse, include_in_schema=False)

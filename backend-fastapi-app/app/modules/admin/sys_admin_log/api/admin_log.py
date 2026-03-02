@@ -1,14 +1,12 @@
-from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_babel import _
 from sqlalchemy.orm import Session
-from app.dependencies.database import get_db
+
 from app.core.security import get_current_admin
+from app.dependencies.database import get_db
 from app.modules.admin.sys_admin_log.crud.sys_admin_log import crud_sys_admin_log
-from app.modules.admin.sys_admin_log.schemas.sys_admin_log import SysAdminLogCreate, SysAdminLogUpdate
-from app.utils.responses import success_response
 from app.utils.response_handlers import ErrorCode
-from app.modules.admin.sys_admin_log.models.sys_admin_log import SysAdminLog
+from app.utils.responses import success_response
 
 # Initialize the API router for sys_admin_log endpoints
 router = APIRouter(
@@ -17,13 +15,15 @@ router = APIRouter(
 
 # Set the maximum per_page limit
 MAX_PER_PAGE = 200
+
+
 @router.get("/list")
 def read_sys_admin_log_list(
     page: int = 1,
     per_page: int = 10,
-    search: Optional[str] = None,
-    orderby: Optional[str] = 'id_desc',  # Sorting field and direction, e.g., "name_asc"
-    db: Session = Depends(get_db)
+    search: str | None = None,
+    orderby: str | None = "id_desc",  # Sorting field and direction, e.g., "name_asc"
+    db: Session = Depends(get_db),
 ):
     """
     Retrieve a list of SysAdminLog records with optional pagination, search, and sorting.
@@ -41,29 +41,35 @@ def read_sys_admin_log_list(
     # If per_page is -1, set it to the maximum allowed value
     if per_page == -1:
         per_page = MAX_PER_PAGE  # Set per_page to the maximum value (200)
-    
+
     # Ensure per_page is within the allowed range
     per_page = min(per_page, MAX_PER_PAGE)
-    
+
     # Ensure page and per_page are at least 1
     page = max(page, 1)
-    
+
     # Retrieve paginated records with search and sorting
-    items = crud_sys_admin_log.get_multi(db, page=page, per_page=per_page, search=search, orderby=orderby)
+    items = crud_sys_admin_log.get_multi(
+        db, page=page, per_page=per_page, search=search, orderby=orderby
+    )
     total = crud_sys_admin_log.get_total(db, search=search)
-    
+
     response_page = page
     response_per_page = per_page
 
     # Prepare the response data
     return success_response(
         {
-            "items": [item.to_dict() for item in items],  # Convert each model instance to a dictionary
+            "items": [
+                item.to_dict() for item in items
+            ],  # Convert each model instance to a dictionary
             "total": total,
             "page": response_page,
             "per_page": response_per_page,
         }
     )
+
+
 @router.get("/{id}")
 def read_sys_admin_log(id: int, db: Session = Depends(get_db)):
     """
@@ -82,9 +88,12 @@ def read_sys_admin_log(id: int, db: Session = Depends(get_db)):
     db_obj = crud_sys_admin_log.get(db, id=id)
     if db_obj is None:
         # Raise a 404 Not Found error if the record does not exist
-        raise HTTPException(status_code=ErrorCode.NOT_FOUND.value, detail=_("SysAdminLog not found."))
+        raise HTTPException(
+            status_code=ErrorCode.NOT_FOUND.value, detail=_("SysAdminLog not found.")
+        )
     # Return the record's data as a dictionary
     return success_response(db_obj.to_dict())
+
 
 @router.delete("/delete/{id}")
 def delete_sys_admin_log(id: int, db: Session = Depends(get_db)):
@@ -104,7 +113,9 @@ def delete_sys_admin_log(id: int, db: Session = Depends(get_db)):
     db_obj = crud_sys_admin_log.get(db, id=id)
     if db_obj is None:
         # Raise a 404 Not Found error if the record does not exist
-        raise HTTPException(status_code=ErrorCode.NOT_FOUND.value, detail=_("SysAdminLog not found."))
+        raise HTTPException(
+            status_code=ErrorCode.NOT_FOUND.value, detail=_("SysAdminLog not found.")
+        )
     # Remove the record from the database
     crud_sys_admin_log.remove(db, id=id)
     # Return an empty success response

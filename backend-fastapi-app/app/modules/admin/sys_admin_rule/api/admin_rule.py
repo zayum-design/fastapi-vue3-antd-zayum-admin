@@ -1,19 +1,19 @@
 from collections import defaultdict
-from typing import Dict, List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_babel import _
 from sqlalchemy.orm import Session
+
+from app.core.security import get_current_admin
 from app.dependencies.database import get_db
 from app.modules.admin.sys_admin_rule.crud.sys_admin_rule import crud_sys_admin_rule
 from app.modules.admin.sys_admin_rule.schemas.sys_admin_rule import (
-    SysAdminRule,
     SysAdminRuleCreate,
     SysAdminRuleTree,
     SysAdminRuleUpdate,
 )
-from app.utils.responses import success_response
 from app.utils.response_handlers import ErrorCode
-from app.core.security import get_current_admin
+from app.utils.responses import success_response
 
 # Initialize the API router for sys_admin_rule endpoints
 router = APIRouter(
@@ -28,8 +28,8 @@ MAX_PER_PAGE = 200
 def read_sys_admin_rule_list(
     page: int = 1,
     per_page: int = 10,
-    search: Optional[str] = None,
-    orderby: Optional[str] = None,  # Sorting field and direction, e.g., "name_asc"
+    search: str | None = None,
+    orderby: str | None = None,  # Sorting field and direction, e.g., "name_asc"
     db: Session = Depends(get_db),
 ):
     """
@@ -79,31 +79,29 @@ def read_sys_admin_rule_list(
     )
 
 
-from typing import List, Dict, Optional
-from collections import defaultdict
 from app.modules.admin.sys_admin_rule.models.sys_admin_rule import SysAdminRule as ModelSysAdminRule
 
 
-def build_tree(items: List[ModelSysAdminRule]) -> List[Dict]:
+def build_tree(items: list[ModelSysAdminRule]) -> list[dict]:
     """
     将平面的 SysAdminRule 列表转换为树形结构，去除没有子节点的 children 字段
     """
     # 预处理items，确保permission字段是字典类型
     for item in items:
-        if hasattr(item, 'permission') and isinstance(item.permission, str):
+        if hasattr(item, "permission") and isinstance(item.permission, str):
             try:
-                item.permission = {} if item.permission == '{}' else eval(item.permission)
+                item.permission = {} if item.permission == "{}" else eval(item.permission)
             except:
                 item.permission = {}
-    
+
     # 将 SQLAlchemy 对象转换为 Pydantic 对象
     pydantic_items = [SysAdminRuleTree.from_orm(item) for item in items]
 
     # 创建一个 id 到节点的映射
-    item_dict: Dict[int, SysAdminRuleTree] = {item.id: item for item in pydantic_items}
+    item_dict: dict[int, SysAdminRuleTree] = {item.id: item for item in pydantic_items}
 
     # 创建 parent_id 到子节点的映射
-    children_map: Dict[int, List[SysAdminRuleTree]] = defaultdict(list)
+    children_map: dict[int, list[SysAdminRuleTree]] = defaultdict(list)
     for item in pydantic_items:
         parent_id = item.parent_id if item.parent_id is not None else 0
         children_map[parent_id].append(item)
@@ -127,7 +125,7 @@ def build_tree(items: List[ModelSysAdminRule]) -> List[Dict]:
         add_children(item)
 
     # 将树结构转换成字典格式，去除空的children字段
-    def convert_to_dict(item: SysAdminRuleTree) -> Dict:
+    def convert_to_dict(item: SysAdminRuleTree) -> dict:
         result = item.dict()  # 转换为字典
         # 如果children为空（为None或为空列表），删除该字段
         if item.children is None or len(item.children) == 0:
@@ -181,9 +179,7 @@ def create_sys_admin_rule(obj_in: SysAdminRuleCreate, db: Session = Depends(get_
 
 
 @router.put("/update/{id}")
-def update_sys_admin_rule(
-    id: int, obj_in: SysAdminRuleUpdate, db: Session = Depends(get_db)
-):
+def update_sys_admin_rule(id: int, obj_in: SysAdminRuleUpdate, db: Session = Depends(get_db)):
     """
     Update an existing SysAdminRule record.
 

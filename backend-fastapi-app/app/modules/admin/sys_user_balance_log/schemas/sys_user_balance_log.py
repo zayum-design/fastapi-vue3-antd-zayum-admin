@@ -1,44 +1,43 @@
-from datetime import datetime, date, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
-from typing import Optional, Literal
-from pydantic import BaseModel, Field, EmailStr, field_validator
-from fastapi_babel import _
-import re
+
+from pydantic import BaseModel, Field
 
 
 class SysUserBalanceLogBase(BaseModel):
-    id: Optional[int] = Field(None)
+    id: int | None = Field(None)
     user_id: int = Field(...)
     balance: Decimal = Field(...)
     before: Decimal = Field(...)
     after: Decimal = Field(...)
-    memo: Optional[str] = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    memo: str | None = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     class Config:
-        orm_mode = True
+        from_attributes = True
         arbitrary_types_allowed = True
-        json_encoders = {
-            Decimal: lambda v: str(v)
-        }
+        json_encoders = {Decimal: lambda v: str(v)}
 
 
 class SysUserBalanceLogCreate(SysUserBalanceLogBase):
     pass
 
+
 class SysUserBalanceLogUpdate(BaseModel):
-    user_id: Optional[int] = None
-    balance: Optional[Decimal] = None
-    before: Optional[Decimal] = None
-    after: Optional[Decimal] = None
-    memo: Optional[str] = Field(None, max_length=255)
+    user_id: int | None = None
+    balance: Decimal | None = None
+    before: Decimal | None = None
+    after: Decimal | None = None
+    memo: str | None = Field(None, max_length=255)
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 class SysUserBalanceLogInDBBase(SysUserBalanceLogBase):
     pass
+
 
 class SysUserBalanceLog(SysUserBalanceLogInDBBase):
     pass

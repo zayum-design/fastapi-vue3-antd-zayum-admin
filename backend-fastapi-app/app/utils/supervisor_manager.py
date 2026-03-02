@@ -1,10 +1,11 @@
 import subprocess
 from xmlrpc.client import ServerProxy
 
+
 class SupervisorManager:
     def __init__(self, modules_name):
         self.modules_name = modules_name
-        
+
     def via_command(self):
         """通过命令行重启"""
         try:
@@ -12,20 +13,21 @@ class SupervisorManager:
             return True
         except subprocess.CalledProcessError:
             return False
-            
+
     def via_xmlrpc(self):
         """通过 XML-RPC 重启"""
         try:
-            server = ServerProxy('http://localhost:8000')
+            server = ServerProxy("http://localhost:8000")
             server.supervisor.stopProcess(self.modules_name)
             server.supervisor.startProcess(self.modules_name)
             return True
         except Exception:
             return False
-            
+
     def safe_restart(self):
         """自动选择可用方法"""
         return self.via_command() or self.via_xmlrpc()
+
 
 # 使用示例
 manager = SupervisorManager("my_fastapi_app")

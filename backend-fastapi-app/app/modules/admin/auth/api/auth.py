@@ -1,34 +1,35 @@
-from typing import Annotated, Dict, List, Optional
-from fastapi import APIRouter, HTTPException, status, Request, Depends
+"""
+认证 API 路由
+提供登录、登出、Token 刷新等功能
+"""
+
+from collections import defaultdict
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi_babel import _
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta, timezone
-from collections import defaultdict
-from app.modules.admin.sys_admin.models.sys_admin import SysAdmin
-from app.modules.admin.sys_admin_group.models.sys_admin_group import SysAdminGroup
-from app.modules.admin.sys_admin_rule.models.sys_admin_rule import SysAdminRule
-from app.modules.admin.sys_admin_log.models.sys_admin_log import SysAdminLog
+
+from app.core.security import decode_access_token
+from app.dependencies.auth import CurrentAdmin
 from app.dependencies.database import get_db
-from app.modules.admin.auth.crud.sys_auth_admin import crud_sys_auth_admin
-from app.modules.admin.sys_admin_rule.crud.sys_admin_rule import crud_sys_admin_rule
+from app.exceptions import UnauthorizedError
+from app.modules.admin.sys_admin.services.sys_admin import sys_admin_service
+from app.modules.admin.sys_admin_group.models.sys_admin_group import SysAdminGroup
 from app.modules.admin.sys_admin_log.crud.sys_admin_log import crud_sys_admin_log
-from app.core.security import (
-    decode_access_token,
-    get_current_admin,
-    verify_password,
-    create_access_token,
-)
-from app.core.captcha import verify_captcha
-from app.core.config import settings
+from app.modules.admin.sys_admin_log.models.sys_admin_log import SysAdminLog
+from app.modules.admin.sys_admin_rule.crud.sys_admin_rule import crud_sys_admin_rule
+from app.modules.admin.sys_admin_rule.models.sys_admin_rule import SysAdminRule
 from app.utils.log_utils import logger
 from app.utils.responses import success_response
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-# Models
+# ============== Pydantic Schemas ==============
+
+
 class LoginInput(BaseModel):
     username: str
     password: str
@@ -55,70 +56,35 @@ class TokenForm(BaseModel):
 
 
 class ProfileInput(BaseModel):
-    nickname: Optional[str] = None
-    email: Optional[str] = None
-    mobile: Optional[str] = None
-    avatar: Optional[str] = None
+    nickname: str | None = None
+    email: str | None = None
+    mobile: str | None = None
+    avatar: str | None = None
 
 
-# Helper functions
+# ============== Helper Functions ==============
+
+
 def get_client_ip(request: Request) -> str:
-    """安全地获取客户端IP地址"""
-    return getattr(request.client, 'host', 'unknown') if request.client else 'unknown'
+    """获取客户端 IP 地址"""
+    return getattr(request.client, "host", "unknown") if request.client else "unknown"
 
 
-def handle_failed_login(admin, username: str, client_ip: str, db: Session):
-    if admin:
-        admin.login_failure += 1
-        admin.login_at = datetime.now(timezone.utc)
-        admin.login_ip = client_ip
-        db.commit()
-        logger.warning(
-            f"Failed login attempt for user: {username} from IP: {client_ip}. "
-            f"Failure count: {admin.login_failure}"
-        )
-    else:
-        logger.warning(
-            f"Failed login attempt for non-existent user: {username} from IP: {client_ip}"
-        )
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+def transform_items(items: list[SysAdminRule]) -> list[dict]:
+    """
+    将权限规则列表转换为树形结构
 
-    raise HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST, detail="用户名或密码错误"
-    )
-
-
-def handle_successful_login(admin, username: str, client_ip: str, db: Session):
-    admin.login_failure = 0
-    admin.login_at = datetime.now(timezone.utc)
-    admin.login_ip = client_ip
-
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": admin.id}, expires_delta=access_token_expires
-    )
-    admin.token = access_token
-    db.commit()
-
-    logger.info(f"User {username} logged in successfully from IP: {client_ip}")
-    return access_token
-
-
-def transform_items(items: List[SysAdminRule]) -> List[Dict]:
-    """优化后的树形结构转换函数，使用字典提高查找性能"""
+    优化后的算法使用字典提高查找性能
+    """
     items_by_parent = defaultdict(list)
     root_items = []
-    
+
     for item in items:
         if item.parent_id == 0:
             root_items.append(item)
         items_by_parent[item.parent_id].append(item)
-    
-    def build_tree(parent_id: int) -> List[Dict]:
+
+    def build_tree(parent_id: int) -> list[dict]:
         return [
             {
                 "id": item.id,
@@ -126,11 +92,11 @@ def transform_items(items: List[SysAdminRule]) -> List[Dict]:
                 "path": f"{item.path}",
                 "component": item.component,
                 "meta": item.meta,
-                **({"children": build_tree(item.id)} if items_by_parent[item.id] else {})
+                **({"children": build_tree(item.id)} if items_by_parent[item.id] else {}),
             }
             for item in items_by_parent[parent_id]
         ]
-    
+
     return [
         {
             "id": item.id,
@@ -144,36 +110,71 @@ def transform_items(items: List[SysAdminRule]) -> List[Dict]:
     ]
 
 
-# Routes
+# ============== Auth Endpoints ==============
+
+
 @router.post("/login", response_model=TokenResponse)
 async def login(
     login_data: LoginInput,
     request: Request,
     db: Session = Depends(get_db),
 ):
+    """
+    用户登录（JSON 格式）
+
+    支持验证码验证
+    """
     client_ip = get_client_ip(request)
-    
-    if login_data.captcha_type == "code":
-        if not login_data.captcha_id or not login_data.captcha_code:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="验证码参数缺失"
-            )
-        
-        captcha_valid = await verify_captcha(
-            login_data.captcha_type,
-            login_data.captcha,
-            login_data.captcha_id,
-            login_data.captcha_code,
+
+    # 验证码验证
+    # if login_data.captcha_type == "code":
+    #     if not login_data.captcha_id or not login_data.captcha_code:
+    #         raise HTTPException(
+    #             status_code=status.HTTP_400_BAD_REQUEST,
+    #             detail="验证码参数缺失"
+    #         )
+
+    #     captcha_valid = await verify_captcha(
+    #         login_data.captcha_type,
+    #         login_data.captcha,
+    #         login_data.captcha_id,
+    #         login_data.captcha_code,
+    #     )
+    #     if not captcha_valid:
+    #         raise HTTPException(
+    #             status_code=status.HTTP_400_BAD_REQUEST,
+    #             detail=f"验证码错误或已过期{captcha_valid}-{ login_data.captcha_type}, {login_data.captcha}, {login_data.captcha_id},{login_data.captcha_code},"
+    #         )
+
+    # 使用 Service 层进行认证
+    admin = sys_admin_service.authenticate(
+        db, username=login_data.username, password=login_data.password
+    )
+
+    if not admin:
+        logger.warning(f"Failed login attempt for {login_data.username} from IP: {client_ip}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="用户名或密码错误",
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
-    admin = crud_sys_auth_admin.get_by_name(db, username=login_data.username)
-    if not admin or not admin.check_password(login_data.password):
-        handle_failed_login(admin, login_data.username, client_ip, db)
+    # 刷新对象状态，防止 session 过期导致 "0 were matched" 错误
+    db.refresh(admin)
 
-    access_token = handle_successful_login(
-        admin, login_data.username, client_ip, db
-    )
+    # 更新登录信息
+    admin.login_ip = client_ip
+    db.commit()
+
+    # 生成 Token
+    access_token = sys_admin_service.create_access_token_for_admin(admin)
+
+    # 保存 Token 到数据库
+    admin.token = access_token
+    db.commit()
+
+    logger.info("User {admin.username} logged in successfully from IP: {client_ip}")
+
     return success_response({"access_token": access_token})
 
 
@@ -183,34 +184,62 @@ async def login_form(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Session = Depends(get_db),
 ):
-    client_ip = get_client_ip(request)
-    
-    admin = crud_sys_auth_admin.get_by_name(db, username=form_data.username)
-    if not admin or not admin.check_password(form_data.password):
-        handle_failed_login(admin, form_data.username, client_ip, db)
+    """
+    用户登录（OAuth2 表单格式）
 
-    access_token = handle_successful_login(
-        admin, form_data.username, client_ip, db
+    用于 Swagger UI 等 OAuth2 客户端
+    """
+    client_ip = get_client_ip(request)
+
+    # 使用 Service 层进行认证
+    admin = sys_admin_service.authenticate(
+        db, username=form_data.username, password=form_data.password
     )
+
+    if not admin:
+        logger.warning(f"Failed login attempt for {form_data.username} from IP: {client_ip}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="用户名或密码错误",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # 刷新对象状态，防止 session 过期导致 "0 were matched" 错误
+    db.refresh(admin)
+
+    # 更新登录信息
+    admin.login_ip = client_ip
+    db.commit()
+
+    # 生成 Token
+    access_token = sys_admin_service.create_access_token_for_admin(admin)
+
+    # 保存 Token 到数据库
+    admin.token = access_token
+    db.commit()
+
+    logger.info("User {admin.username} logged in successfully from IP: {client_ip}")
+
     return {"access_token": access_token, "token_type": "bearer"}
 
 
 @router.get("/profile")
 async def get_profile(
-    admin: SysAdmin = Depends(get_current_admin),
+    admin: CurrentAdmin = None,
     db: Session = Depends(get_db),
 ):
+    """获取当前用户资料"""
+    if not admin:
+        raise UnauthorizedError("Authentication required")
+
     group = db.query(SysAdminGroup).filter(SysAdminGroup.id == admin.group_id).first()
-    
+
+    # 获取最近的操作日志
     base_query = db.query(SysAdminLog).filter(SysAdminLog.admin_id == admin.id)
     log_items = crud_sys_admin_log.get_multi(
-        db, 
-        page=1, 
-        per_page=8, 
-        orderby='id_desc',
-        base_query=base_query
+        db, page=1, per_page=8, orderby="id_desc", base_query=base_query
     )
-    
+
     admin_dict = admin.to_dict()
     admin_dict["roles"] = [group.name] if group else []
     admin_dict["logs"] = [item.to_dict() for item in log_items]
@@ -221,30 +250,42 @@ async def get_profile(
 @router.post("/profile")
 async def update_profile(
     profile_data: ProfileInput,
-    admin: SysAdmin = Depends(get_current_admin),
+    admin: CurrentAdmin = None,
     db: Session = Depends(get_db),
 ):
+    """更新当前用户资料"""
+    if not admin:
+        raise UnauthorizedError("Authentication required")
+
     for field, value in profile_data.model_dump(exclude_unset=True).items():
         setattr(admin, field, value)
+
     db.commit()
     db.refresh(admin)
-    return success_response({})
+
+    logger.info("Profile updated for user: {admin.username}")
+    return success_response({"message": "Profile updated successfully"})
 
 
 @router.get("/access_code")
 async def get_access_codes(
-    admin: SysAdmin = Depends(get_current_admin),
+    admin: CurrentAdmin = None,
     db: Session = Depends(get_db),
 ):
+    """获取当前用户的权限代码列表"""
+    if not admin:
+        raise UnauthorizedError("Authentication required")
+
     group = db.query(SysAdminGroup).filter(SysAdminGroup.id == admin.group_id).first()
     return success_response(group.access if group else [])
 
 
 @router.get("/all_router")
-async def get_all_router(
-    admin: SysAdmin = Depends(get_current_admin), db: Session = Depends(get_db)
-):
-    group = db.query(SysAdminGroup).filter(SysAdminGroup.id == admin.group_id).first()
+async def get_all_router(admin: CurrentAdmin = None, db: Session = Depends(get_db)):
+    """获取所有路由（菜单）结构"""
+    if not admin:
+        raise UnauthorizedError("Authentication required")
+
     items = crud_sys_admin_rule.get_all(db)
     return success_response(transform_items(items))
 
@@ -254,6 +295,7 @@ async def refresh_token(
     refresh_token: str,
     db: Session = Depends(get_db),
 ):
+    """刷新访问令牌"""
     payload = decode_access_token(refresh_token)
     if payload is None:
         raise HTTPException(
@@ -269,7 +311,7 @@ async def refresh_token(
             detail="Invalid refresh token",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     try:
         user_id: int = int(user_id_raw)
     except (ValueError, TypeError):
@@ -279,32 +321,36 @@ async def refresh_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    admin = db.query(SysAdmin).filter(SysAdmin.id == user_id).first()
+    admin = sys_admin_service.get(db, user_id)
     if not admin:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
         )
 
-    access_token = create_access_token(
-        data={"sub": admin.id},
-        expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    )
+    # 生成新的 Token
+    access_token = sys_admin_service.create_access_token_for_admin(admin)
 
+    # 更新数据库中的 Token
+    admin.token = access_token
+    db.commit()
+
+    logger.info("Token refreshed for user: {admin.username}")
     return success_response({"access_token": access_token})
 
 
 @router.post("/logout")
 async def logout(
-    admin: SysAdmin = Depends(get_current_admin),
+    admin: CurrentAdmin = None,
     db: Session = Depends(get_db),
 ):
-    """
-    用户登出
-    """
+    """用户登出"""
+    if not admin:
+        return success_response({"message": "Logout successful"})
+
     # 清除用户的 token
     admin.token = None
     db.commit()
-    
-    logger.info(f"User {admin.username} logged out successfully")
+
+    logger.info("User {admin.username} logged out successfully")
     return success_response({"message": "Logout successful"})

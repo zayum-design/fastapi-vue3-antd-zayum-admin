@@ -31,9 +31,10 @@ def organize_rules(rules):
     # 为顶层条目设置 url_paths 属性
     for rule in top_level_rules:
         all_paths = collect_url_paths(rule)
-        rule.url_paths = ','.join(all_paths)
-    
+        rule.url_paths = ",".join(all_paths)
+
     return top_level_rules
+
 
 def organize_admin_rules(admin_rules):
     """
@@ -42,6 +43,7 @@ def organize_admin_rules(admin_rules):
     :return: 顶层管理员规则条目列表
     """
     return organize_rules(admin_rules)
+
 
 def organize_user_rules(user_rules):
     """

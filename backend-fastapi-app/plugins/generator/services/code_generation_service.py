@@ -6,7 +6,6 @@
 from typing import List
 import datetime
 from sqlalchemy import MetaData, Table, inspect
-from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
 from ..core.types import FieldInfo, CodeGeneration, CodeGenerationResponse
@@ -34,7 +33,8 @@ class CodeGenerationService:
     def get_tables(self) -> List[str]:
         """获取数据库中的所有表名"""
         try:
-            from app.dependencies.database import engine
+            from app.dependencies.database import get_engine
+            engine = get_engine()
             inspector = inspect(engine)
             return inspector.get_table_names()
         except Exception as e:
@@ -51,7 +51,8 @@ class CodeGenerationService:
     ) -> CodeGenerationResponse:
         """为指定表生成代码"""
         try:
-            from app.dependencies.database import engine
+            from app.dependencies.database import get_engine
+            engine = get_engine()
             
             inspector = inspect(engine)
             if table_name not in inspector.get_table_names():

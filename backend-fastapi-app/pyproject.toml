@@ -1,0 +1,217 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zayum-admin-backend"
+version = "1.0.0"
+description = "Zayum Admin Backend - FastAPI based admin system"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Zayum Team"}
+]
+keywords = ["fastapi", "admin", "backend", "api"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+    "sqlalchemy>=2.0.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "pymysql>=1.1.0",
+    "bcrypt>=4.0.0",
+    "python-jose>=3.3.0",
+    "python-multipart>=0.0.6",
+    "fastapi-babel>=0.0.8",
+    "redis>=5.0.0",
+]
+
+[project.optional-dependencies]
+enhanced = [
+    "slowapi>=0.1.9",
+    "redis[hiredis]>=5.0.0",
+]
+dev = [
+    "ruff>=0.1.0",
+    "mypy>=1.7.0",
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "httpx>=0.25.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*", "plugins*", "install*"]
+exclude = ["tests*", "docs*"]
+
+# ==================== Ruff 配置 ====================
+[tool.ruff]
+target-version = "py311"  # 目标 Python 版本
+line-length = 100         # 行长度限制
+indent-width = 4          # 缩进宽度
+
+[tool.ruff.lint]
+# 启用规则集
+select = [
+    "E",   # pycodestyle 错误
+    "F",   # Pyflakes
+    "I",   # isort (导入排序)
+    "N",   # pep8-naming (命名规范)
+    "W",   # pycodestyle 警告
+    "UP",  # pyupgrade (升级语法)
+    "B",   # flake8-bugbear (潜在 bug)
+    "C4",  # flake8-comprehensions (推导式优化)
+    "SIM", # flake8-simplify (简化代码)
+    "PERF",# Perflint (性能优化)
+    "RUF", # Ruff 特有规则
+]
+
+ignore = [
+    "E501",  # 行过长 (由 formatter 处理)
+    "B008",  # 函数默认参数中的函数调用 (FastAPI Depends 需要)
+    "B904",  # raise ... from e (暂不强制)
+    "RUF001",  # 字符串包含全角标点 (中文项目常见)
+    "RUF002",  # 文档字符串包含全角标点 (中文项目常见)
+    "RUF003",  # 注释包含全角标点 (中文项目常见)
+    "N801",    # 类名 CapWords 规范
+    "N802",    # 函数名 lowercase 规范
+    "N805",    # 方法第一个参数应为 self
+    "N806",    # 函数内变量应为小写
+    "N818",    # 异常名应以 Error 结尾
+    "RUF012",  # 可变类属性应使用 ClassVar
+    "RUF013",  # 隐式 Optional (FastAPI 常见写法)
+    "RUF022",  # __all__ 未排序
+    "E402",    # 模块级导入不在文件顶部
+    "W291",    # 行尾空白
+    "W293",    # 空行包含空白
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"  # 文档字符串风格
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "plugins", "install"]
+
+[tool.ruff.format]
+quote-style = "double"      # 使用双引号
+indent-style = "space"      # 使用空格缩进
+line-ending = "lf"          # 使用 LF 换行
+skip-magic-trailing-comma = false
+
+# ==================== MyPy 配置 ====================
+[tool.mypy]
+python_version = "3.11"
+# 降低严格度以减少 VS Code 中的红色波浪线
+# 如需严格检查，可临时改为 strict = true
+strict = false
+warn_return_any = false
+warn_unused_ignores = false
+warn_unused_configs = false
+# 允许函数无类型注解 (减少波浪线)
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = false
+disallow_untyped_decorators = false
+no_implicit_optional = false
+warn_redundant_casts = false
+warn_no_return = true
+warn_unreachable = false
+
+# 忽略某些第三方库的类型检查
+[[tool.mypy.overrides]]
+module = [
+    "fastapi_babel.*",
+    "bcrypt.*",
+    "jose.*",
+    "captcha.*",
+]
+ignore_missing_imports = true
+
+# ==================== Pytest 配置 ====================
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+    "--disable-warnings",
+]
+markers = [
+    "unit: 单元测试",
+    "integration: 集成测试",
+    "e2e: 端到端测试",
+    "slow: 慢测试",
+    "asyncio: 异步测试",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+
+# 异步测试配置
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+# ==================== Coverage 配置 ====================
+[tool.coverage.run]
+source = ["app", "plugins"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/venv/*",
+    "*/.venv/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+show_missing = true
+skip_covered = false
+fail_under = 80
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+# ==================== Bandit 安全配置 ====================
+[tool.bandit]
+exclude_dirs = ["tests", "venv", ".venv"]
+skips = ["B101"]  # 跳过某些检查
+
+# ==================== Black 配置（备用） ====================
+[tool.black]
+line-length = 100
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''

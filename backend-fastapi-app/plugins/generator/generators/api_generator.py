@@ -3,7 +3,6 @@ API代码生成器
 生成FastAPI路由代码
 """
 
-from typing import Optional
 from sqlalchemy import Table
 
 

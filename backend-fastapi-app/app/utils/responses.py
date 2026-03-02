@@ -1,16 +1,16 @@
 from datetime import datetime
-from typing import Optional
-from fastapi import HTTPException
-from fastapi.responses import JSONResponse
-from fastapi_babel import _
-from app.utils.response_handlers import ErrorCode,ErrorMessage
-from app.utils.log_utils import logger
 
-def get_current_time(): 
+from fastapi.responses import JSONResponse
+
+from app.utils.response_handlers import ErrorCode, ErrorMessage
+
+
+def get_current_time():
     """
     获取当前时间的字符串格式。
     """
-    return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
 
 def success_response(data, msg="Success"):
     """
@@ -19,18 +19,14 @@ def success_response(data, msg="Success"):
     :param msg: 可选的成功消息，默认为"Success"
     :return: 格式化后的响应字典
     """
-    return {
-        "code": 0,
-        "msg": msg,
-        "data": data,
-        "time": get_current_time()
-    }
+    return {"code": 0, "msg": msg, "data": data, "time": get_current_time()}
+
 
 def error_response(
-    error_code: ErrorCode, 
-    message: str = "An unexpected error occurred on the server.", 
-    data: Optional[dict] = None, 
-    e: Exception = None
+    error_code: ErrorCode,
+    message: str = "An unexpected error occurred on the server.",
+    data: dict | None = None,
+    e: Exception = None,
 ):
     """
     格式化错误响应。
@@ -49,18 +45,17 @@ def error_response(
 
     if e:
         # 仅在日志中记录详细的异常信息，不在响应中包含
-        error += f" | {str(e)}"
-    
+        error += f" | {e!s}"
+
     return JSONResponse(
         status_code=error_code.value,
         content={
             "code": 0,
             "msg": message,
             "data": data if data is not None else {},
-            "time": get_current_time()
-        }
+            "time": get_current_time(),
+        },
     )
-
 
 
 def not_authenticated_response():

@@ -1,17 +1,10 @@
-from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi_babel import _
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+
+from app.core.security import get_current_admin
 from app.dependencies.database import get_db
 from app.modules.admin.sys_general_config.crud.sys_general_config import crud_sys_general_config
-from app.modules.admin.sys_general_config.schemas.sys_general_config import (
-    SysGeneralConfigCreate,
-    SysGeneralConfigUpdate,
-)
 from app.utils.responses import success_response
-from app.utils.response_handlers import ErrorCode
-from app.modules.admin.sys_general_config.models.sys_general_config import SysGeneralConfig as SysGeneralConfigModel
-from app.core.security import get_current_admin
 
 # Initialize the API router for sys_general_config endpoints
 router = APIRouter(
@@ -25,8 +18,8 @@ router = APIRouter(
 def read_sys_general_config_list(
     page: int = 1,
     per_page: int = 10,
-    search: Optional[str] = None,
-    orderby: Optional[str] = None,  # Sorting field and direction, e.g., "name_asc"
+    search: str | None = None,
+    orderby: str | None = None,  # Sorting field and direction, e.g., "name_asc"
     db: Session = Depends(get_db),
 ):
     """

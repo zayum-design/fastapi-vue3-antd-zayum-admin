@@ -3,7 +3,6 @@ Vue代码生成器
 生成Vue前端代码
 """
 
-from typing import Optional
 from sqlalchemy import Table
 
 

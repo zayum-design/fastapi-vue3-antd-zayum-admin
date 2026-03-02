@@ -1,8 +1,10 @@
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
+
 from app.core.captcha import generate_captcha
 
 router = APIRouter(prefix="/captcha", tags=["captcha"])
+
 
 @router.get("", response_class=StreamingResponse)
 async def get_captcha():

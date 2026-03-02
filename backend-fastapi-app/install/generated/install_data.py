@@ -1,7 +1,8 @@
 """按模型逐步导入数据（含表结构检查），每个模型一个函数"""
+# flake8: noqa: F821  # 模型类通过 _load_models() 动态加载
 import importlib
 from pathlib import Path
-from datetime import datetime, date
+from datetime import datetime
 from decimal import Decimal
 from sqlalchemy import inspect, create_engine, select
 from sqlalchemy.orm import Session
@@ -54,7 +55,7 @@ def import_SysAdmin(db: Session):
         print('✅ 表已存在: sys_admin')
     if not table_has_data(db, SysAdmin):
       print('📥 导入数据: SysAdmin')
-      sysadmin_item = SysAdmin()
+      sysadmin_item = SysAdmin()  # noqa: F821
       sysadmin_item.id = 1
       sysadmin_item.group_id = 1
       sysadmin_item.username = 'admin'
@@ -99,7 +100,7 @@ def import_SysGeneralCategory(db: Session):
         print('✅ 表已存在: sys_general_category')
     if not table_has_data(db, SysGeneralCategory):
       print('📥 导入数据: SysGeneralCategory')
-      sysgeneralcategory_item = SysGeneralCategory()
+      sysgeneralcategory_item = SysGeneralCategory()  # noqa: F821
       sysgeneralcategory_item.id = 1
       sysgeneralcategory_item.pid = 0
       sysgeneralcategory_item.type = 'default'
@@ -112,7 +113,7 @@ def import_SysGeneralCategory(db: Session):
       sysgeneralcategory_item.created_at = datetime.fromisoformat('2024-05-08T17:19:06')
       sysgeneralcategory_item.updated_at = datetime.fromisoformat('2025-03-07T11:50:19')
       db.add(sysgeneralcategory_item)
-      sysgeneralcategory_item = SysGeneralCategory()
+      sysgeneralcategory_item = SysGeneralCategory()  # noqa: F821
       sysgeneralcategory_item.id = 2
       sysgeneralcategory_item.pid = 0
       sysgeneralcategory_item.type = 'blog'
@@ -135,7 +136,7 @@ def import_SysAdminRule(db: Session):
         print('✅ 表已存在: sys_admin_rule')
     if not table_has_data(db, SysAdminRule):
       print('📥 导入数据: SysAdminRule')
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 1
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 0
@@ -153,7 +154,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2024-01-22T14:32:00')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-11-11T01:23:42')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 2
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 1
@@ -171,7 +172,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2024-01-22T14:32:00')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-06-05T00:22:17')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 3
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 0
@@ -189,7 +190,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2024-01-22T14:32:00')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-02-28T18:40:34')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 4
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 3
@@ -207,7 +208,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2024-01-22T14:32:00')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-02-28T12:04:00')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 5
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 3
@@ -225,7 +226,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2025-03-04T03:24:40')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-03-07T11:12:12')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 6
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 3
@@ -243,7 +244,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2024-01-22T14:32:00')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-03-04T07:36:31')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 7
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 0
@@ -261,7 +262,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2024-01-22T14:32:00')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-03-06T11:39:00')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 8
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 7
@@ -279,7 +280,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2024-01-22T14:32:00')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-03-06T11:39:00')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 9
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 0
@@ -297,7 +298,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2024-01-22T14:32:00')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-02-28T17:51:12')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 10
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 0
@@ -315,7 +316,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2024-01-22T14:32:00')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-06-04T12:15:36')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 11
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 10
@@ -333,7 +334,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2024-01-22T14:32:00')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-03-06T16:24:24')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 12
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 10
@@ -351,7 +352,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2024-01-22T14:32:00')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-03-06T13:03:05')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 13
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 10
@@ -369,7 +370,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2024-01-22T14:32:00')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-03-06T13:03:05')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 14
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 10
@@ -387,7 +388,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2024-01-22T14:32:00')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-03-04T07:36:31')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 15
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 0
@@ -405,7 +406,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2024-01-22T14:32:00')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-02-26T17:47:48')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 16
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 15
@@ -423,7 +424,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2024-01-22T14:32:00')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-03-06T16:19:59')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 17
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 15
@@ -441,7 +442,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2024-01-22T14:32:00')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-03-04T07:36:31')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 18
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 15
@@ -459,7 +460,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2024-01-22T14:32:00')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-03-06T16:27:28')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 19
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 15
@@ -477,7 +478,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2024-01-22T14:32:00')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-03-06T16:28:37')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 20
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 15
@@ -495,7 +496,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2024-09-26T13:01:14')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-03-04T07:36:31')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 22
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 9
@@ -513,7 +514,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2025-02-28T10:31:33')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-03-04T07:36:31')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 24
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 7
@@ -531,7 +532,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2025-03-06T03:54:07')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-03-06T12:56:31')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 25
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 9
@@ -549,7 +550,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2025-03-09T02:40:04')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-03-09T11:05:32')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 26
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 9
@@ -567,7 +568,7 @@ def import_SysAdminRule(db: Session):
       sysadminrule_item.created_at = datetime.fromisoformat('2025-03-10T07:15:54')
       sysadminrule_item.updated_at = datetime.fromisoformat('2025-03-10T16:07:41')
       db.add(sysadminrule_item)
-      sysadminrule_item = SysAdminRule()
+      sysadminrule_item = SysAdminRule()  # noqa: F821
       sysadminrule_item.id = 27
       sysadminrule_item.rule_type = 'menu'
       sysadminrule_item.parent_id = 1
@@ -604,7 +605,7 @@ def import_SysAdminLog(db: Session):
         print('✅ 表已存在: sys_admin_log')
     if not table_has_data(db, SysAdminLog):
       print('📥 导入数据: SysAdminLog')
-      sysadminlog_item = SysAdminLog()
+      sysadminlog_item = SysAdminLog()  # noqa: F821
       sysadminlog_item.id = 1
       sysadminlog_item.admin_id = 1
       sysadminlog_item.username = 'admin'
@@ -616,7 +617,7 @@ def import_SysAdminLog(db: Session):
       sysadminlog_item.created_at = datetime.fromisoformat('2025-11-27T03:59:30')
       sysadminlog_item.updated_at = datetime.fromisoformat('2025-11-27T03:59:30')
       db.add(sysadminlog_item)
-      sysadminlog_item = SysAdminLog()
+      sysadminlog_item = SysAdminLog()  # noqa: F821
       sysadminlog_item.id = 2
       sysadminlog_item.admin_id = 1
       sysadminlog_item.username = 'admin'
@@ -638,7 +639,7 @@ def import_SysUserRule(db: Session):
         print('✅ 表已存在: sys_user_rule')
     if not table_has_data(db, SysUserRule):
       print('📥 导入数据: SysUserRule')
-      sysuserrule_item = SysUserRule()
+      sysuserrule_item = SysUserRule()  # noqa: F821
       sysuserrule_item.id = 1
       sysuserrule_item.rule_type = 'menu'
       sysuserrule_item.parent_id = 0
@@ -656,7 +657,7 @@ def import_SysUserRule(db: Session):
       sysuserrule_item.created_at = datetime.fromisoformat('2024-01-22T14:32:00')
       sysuserrule_item.updated_at = datetime.fromisoformat('2025-07-01T09:21:36')
       db.add(sysuserrule_item)
-      sysuserrule_item = SysUserRule()
+      sysuserrule_item = SysUserRule()  # noqa: F821
       sysuserrule_item.id = 2
       sysuserrule_item.rule_type = 'menu'
       sysuserrule_item.parent_id = 0
@@ -674,7 +675,7 @@ def import_SysUserRule(db: Session):
       sysuserrule_item.created_at = datetime.fromisoformat('2024-01-22T14:32:00')
       sysuserrule_item.updated_at = datetime.fromisoformat('2025-07-01T09:22:00')
       db.add(sysuserrule_item)
-      sysuserrule_item = SysUserRule()
+      sysuserrule_item = SysUserRule()  # noqa: F821
       sysuserrule_item.id = 3
       sysuserrule_item.rule_type = 'menu'
       sysuserrule_item.parent_id = 0
@@ -702,7 +703,7 @@ def import_SysAdminGroup(db: Session):
         print('✅ 表已存在: sys_admin_group')
     if not table_has_data(db, SysAdminGroup):
       print('📥 导入数据: SysAdminGroup')
-      sysadmingroup_item = SysAdminGroup()
+      sysadmingroup_item = SysAdminGroup()  # noqa: F821
       sysadmingroup_item.id = 1
       sysadmingroup_item.pid = 0
       sysadmingroup_item.name = 'super'
@@ -722,7 +723,7 @@ def import_SysPlugin(db: Session):
         print('✅ 表已存在: sys_plugin')
     if not table_has_data(db, SysPlugin):
       print('📥 导入数据: SysPlugin')
-      sysplugin_item = SysPlugin()
+      sysplugin_item = SysPlugin()  # noqa: F821
       sysplugin_item.id = 1
       sysplugin_item.title = '代码生成器'
       sysplugin_item.author = 'StkFish'
@@ -751,7 +752,7 @@ def import_SysUser(db: Session):
         print('✅ 表已存在: sys_user')
     if not table_has_data(db, SysUser):
       print('📥 导入数据: SysUser')
-      sysuser_item = SysUser()
+      sysuser_item = SysUser()  # noqa: F821
       sysuser_item.id = 1
       sysuser_item.user_group_id = 1
       sysuser_item.username = 'uuuu'
@@ -808,7 +809,7 @@ def import_SysAttachmentCategory(db: Session):
         print('✅ 表已存在: sys_attachment_category')
     if not table_has_data(db, SysAttachmentCategory):
       print('📥 导入数据: SysAttachmentCategory')
-      sysattachmentcategory_item = SysAttachmentCategory()
+      sysattachmentcategory_item = SysAttachmentCategory()  # noqa: F821
       sysattachmentcategory_item.id = 1
       sysattachmentcategory_item.pid = 0
       sysattachmentcategory_item.name = 'default'
@@ -826,7 +827,7 @@ def import_SysUserGroup(db: Session):
         print('✅ 表已存在: sys_user_group')
     if not table_has_data(db, SysUserGroup):
       print('📥 导入数据: SysUserGroup')
-      sysusergroup_item = SysUserGroup()
+      sysusergroup_item = SysUserGroup()  # noqa: F821
       sysusergroup_item.id = 1
       sysusergroup_item.pid = 0
       sysusergroup_item.name = 'super'
@@ -846,7 +847,7 @@ def import_SysGeneralConfig(db: Session):
         print('✅ 表已存在: sys_general_config')
     if not table_has_data(db, SysGeneralConfig):
       print('📥 导入数据: SysGeneralConfig')
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 1
       sysgeneralconfig_item.name = 'name'
       sysgeneralconfig_item.group = 'basic'
@@ -862,7 +863,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 2
       sysgeneralconfig_item.name = 'copyright'
       sysgeneralconfig_item.group = 'basic'
@@ -878,7 +879,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 3
       sysgeneralconfig_item.name = 'cdnurl'
       sysgeneralconfig_item.group = 'basic'
@@ -894,7 +895,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 4
       sysgeneralconfig_item.name = 'version'
       sysgeneralconfig_item.group = 'basic'
@@ -910,7 +911,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 5
       sysgeneralconfig_item.name = 'timezone'
       sysgeneralconfig_item.group = 'basic'
@@ -926,7 +927,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 6
       sysgeneralconfig_item.name = 'forbiddenip'
       sysgeneralconfig_item.group = 'basic'
@@ -942,7 +943,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2025-04-29T07:12:13')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2025-04-29T07:12:13')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 7
       sysgeneralconfig_item.name = 'languages'
       sysgeneralconfig_item.group = 'basic'
@@ -958,7 +959,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-29T01:39:29')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 8
       sysgeneralconfig_item.name = 'fixedpage'
       sysgeneralconfig_item.group = 'basic'
@@ -974,7 +975,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 9
       sysgeneralconfig_item.name = 'categorytype'
       sysgeneralconfig_item.group = 'dictionary'
@@ -990,7 +991,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 10
       sysgeneralconfig_item.name = 'default_category'
       sysgeneralconfig_item.group = 'dictionary'
@@ -1006,7 +1007,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 11
       sysgeneralconfig_item.name = 'mail_type'
       sysgeneralconfig_item.group = 'email'
@@ -1022,7 +1023,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-29T20:59:28')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 12
       sysgeneralconfig_item.name = 'mail_smtp_host'
       sysgeneralconfig_item.group = 'email'
@@ -1038,7 +1039,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 13
       sysgeneralconfig_item.name = 'mail_smtp_port'
       sysgeneralconfig_item.group = 'email'
@@ -1054,7 +1055,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 14
       sysgeneralconfig_item.name = 'mail_smtp_user'
       sysgeneralconfig_item.group = 'email'
@@ -1070,7 +1071,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 15
       sysgeneralconfig_item.name = 'mail_smtp_pass'
       sysgeneralconfig_item.group = 'email'
@@ -1086,7 +1087,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 16
       sysgeneralconfig_item.name = 'mail_verify_type'
       sysgeneralconfig_item.group = 'email'
@@ -1102,7 +1103,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-29T20:58:05')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 17
       sysgeneralconfig_item.name = 'mail_from'
       sysgeneralconfig_item.group = 'email'
@@ -1118,7 +1119,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 18
       sysgeneralconfig_item.name = 'image_category'
       sysgeneralconfig_item.group = 'dictionary'
@@ -1134,7 +1135,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-29T01:39:29')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 19
       sysgeneralconfig_item.name = 'file_category'
       sysgeneralconfig_item.group = 'dictionary'
@@ -1150,7 +1151,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-29T01:39:29')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 20
       sysgeneralconfig_item.name = 'video_category'
       sysgeneralconfig_item.group = 'dictionary'
@@ -1166,7 +1167,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-29T01:39:29')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 21
       sysgeneralconfig_item.name = 'audio_category'
       sysgeneralconfig_item.group = 'dictionary'
@@ -1182,7 +1183,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-29T01:39:29')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 22
       sysgeneralconfig_item.name = 'document_category'
       sysgeneralconfig_item.group = 'dictionary'
@@ -1198,7 +1199,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-29T01:39:29')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 23
       sysgeneralconfig_item.name = 'user_page_title'
       sysgeneralconfig_item.group = 'user'
@@ -1214,7 +1215,7 @@ def import_SysGeneralConfig(db: Session):
       sysgeneralconfig_item.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
       sysgeneralconfig_item.updated_at = datetime.fromisoformat('2024-12-30T12:50:59')
       db.add(sysgeneralconfig_item)
-      sysgeneralconfig_item = SysGeneralConfig()
+      sysgeneralconfig_item = SysGeneralConfig()  # noqa: F821
       sysgeneralconfig_item.id = 24
       sysgeneralconfig_item.name = 'user_footer'
       sysgeneralconfig_item.group = 'user'

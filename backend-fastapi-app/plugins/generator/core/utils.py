@@ -6,7 +6,6 @@ from typing import Optional
 import datetime
 import decimal
 from sqlalchemy import Enum as SqlEnum
-from sqlalchemy.types import TypeEngine
 
 
 def map_sql_type_to_ts(col_type) -> str:

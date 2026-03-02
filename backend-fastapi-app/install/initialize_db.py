@@ -4,7 +4,7 @@ import json
 from typing import Dict, Any, Optional
 from datetime import datetime, date
 from decimal import Decimal
-from sqlalchemy import JSON, inspect
+from sqlalchemy import JSON
 from sqlalchemy.orm import Session
 from app.dependencies.database import SessionLocal
 

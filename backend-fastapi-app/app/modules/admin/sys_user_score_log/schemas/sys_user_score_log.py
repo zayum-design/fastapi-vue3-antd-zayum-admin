@@ -1,41 +1,41 @@
-from datetime import datetime, date, timezone
-from decimal import Decimal
-from typing import Optional, Literal
-from pydantic import BaseModel, Field, EmailStr, field_validator
-from fastapi_babel import _
-import re
+from datetime import UTC, datetime
+
+from pydantic import BaseModel, Field
 
 
 class SysUserScoreLogBase(BaseModel):
-    id: Optional[int] = Field(None)
+    id: int | None = Field(None)
     user_id: int = Field(...)
     score: int = Field(...)
     before: int = Field(...)
     after: int = Field(...)
-    memo: Optional[str] = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    memo: str | None = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     class Config:
-        orm_mode = True
+        from_attributes = True
         arbitrary_types_allowed = True
 
 
 class SysUserScoreLogCreate(SysUserScoreLogBase):
     pass
 
+
 class SysUserScoreLogUpdate(BaseModel):
-    user_id: Optional[int] = None
-    score: Optional[int] = None
-    before: Optional[int] = None
-    after: Optional[int] = None
-    memo: Optional[str] = Field(None, max_length=255)
+    user_id: int | None = None
+    score: int | None = None
+    before: int | None = None
+    after: int | None = None
+    memo: str | None = Field(None, max_length=255)
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 class SysUserScoreLogInDBBase(SysUserScoreLogBase):
     pass
+
 
 class SysUserScoreLog(SysUserScoreLogInDBBase):
     pass

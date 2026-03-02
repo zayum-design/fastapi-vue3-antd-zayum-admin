@@ -1,29 +1,28 @@
-from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_babel import _
 from sqlalchemy.orm import Session
-from app.dependencies.database import get_db
+
 from app.core.security import get_current_admin
+from app.dependencies.database import get_db
 from app.modules.admin.sys_user.crud.sys_user import crud_sys_user
 from app.modules.admin.sys_user.schemas.sys_user import SysUserCreate, SysUserUpdate
-from app.utils.responses import success_response
 from app.utils.response_handlers import ErrorCode
-from app.modules.admin.sys_user.models.sys_user import SysUser
+from app.utils.responses import success_response
 
 # Initialize the API router for sys_user endpoints
-router = APIRouter(
-    prefix="/user", tags=["user"], dependencies=[Depends(get_current_admin)]
-)
+router = APIRouter(prefix="/user", tags=["user"], dependencies=[Depends(get_current_admin)])
 
 # Set the maximum per_page limit
 MAX_PER_PAGE = 200
+
+
 @router.get("/list")
 def read_sys_user_list(
     page: int = 1,
     per_page: int = 10,
-    search: Optional[str] = None,
-    orderby: Optional[str] = None,  # Sorting field and direction, e.g., "name_asc"
-    db: Session = Depends(get_db)
+    search: str | None = None,
+    orderby: str | None = None,  # Sorting field and direction, e.g., "name_asc"
+    db: Session = Depends(get_db),
 ):
     """
     Retrieve a list of SysUser records with optional pagination, search, and sorting.
@@ -41,29 +40,35 @@ def read_sys_user_list(
     # If per_page is -1, set it to the maximum allowed value
     if per_page == -1:
         per_page = MAX_PER_PAGE  # Set per_page to the maximum value (200)
-    
+
     # Ensure per_page is within the allowed range
     per_page = min(per_page, MAX_PER_PAGE)
-    
+
     # Ensure page and per_page are at least 1
     page = max(page, 1)
-    
+
     # Retrieve paginated records with search and sorting
-    items = crud_sys_user.get_multi(db, page=page, per_page=per_page, search=search, orderby=orderby)
+    items = crud_sys_user.get_multi(
+        db, page=page, per_page=per_page, search=search, orderby=orderby
+    )
     total = crud_sys_user.get_total(db, search=search)
-    
+
     response_page = page
     response_per_page = per_page
 
     # Prepare the response data
     return success_response(
         {
-            "items": [item.to_dict() for item in items],  # Convert each model instance to a dictionary
+            "items": [
+                item.to_dict() for item in items
+            ],  # Convert each model instance to a dictionary
             "total": total,
             "page": response_page,
             "per_page": response_per_page,
         }
     )
+
+
 @router.get("/{id}")
 def read_sys_user(id: int, db: Session = Depends(get_db)):
     """
@@ -85,6 +90,8 @@ def read_sys_user(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=ErrorCode.NOT_FOUND.value, detail=_("SysUser not found."))
     # Return the record's data as a dictionary
     return success_response(db_obj.to_dict())
+
+
 @router.post("/create")
 def create_sys_user(obj_in: SysUserCreate, db: Session = Depends(get_db)):
     """
@@ -100,6 +107,8 @@ def create_sys_user(obj_in: SysUserCreate, db: Session = Depends(get_db)):
     ret = crud_sys_user.create(db, obj_in=obj_in)
     # Return the ID of the inserted record
     return success_response({"insert_id": ret.id})
+
+
 @router.put("/update/{id}")
 def update_sys_user(id: int, obj_in: SysUserUpdate, db: Session = Depends(get_db)):
     """
@@ -126,6 +135,8 @@ def update_sys_user(id: int, obj_in: SysUserUpdate, db: Session = Depends(get_db
     )
     # Return the updated record's data as a dictionary
     return success_response(updated_obj.to_dict())
+
+
 @router.delete("/delete/{id}")
 def delete_sys_user(id: int, db: Session = Depends(get_db)):
     """

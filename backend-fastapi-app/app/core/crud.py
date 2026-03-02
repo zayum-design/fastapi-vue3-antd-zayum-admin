@@ -1,6 +1,6 @@
 # app/core/crud.py
-import os
 import importlib
+import os
 
 from app.core.config import settings
 
@@ -10,7 +10,9 @@ PLUGIN_DIR = settings.PLUGINS_DIR
 if os.path.exists(PLUGIN_DIR):
     for plugin_name in os.listdir(PLUGIN_DIR):
         plugin_path = os.path.join(PLUGIN_DIR, plugin_name)
-        if os.path.isdir(plugin_path) and os.path.exists(os.path.join(plugin_path, "crud", "__init__.py")):
+        if os.path.isdir(plugin_path) and os.path.exists(
+            os.path.join(plugin_path, "crud", "__init__.py")
+        ):
             try:
                 importlib.import_module(f"plugins.{plugin_name}.crud")
                 print(f"Loaded crud from plugin: {plugin_name}")

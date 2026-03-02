@@ -1,57 +1,58 @@
-from datetime import datetime, date, timezone
-from decimal import Decimal
-from typing import Optional, Literal
-from pydantic import BaseModel, Field, EmailStr, field_validator
-from fastapi_babel import _
-import re
+from datetime import UTC, datetime
+from typing import Literal
+
+from pydantic import BaseModel, Field
 
 
 class SysAttachmentBase(BaseModel):
-    id: Optional[int] = Field(None)
-    cat_id: Optional[int] = None
+    id: int | None = Field(None)
+    cat_id: int | None = None
     admin_id: int = Field(...)
     user_id: int = Field(...)
-    att_type: Optional[Literal['image', 'file']] = None
-    thumb: Optional[str] = None
+    att_type: Literal["image", "file"] | None = None
+    thumb: str | None = None
     path_file: str = Field(..., max_length=255)
-    file_name: Optional[str] = None
+    file_name: str | None = None
     file_size: int = Field(...)
-    mimetype: Optional[str] = None
-    ext_param: Optional[str] = None
+    mimetype: str | None = None
+    ext_param: str | None = None
     storage: str = Field(..., max_length=100)
-    sha1: Optional[str] = None
-    general_attachment_col: Optional[str] = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    sha1: str | None = None
+    general_attachment_col: str | None = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     class Config:
-        orm_mode = True
+        from_attributes = True
         arbitrary_types_allowed = True
 
 
 class SysAttachmentCreate(SysAttachmentBase):
     pass
 
+
 class SysAttachmentUpdate(BaseModel):
-    cat_id: Optional[int] = None
-    admin_id: Optional[int] = None
-    user_id: Optional[int] = None
-    att_type: Optional[Literal['image', 'file']] = Field(None, max_length=5)
-    thumb: Optional[str] = Field(None, max_length=255)
-    path_file: Optional[str] = Field(None, max_length=255)
-    file_name: Optional[str] = Field(None, max_length=100)
-    file_size: Optional[int] = None
-    mimetype: Optional[str] = Field(None, max_length=100)
-    ext_param: Optional[str] = Field(None, max_length=255)
-    storage: Optional[str] = Field(None, max_length=100)
-    sha1: Optional[str] = Field(None, max_length=40)
-    general_attachment_col: Optional[str] = Field(None, max_length=45)
+    cat_id: int | None = None
+    admin_id: int | None = None
+    user_id: int | None = None
+    att_type: Literal["image", "file"] | None = Field(None, max_length=5)
+    thumb: str | None = Field(None, max_length=255)
+    path_file: str | None = Field(None, max_length=255)
+    file_name: str | None = Field(None, max_length=100)
+    file_size: int | None = None
+    mimetype: str | None = Field(None, max_length=100)
+    ext_param: str | None = Field(None, max_length=255)
+    storage: str | None = Field(None, max_length=100)
+    sha1: str | None = Field(None, max_length=40)
+    general_attachment_col: str | None = Field(None, max_length=45)
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 class SysAttachmentInDBBase(SysAttachmentBase):
     pass
+
 
 class SysAttachment(SysAttachmentInDBBase):
     pass

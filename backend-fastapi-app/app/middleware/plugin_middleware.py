@@ -1,12 +1,11 @@
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
-from sqlalchemy.orm import Session
-from app.dependencies.database import get_db
-from app.modules.admin.sys_plugin.schemas.sys_plugin import SysPlugin
-from fastapi import Depends
-from app.utils.log_utils import logger
+
 from app.core.config import settings
+from app.modules.admin.sys_plugin.schemas.sys_plugin import SysPlugin
+
+
 class PluginMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, get_db):
         super().__init__(app)
@@ -31,5 +30,7 @@ class PluginMiddleware(BaseHTTPMiddleware):
                 async with self.get_db() as db:
                     plugin = db.query(SysPlugin).filter(SysPlugin.uuid == plugin_uuid).first()
                     if not plugin or not plugin.enabled:
-                        return JSONResponse(status_code=404, content={"detail": "Plugin not found or not enabled."})
+                        return JSONResponse(
+                            status_code=404, content={"detail": "Plugin not found or not enabled."}
+                        )
         return await call_next(request)

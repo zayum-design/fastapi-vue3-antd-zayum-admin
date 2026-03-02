@@ -1,10 +1,10 @@
+import hashlib
 import os
 import uuid
-import hashlib
 from datetime import datetime
-from typing import Optional
 
 from fastapi import HTTPException, UploadFile
+
 from app.core.config import settings
 
 
@@ -26,28 +26,24 @@ class Upload:
     def _check_file_size(self, file: UploadFile) -> int:
         file.file.seek(0, 2)  # 移到末尾
         file_size = file.file.tell()
-        file.file.seek(0)    # 回到开头
+        file.file.seek(0)  # 回到开头
         if file_size > self.max_size:
             raise HTTPException(
                 status_code=400,
-                detail=f"文件大小超过限制: {file_size} bytes，限制为 {self.max_size} bytes."
+                detail=f"文件大小超过限制: {file_size} bytes，限制为 {self.max_size} bytes.",
             )
         return file_size
 
-    def _check_file_extension(self, filename: Optional[str]) -> None:
+    def _check_file_extension(self, filename: str | None) -> None:
         if filename is None:
-            raise HTTPException(
-                status_code=400,
-                detail="文件名不能为空"
-            )
+            raise HTTPException(status_code=400, detail="文件名不能为空")
         extension = filename.split(".")[-1].lower()
         if extension not in self.allowed_extensions:
             raise HTTPException(
                 status_code=400,
                 detail=(
-                    f"不允许的文件拓展名: .{extension}, "
-                    f"允许的拓展名: {self.allowed_extensions}"
-                )
+                    f"不允许的文件拓展名: .{extension}, 允许的拓展名: {self.allowed_extensions}"
+                ),
             )
 
     def _compute_sha1(self, file: UploadFile) -> str:
@@ -71,7 +67,9 @@ class Upload:
                 f.write(chunk)
         file.file.seek(0)
 
-    def save_file(self, file: UploadFile, ext_param: str = "test", sub_dir: str = None, filename: str = None) -> dict:
+    def save_file(
+        self, file: UploadFile, ext_param: str = "test", sub_dir: str = None, filename: str = None
+    ) -> dict:
         """
         保存文件并返回各种信息：
           - file_name: 源文件名
@@ -99,8 +97,8 @@ class Upload:
             saved_filename = f"{filename}.{extension}"
         else:
             now = datetime.now()
-            time_str = now.strftime('%Y%m%d%H%M%S')  # 20250305121035
-            random_str = uuid.uuid4().hex[:6]        # abc123
+            time_str = now.strftime("%Y%m%d%H%M%S")  # 20250305121035
+            random_str = uuid.uuid4().hex[:6]  # abc123
             if file.filename is None:
                 raise HTTPException(status_code=400, detail="上传的文件没有文件名")
             extension = file.filename.split(".")[-1].lower()
@@ -120,7 +118,9 @@ class Upload:
         # 6. 是否图片（根据允许的扩展名中的图片类型判断）
         image_extensions = {"jpg", "jpeg", "png", "gif", "bmp", "webp", "svg"}
         # 只考虑在 allowed_extensions 中的图片扩展名
-        allowed_image_extensions = [ext for ext in image_extensions if ext in self.allowed_extensions]
+        allowed_image_extensions = [
+            ext for ext in image_extensions if ext in self.allowed_extensions
+        ]
         is_image = extension in allowed_image_extensions
 
         # 7. 返回信息
@@ -129,11 +129,13 @@ class Upload:
             "saved_filename": saved_filename,  # 供访问接口使用
             "absolute_path": os.path.abspath(save_path),
             # 返回完整路径，包括 UPLOAD_DIR
-            "relative_path": os.path.join(self.upload_dir, os.path.relpath(save_path, self.upload_dir)).replace('./', '/'),
+            "relative_path": os.path.join(
+                self.upload_dir, os.path.relpath(save_path, self.upload_dir)
+            ).replace("./", "/"),
             "size": file_size,
             "is_image": is_image,
             "mimetype": file.content_type,
             "ext_param": ext_param,
             "sha1": sha1_val,
-            "general_attachment_col": "some_value"
+            "general_attachment_col": "some_value",
         }

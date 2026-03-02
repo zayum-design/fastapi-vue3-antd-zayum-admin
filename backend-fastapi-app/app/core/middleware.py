@@ -1,30 +1,36 @@
 # backend-fastapi-app/app/core/middleware.py
 
 import json
-from typing import Callable, Awaitable
-from fastapi import Request, HTTPException
-from requests import Session
+from collections.abc import Awaitable, Callable
+
+from fastapi import HTTPException, Request
 from starlette.middleware.base import BaseHTTPMiddleware
-from app.modules.admin.sys_admin_log.crud.sys_admin_log import crud_sys_admin_log
-from app.modules.admin.sys_admin_log.schemas.sys_admin_log import SysAdminLogCreate
+
 from app.core.security import get_current_admin
 from app.dependencies.database import get_db
+from app.modules.admin.sys_admin_log.crud.sys_admin_log import crud_sys_admin_log
+from app.modules.admin.sys_admin_log.schemas.sys_admin_log import SysAdminLogCreate
+
 
 def filter_sensitive_data(data: dict) -> dict:
     """递归过滤敏感数据"""
     if isinstance(data, dict):
-        return {k: ('*' if 'password' in k.lower() else filter_sensitive_data(v)) for k, v in data.items()}
+        return {
+            k: ("*" if "password" in k.lower() else filter_sensitive_data(v))
+            for k, v in data.items()
+        }
     elif isinstance(data, list):
         return [filter_sensitive_data(item) for item in data]
     return data
+
 
 class AdminLoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable]):
         admin = None
         auth_header = request.headers.get("authorization")
-        
+
         if auth_header and auth_header.startswith("Bearer "):
-            token = auth_header[len("Bearer "):]
+            token = auth_header[len("Bearer ") :]
             db = next(get_db())
             try:
                 admin = get_current_admin(token=token, db=db)
@@ -36,12 +42,14 @@ class AdminLoggingMiddleware(BaseHTTPMiddleware):
                 raise e
             finally:
                 db.close()
-        
+
         # 仅记录 POST、PUT、DELETE 请求日志，并排除日志删除接口和文件上传接口
-        if (request.method in {"POST", "PUT", "DELETE"} and 
-            not request.url.path.startswith("/api/admin/admin/log/delete/") and 
-            not request.url.path.startswith("/api/admin/auth") and
-            not request.url.path.startswith("/api/admin/upload")):
+        if (
+            request.method in {"POST", "PUT", "DELETE"}
+            and not request.url.path.startswith("/api/admin/admin/log/delete/")
+            and not request.url.path.startswith("/api/admin/auth")
+            and not request.url.path.startswith("/api/admin/upload")
+        ):
             try:
                 body_bytes = await request.body()
                 body_text = body_bytes.decode() if body_bytes else ""
@@ -53,7 +61,7 @@ class AdminLoggingMiddleware(BaseHTTPMiddleware):
             admin_obj = getattr(request.state, "admin", None)
             admin_id = admin_obj.id if admin_obj else 1
             username = admin_obj.username if admin_obj else "unknown"
-            
+
             log_data = SysAdminLogCreate(
                 id=None,  # id 是可选的，设为 None
                 admin_id=admin_id,
@@ -61,7 +69,7 @@ class AdminLoggingMiddleware(BaseHTTPMiddleware):
                 url=str(request.url),
                 title=request.method,
                 content=json.dumps(filtered_params, ensure_ascii=False),
-                useragent=request.headers.get("user-agent", ""),  
+                useragent=request.headers.get("user-agent", ""),
                 ip=request.client.host if request.client else "",
             )
 

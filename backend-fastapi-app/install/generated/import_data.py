@@ -1,9 +1,9 @@
 """导入模型数据脚本，不依赖 Alembic"""
+# flake8: noqa: F821  # 模型类通过 _load_models() 动态加载
 import importlib
 from pathlib import Path
-from datetime import datetime, date
+from datetime import datetime
 from decimal import Decimal
-from sqlalchemy.orm import Session
 from app.dependencies.database import SessionLocal
 
 
@@ -41,7 +41,7 @@ def import_data():
     db = SessionLocal()
     try:
         # 插入 sys_admin 表数据
-        sys_admin = SysAdmin()
+        sys_admin = SysAdmin()  # noqa: F821
         sys_admin.id = 1
         sys_admin.group_id = 1
         sys_admin.username = 'admin'
@@ -60,7 +60,7 @@ def import_data():
         db.add(sys_admin)
 
         # 插入 sys_general_category 表数据
-        sys_general_category = SysGeneralCategory()
+        sys_general_category = SysGeneralCategory()  # noqa: F821
         sys_general_category.id = 1
         sys_general_category.pid = 0
         sys_general_category.type = 'default'
@@ -73,7 +73,7 @@ def import_data():
         sys_general_category.created_at = datetime.fromisoformat('2024-05-08T17:19:06')
         sys_general_category.updated_at = datetime.fromisoformat('2025-03-07T11:50:19')
         db.add(sys_general_category)
-        sys_general_category = SysGeneralCategory()
+        sys_general_category = SysGeneralCategory()  # noqa: F821
         sys_general_category.id = 2
         sys_general_category.pid = 0
         sys_general_category.type = 'blog'
@@ -117,7 +117,7 @@ def import_data():
         ]
 
         for sys_admin_rule_item in sys_admin_rule_data:
-            item = SysAdminRule()
+            item = SysAdminRule()  # noqa: F821
             item.id = sys_admin_rule_item[0]
             item.rule_type = sys_admin_rule_item[1]
             item.parent_id = sys_admin_rule_item[2]
@@ -137,7 +137,7 @@ def import_data():
             db.add(item)
 
         # 插入 sys_admin_log 表数据
-        sys_admin_log = SysAdminLog()
+        sys_admin_log = SysAdminLog()  # noqa: F821
         sys_admin_log.id = 1
         sys_admin_log.admin_id = 1
         sys_admin_log.username = 'admin'
@@ -149,7 +149,7 @@ def import_data():
         sys_admin_log.created_at = datetime.fromisoformat('2025-11-27T03:59:30')
         sys_admin_log.updated_at = datetime.fromisoformat('2025-11-27T03:59:30')
         db.add(sys_admin_log)
-        sys_admin_log = SysAdminLog()
+        sys_admin_log = SysAdminLog()  # noqa: F821
         sys_admin_log.id = 2
         sys_admin_log.admin_id = 1
         sys_admin_log.username = 'admin'
@@ -170,7 +170,7 @@ def import_data():
         ]
 
         for sys_user_rule_item in sys_user_rule_data:
-            item = SysUserRule()
+            item = SysUserRule()  # noqa: F821
             item.id = sys_user_rule_item[0]
             item.rule_type = sys_user_rule_item[1]
             item.parent_id = sys_user_rule_item[2]
@@ -190,7 +190,7 @@ def import_data():
             db.add(item)
 
         # 插入 sys_admin_group 表数据
-        sys_admin_group = SysAdminGroup()
+        sys_admin_group = SysAdminGroup()  # noqa: F821
         sys_admin_group.id = 1
         sys_admin_group.pid = 0
         sys_admin_group.name = 'super'
@@ -202,7 +202,7 @@ def import_data():
         db.add(sys_admin_group)
 
         # 插入 sys_plugin 表数据
-        sys_plugin = SysPlugin()
+        sys_plugin = SysPlugin()  # noqa: F821
         sys_plugin.id = 1
         sys_plugin.title = '代码生成器'
         sys_plugin.author = 'StkFish'
@@ -223,7 +223,7 @@ def import_data():
         db.add(sys_plugin)
 
         # 插入 sys_user 表数据
-        sys_user = SysUser()
+        sys_user = SysUser()  # noqa: F821
         sys_user.id = 1
         sys_user.user_group_id = 1
         sys_user.username = 'uuuu'
@@ -254,7 +254,7 @@ def import_data():
         db.add(sys_user)
 
         # 插入 sys_attachment_category 表数据
-        sys_attachment_category = SysAttachmentCategory()
+        sys_attachment_category = SysAttachmentCategory()  # noqa: F821
         sys_attachment_category.id = 1
         sys_attachment_category.pid = 0
         sys_attachment_category.name = 'default'
@@ -264,7 +264,7 @@ def import_data():
         db.add(sys_attachment_category)
 
         # 插入 sys_user_group 表数据
-        sys_user_group = SysUserGroup()
+        sys_user_group = SysUserGroup()  # noqa: F821
         sys_user_group.id = 1
         sys_user_group.pid = 0
         sys_user_group.name = 'super'
@@ -276,7 +276,7 @@ def import_data():
         db.add(sys_user_group)
 
         # 插入 sys_general_config 表数据
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 1
         sys_general_config.name = 'name'
         sys_general_config.group = 'basic'
@@ -292,7 +292,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 2
         sys_general_config.name = 'copyright'
         sys_general_config.group = 'basic'
@@ -308,7 +308,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 3
         sys_general_config.name = 'cdnurl'
         sys_general_config.group = 'basic'
@@ -324,7 +324,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 4
         sys_general_config.name = 'version'
         sys_general_config.group = 'basic'
@@ -340,7 +340,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 5
         sys_general_config.name = 'timezone'
         sys_general_config.group = 'basic'
@@ -356,7 +356,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 6
         sys_general_config.name = 'forbiddenip'
         sys_general_config.group = 'basic'
@@ -372,7 +372,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2025-04-29T07:12:13')
         sys_general_config.updated_at = datetime.fromisoformat('2025-04-29T07:12:13')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 7
         sys_general_config.name = 'languages'
         sys_general_config.group = 'basic'
@@ -388,7 +388,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-29T01:39:29')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 8
         sys_general_config.name = 'fixedpage'
         sys_general_config.group = 'basic'
@@ -404,7 +404,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 9
         sys_general_config.name = 'categorytype'
         sys_general_config.group = 'dictionary'
@@ -420,7 +420,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 10
         sys_general_config.name = 'default_category'
         sys_general_config.group = 'dictionary'
@@ -436,7 +436,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 11
         sys_general_config.name = 'mail_type'
         sys_general_config.group = 'email'
@@ -452,7 +452,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-29T20:59:28')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 12
         sys_general_config.name = 'mail_smtp_host'
         sys_general_config.group = 'email'
@@ -468,7 +468,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 13
         sys_general_config.name = 'mail_smtp_port'
         sys_general_config.group = 'email'
@@ -484,7 +484,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 14
         sys_general_config.name = 'mail_smtp_user'
         sys_general_config.group = 'email'
@@ -500,7 +500,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 15
         sys_general_config.name = 'mail_smtp_pass'
         sys_general_config.group = 'email'
@@ -516,7 +516,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 16
         sys_general_config.name = 'mail_verify_type'
         sys_general_config.group = 'email'
@@ -532,7 +532,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-29T20:58:05')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 17
         sys_general_config.name = 'mail_from'
         sys_general_config.group = 'email'
@@ -548,7 +548,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-27T11:57:06')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 18
         sys_general_config.name = 'image_category'
         sys_general_config.group = 'dictionary'
@@ -564,7 +564,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-29T01:39:29')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 19
         sys_general_config.name = 'file_category'
         sys_general_config.group = 'dictionary'
@@ -580,7 +580,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-29T01:39:29')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 20
         sys_general_config.name = 'video_category'
         sys_general_config.group = 'dictionary'
@@ -596,7 +596,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-29T01:39:29')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 21
         sys_general_config.name = 'audio_category'
         sys_general_config.group = 'dictionary'
@@ -612,7 +612,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-29T01:39:29')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 22
         sys_general_config.name = 'document_category'
         sys_general_config.group = 'dictionary'
@@ -628,7 +628,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-29T01:39:29')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 23
         sys_general_config.name = 'user_page_title'
         sys_general_config.group = 'user'
@@ -644,7 +644,7 @@ def import_data():
         sys_general_config.created_at = datetime.fromisoformat('2024-12-29T01:39:29')
         sys_general_config.updated_at = datetime.fromisoformat('2024-12-30T12:50:59')
         db.add(sys_general_config)
-        sys_general_config = SysGeneralConfig()
+        sys_general_config = SysGeneralConfig()  # noqa: F821
         sys_general_config.id = 24
         sys_general_config.name = 'user_footer'
         sys_general_config.group = 'user'

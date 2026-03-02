@@ -1,19 +1,6 @@
-import json
-import os
-from datetime import datetime
-from pathlib import Path
-import re
-import importlib
-import string
 import random
-from collections import defaultdict
-from urllib.parse import urlparse, urljoin
-import inspect
-from sqlalchemy import inspect as sqlalchemyInspect
-from app.core import db
-from app.core.utils.defs import now
-
-from app.core.utils.logger import logger
+import string
+from urllib.parse import urljoin, urlparse
 
 
 def get_timestamp():
@@ -33,14 +20,12 @@ def is_safe_url(request, target):
     :return: 如果目标 URL 与当前主机相同且使用 http 或 https 协议，则返回 True；否则返回 False
     """
     ref_url = urlparse(request.host_url)  # 解析当前请求的主机 URL
-    test_url = urlparse(
-        urljoin(request.host_url, target)
-    )  # 将目标 URL 与主机 URL 合并并解析
+    test_url = urlparse(urljoin(request.host_url, target))  # 将目标 URL 与主机 URL 合并并解析
 
     # 判断协议是否为 http 或 https，且主机名相同
     return test_url.scheme in ("http", "https") and ref_url.netloc == test_url.netloc
 
- 
+
 def generate_random_string(length):
     """Generate a random string of a given length."""
     # 定义可能的字符集合

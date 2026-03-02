@@ -1,58 +1,74 @@
-from typing import List, Optional, Dict, Any, Union
+from typing import Any
+
 from fastapi_babel import _
-from sqlalchemy.orm import Session, Query
-from sqlalchemy import and_, or_
+from sqlalchemy import or_
+from sqlalchemy.orm import Query, Session
+
 from app.modules.admin.sys_user.models.sys_user import SysUser
 from app.modules.admin.sys_user.schemas.sys_user import SysUserCreate, SysUserUpdate
 from app.utils.log_utils import logger
 
 
 class CRUDSysUser:
-    SEARCHABLE_FIELDS = ['username', 'nickname', 'email', 'mobile', 'avatar', 'gender', 'bio', 'login_ip', 'join_ip', 'verification', 'token', 'status', 'platform']
+    SEARCHABLE_FIELDS = [
+        "username",
+        "nickname",
+        "email",
+        "mobile",
+        "avatar",
+        "gender",
+        "bio",
+        "login_ip",
+        "join_ip",
+        "verification",
+        "token",
+        "status",
+        "platform",
+    ]
 
-    def get(self, db: Session, id: int) -> Optional[SysUser]:
+    def get(self, db: Session, id: int) -> SysUser | None:
         """Get SysUser by ID"""
-        return db.get(SysUser,id)
+        return db.get(SysUser, id)
 
-    def _apply_search_filter(self, query: Query, search: Optional[str]) -> Query:
+    def _apply_search_filter(self, query: Query, search: str | None) -> Query:
         """Apply search filter"""
         if not search or not self.SEARCHABLE_FIELDS:
             return query
-        
+
         search_pattern = f"%{search}%"
         filters = []
         for field in self.SEARCHABLE_FIELDS:
             if hasattr(SysUser, field):
                 filters.append(getattr(SysUser, field).ilike(search_pattern))
         if not filters:
-             return query
+            return query
         return query.filter(or_(*filters))
 
-    def _apply_order_by(self, query: Query, orderby: Optional[str]) -> Query:
+    def _apply_order_by(self, query: Query, orderby: str | None) -> Query:
         """Apply ordering"""
         if not orderby:
             return query
-        
+
         try:
             field, direction = orderby.rsplit("_", 1)
             if not hasattr(SysUser, field):
-                logger.error(_(f"Invalid sort field: {field} for model SysUser"))
+                logger.error(_("Invalid sort field: {field} for model SysUser"))
                 return query
             order_column = getattr(SysUser, field)
             if direction.lower() == "asc":
                 return query.order_by(order_column.asc())
             elif direction.lower() == "desc":
                 return query.order_by(order_column.desc())
-            logger.warning(_(f"Invalid sort direction: {direction} for field {field}"))
+            logger.warning(_("Invalid sort direction: {direction} for field {field}"))
             return query
-        except ValueError: # Handles rsplit error if '_' not found
+        except ValueError:  # Handles rsplit error if '_' not found
             logger.error(_("Invalid orderby format. Expected format: field_direction"))
             return query
-        except AttributeError: # Should be caught by hasattr check, but as a fallbacky
-            logger.error(_(f"Sort field does not exist on model SysUser"))
+        except AttributeError:  # Should be caught by hasattr check, but as a fallbacky
+            logger.error(_("Sort field does not exist on model SysUser"))
             return query
 
-    def filter(self, db: Session, *criterion) -> 'QueryBuilderSysUser':
+    def filter(self, db: Session, *criterion) -> "QueryBuilderSysUser":
         """
         Apply custom SQLAlchemy filter criteria and return a QueryBuilder instance.
         Allows for chainable calls like .get_all(), .get_multi(), etc.
@@ -67,38 +83,40 @@ class CRUDSysUser:
         return QueryBuilderSysUser(db=db, query=initial_query, crud_base=self)
 
     def get_multi(
-        self, 
-        db: Session, 
-        page: int = 1, 
-        per_page: int = 10, 
-        search: Optional[str] = None, 
-        orderby: Optional[str] = None,
-        base_query: Optional[Query] = None
-    ) -> List[SysUser]:
+        self,
+        db: Session,
+        page: int = 1,
+        per_page: int = 10,
+        search: str | None = None,
+        orderby: str | None = None,
+        base_query: Query | None = None,
+    ) -> list[SysUser]:
         """Get paginated list of SysUser records"""
         page = max(1, page)
         per_page = max(1, min(per_page, 100))
-        
+
         query = base_query if base_query is not None else db.query(SysUser)
         query = self._apply_search_filter(query, search)
         query = self._apply_order_by(query, orderby)
-        
+
         return query.offset((page - 1) * per_page).limit(per_page).all()
 
     def get_all(
-        self, 
-        db: Session, 
-        search: Optional[str] = None, 
-        orderby: Optional[str] = None,
-        base_query: Optional[Query] = None
-    ) -> List[SysUser]:
+        self,
+        db: Session,
+        search: str | None = None,
+        orderby: str | None = None,
+        base_query: Query | None = None,
+    ) -> list[SysUser]:
         """Get all SysUser records"""
         query = base_query if base_query is not None else db.query(SysUser)
         query = self._apply_search_filter(query, search)
         query = self._apply_order_by(query, orderby)
         return query.all()
 
-    def get_total(self, db: Session, search: Optional[str] = None, base_query: Optional[Query] = None) -> int:
+    def get_total(
+        self, db: Session, search: str | None = None, base_query: Query | None = None
+    ) -> int:
         """Get total count of SysUser records"""
         query = base_query if base_query is not None else db.query(SysUser)
         query = self._apply_search_filter(query, search)
@@ -109,28 +127,24 @@ class CRUDSysUser:
         """Create new SysUser record with uniqueness validation"""
         try:
             # Check username uniqueness
-            if hasattr(obj_in, 'username') and getattr(obj_in, 'username') is not None:
-                existing = db.query(SysUser).filter(
-                    SysUser.username == getattr(obj_in, 'username')
-                ).first()
+            if hasattr(obj_in, "username") and obj_in.username is not None:
+                existing = db.query(SysUser).filter(SysUser.username == obj_in.username).first()
                 if existing:
-                    raise ValueError(_(f"Duplicate value for username: '{getattr(obj_in, 'username')}'"))
+                    raise ValueError(
+                        _("Duplicate value for username: '{getattr(obj_in, 'username')}'")
+                    )
 
             # Check mobile uniqueness
-            if hasattr(obj_in, 'mobile') and getattr(obj_in, 'mobile') is not None:
-                existing = db.query(SysUser).filter(
-                    SysUser.mobile == getattr(obj_in, 'mobile')
-                ).first()
+            if hasattr(obj_in, "mobile") and obj_in.mobile is not None:
+                existing = db.query(SysUser).filter(SysUser.mobile == obj_in.mobile).first()
                 if existing:
-                    raise ValueError(_(f"Duplicate value for mobile: '{getattr(obj_in, 'mobile')}'"))
+                    raise ValueError(_("Duplicate value for mobile: '{getattr(obj_in, 'mobile')}'"))
 
             # Check email uniqueness
-            if hasattr(obj_in, 'email') and getattr(obj_in, 'email') is not None:
-                existing = db.query(SysUser).filter(
-                    SysUser.email == getattr(obj_in, 'email')
-                ).first()
+            if hasattr(obj_in, "email") and obj_in.email is not None:
+                existing = db.query(SysUser).filter(SysUser.email == obj_in.email).first()
                 if existing:
-                    raise ValueError(_(f"Duplicate value for email: '{getattr(obj_in, 'email')}'"))
+                    raise ValueError(_("Duplicate value for email: '{getattr(obj_in, 'email')}'"))
 
             db_obj = SysUser(**obj_in.model_dump(exclude_unset=True))
             db.add(db_obj)
@@ -139,79 +153,81 @@ class CRUDSysUser:
             return db_obj
         except Exception:
             db.rollback()
-            logger.error(f"Failed to create SysUser", exc_info=True)
+            logger.error("Failed to create SysUser", exc_info=True)
             raise
 
     def update(
-        self, 
-        db: Session, 
-        db_obj: SysUser, 
-        obj_in: Union[Dict[str, Any], SysUserUpdate]
+        self, db: Session, db_obj: SysUser, obj_in: dict[str, Any] | SysUserUpdate
     ) -> SysUser:
         """Update existing SysUser record with uniqueness validation"""
         try:
-            update_data = obj_in if isinstance(obj_in, dict) else obj_in.model_dump(exclude_unset=True)
-            
+            update_data = (
+                obj_in if isinstance(obj_in, dict) else obj_in.model_dump(exclude_unset=True)
+            )
+
             # 特殊处理密码字段：如果密码为空字符串，表示不修改密码，从更新数据中移除
-            if 'password' in update_data and update_data['password'] == "":
-                del update_data['password']
-            
+            if "password" in update_data and update_data["password"] == "":
+                del update_data["password"]
+
             # Check username uniqueness if being changed
-            if 'username' in update_data and update_data['username'] is not None:
-                new_username = update_data['username']
-                if new_username != getattr(db_obj, 'username'):
-                    existing = db.query(SysUser).filter(
-                        SysUser.username == new_username,
-                        SysUser.id != getattr(db_obj, 'id')
-                    ).first()
+            if "username" in update_data and update_data["username"] is not None:
+                new_username = update_data["username"]
+                if new_username != db_obj.username:
+                    existing = (
+                        db.query(SysUser)
+                        .filter(SysUser.username == new_username, SysUser.id != db_obj.id)
+                        .first()
+                    )
                     if existing:
-                        raise ValueError(_(f"Duplicate value for username: '{new_username}'"))
+                        raise ValueError(_("Duplicate value for username: '{new_username}'"))
 
             # Check mobile uniqueness if being changed
-            if 'mobile' in update_data and update_data['mobile'] is not None:
-                new_mobile = update_data['mobile']
-                if new_mobile != getattr(db_obj, 'mobile'):
-                    existing = db.query(SysUser).filter(
-                        SysUser.mobile == new_mobile,
-                        SysUser.id != getattr(db_obj, 'id')
-                    ).first()
+            if "mobile" in update_data and update_data["mobile"] is not None:
+                new_mobile = update_data["mobile"]
+                if new_mobile != db_obj.mobile:
+                    existing = (
+                        db.query(SysUser)
+                        .filter(SysUser.mobile == new_mobile, SysUser.id != db_obj.id)
+                        .first()
+                    )
                     if existing:
-                        raise ValueError(_(f"Duplicate value for mobile: '{new_mobile}'"))
+                        raise ValueError(_("Duplicate value for mobile: '{new_mobile}'"))
 
             # Check email uniqueness if being changed
-            if 'email' in update_data and update_data['email'] is not None:
-                new_email = update_data['email']
-                if new_email != getattr(db_obj, 'email'):
-                    existing = db.query(SysUser).filter(
-                        SysUser.email == new_email,
-                        SysUser.id != getattr(db_obj, 'id')
-                    ).first()
+            if "email" in update_data and update_data["email"] is not None:
+                new_email = update_data["email"]
+                if new_email != db_obj.email:
+                    existing = (
+                        db.query(SysUser)
+                        .filter(SysUser.email == new_email, SysUser.id != db_obj.id)
+                        .first()
+                    )
                     if existing:
-                        raise ValueError(_(f"Duplicate value for email: '{new_email}'"))
+                        raise ValueError(_("Duplicate value for email: '{new_email}'"))
 
             for field, value in update_data.items():
                 if hasattr(db_obj, field):
                     setattr(db_obj, field, value)
-            
+
             db.commit()
             db.refresh(db_obj)
             return db_obj
         except Exception:
             db.rollback()
-            logger.error(f"Failed to update SysUser ({db_obj.id})", exc_info=True)
+            logger.error("Failed to update SysUser ({db_obj.id})", exc_info=True)
             raise
 
-    def remove(self, db: Session, id: int) -> Optional[SysUser]:
+    def remove(self, db: Session, id: int) -> SysUser | None:
         """Delete SysUser by ID"""
         try:
-            obj = self.get(db, id) # Use self.get for consistency
+            obj = self.get(db, id)  # Use self.get for consistency
             if obj:
                 db.delete(obj)
                 db.commit()
             return obj
         except Exception:
             db.rollback()
-            logger.error(f"Failed to delete SysUser (ID: {id})", exc_info=True)
+            logger.error("Failed to delete SysUser (ID: {id})", exc_info=True)
             raise
 
 
@@ -222,13 +238,13 @@ class QueryBuilderSysUser:
         self._query: Query = query
         self._crud_base: CRUDSysUser = crud_base
 
-    def filter(self, *criterion) -> 'QueryBuilderSysUser':
+    def filter(self, *criterion) -> "QueryBuilderSysUser":
         """Apply additional filter criteria to the current query."""
         if criterion:
             self._query = self._query.filter(*criterion)
         return self
 
-    def _get_effective_db(self, db_param: Optional[Session]) -> Session:
+    def _get_effective_db(self, db_param: Session | None) -> Session:
         """Determine the actual database session to use. Prefers the initial session."""
         if db_param is not None and db_param is not self._db:
             logger.warning(
@@ -237,40 +253,44 @@ class QueryBuilderSysUser:
             )
         return self._db
 
-    def get_all(self, db: Optional[Session] = None, search: Optional[str] = None, orderby: Optional[str] = None) -> List[SysUser]:
+    def get_all(
+        self, db: Session | None = None, search: str | None = None, orderby: str | None = None
+    ) -> list[SysUser]:
         """Execute the query and return all results, applying optional search and ordering."""
         effective_db = self._get_effective_db(db)
-        return self._crud_base.get_all(db=effective_db, search=search, orderby=orderby, base_query=self._query)
+        return self._crud_base.get_all(
+            db=effective_db, search=search, orderby=orderby, base_query=self._query
+        )
 
     def get_multi(
-        self, 
-        db: Optional[Session] = None,
-        page: int = 1, 
-        per_page: int = 10, 
-        search: Optional[str] = None, 
-        orderby: Optional[str] = None
-    ) -> List[SysUser]:
+        self,
+        db: Session | None = None,
+        page: int = 1,
+        per_page: int = 10,
+        search: str | None = None,
+        orderby: str | None = None,
+    ) -> list[SysUser]:
         """Execute the query with pagination, applying optional search and ordering."""
         effective_db = self._get_effective_db(db)
         return self._crud_base.get_multi(
-            db=effective_db, 
-            page=page, 
-            per_page=per_page, 
-            search=search, 
-            orderby=orderby, 
-            base_query=self._query
+            db=effective_db,
+            page=page,
+            per_page=per_page,
+            search=search,
+            orderby=orderby,
+            base_query=self._query,
         )
 
-    def get_total(self, db: Optional[Session] = None, search: Optional[str] = None) -> int:
+    def get_total(self, db: Session | None = None, search: str | None = None) -> int:
         """Execute the query to get the total count of records, applying optional search."""
         effective_db = self._get_effective_db(db)
         return self._crud_base.get_total(db=effective_db, search=search, base_query=self._query)
 
-    def all(self) -> List[SysUser]:
+    def all(self) -> list[SysUser]:
         """Directly execute .all() on the current query object."""
         return self._query.all()
 
-    def first(self) -> Optional[SysUser]:
+    def first(self) -> SysUser | None:
         """Directly execute .first() on the current query object."""
         return self._query.first()
 

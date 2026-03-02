@@ -2,9 +2,8 @@
 代码生成器类型定义
 """
 
-from typing import List, Optional
+from typing import List
 from pydantic import BaseModel
-import datetime
 
 
 class FieldInfo(BaseModel):

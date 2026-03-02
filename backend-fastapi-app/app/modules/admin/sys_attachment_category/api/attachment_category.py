@@ -1,29 +1,37 @@
-from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_babel import _
 from sqlalchemy.orm import Session
-from app.dependencies.database import get_db
+
 from app.core.security import get_current_admin
-from app.modules.admin.sys_attachment_category.crud.sys_attachment_category import crud_sys_attachment_category
-from app.modules.admin.sys_attachment_category.schemas.sys_attachment_category import SysAttachmentCategoryCreate, SysAttachmentCategoryUpdate
-from app.utils.responses import success_response
+from app.dependencies.database import get_db
+from app.modules.admin.sys_attachment_category.crud.sys_attachment_category import (
+    crud_sys_attachment_category,
+)
+from app.modules.admin.sys_attachment_category.schemas.sys_attachment_category import (
+    SysAttachmentCategoryCreate,
+    SysAttachmentCategoryUpdate,
+)
 from app.utils.response_handlers import ErrorCode
-from app.modules.admin.sys_attachment_category.models.sys_attachment_category import SysAttachmentCategory
+from app.utils.responses import success_response
 
 # Initialize the API router for sys_attachment_category endpoints
 router = APIRouter(
-    prefix="/attachment/category", tags=["attachment_category"], dependencies=[Depends(get_current_admin)]
+    prefix="/attachment/category",
+    tags=["attachment_category"],
+    dependencies=[Depends(get_current_admin)],
 )
 
 # Set the maximum per_page limit
 MAX_PER_PAGE = 200
+
+
 @router.get("/list")
 def read_sys_attachment_category_list(
     page: int = 1,
     per_page: int = 10,
-    search: Optional[str] = None,
-    orderby: Optional[str] = None,  # Sorting field and direction, e.g., "name_asc"
-    db: Session = Depends(get_db)
+    search: str | None = None,
+    orderby: str | None = None,  # Sorting field and direction, e.g., "name_asc"
+    db: Session = Depends(get_db),
 ):
     """
     Retrieve a list of SysAttachmentCategory records with optional pagination, search, and sorting.
@@ -41,29 +49,35 @@ def read_sys_attachment_category_list(
     # If per_page is -1, set it to the maximum allowed value
     if per_page == -1:
         per_page = MAX_PER_PAGE  # Set per_page to the maximum value (200)
-    
+
     # Ensure per_page is within the allowed range
     per_page = min(per_page, MAX_PER_PAGE)
-    
+
     # Ensure page and per_page are at least 1
     page = max(page, 1)
-    
+
     # Retrieve paginated records with search and sorting
-    items = crud_sys_attachment_category.get_multi(db, page=page, per_page=per_page, search=search, orderby=orderby)
+    items = crud_sys_attachment_category.get_multi(
+        db, page=page, per_page=per_page, search=search, orderby=orderby
+    )
     total = crud_sys_attachment_category.get_total(db, search=search)
-    
+
     response_page = page
     response_per_page = per_page
 
     # Prepare the response data
     return success_response(
         {
-            "items": [item.to_dict() for item in items],  # Convert each model instance to a dictionary
+            "items": [
+                item.to_dict() for item in items
+            ],  # Convert each model instance to a dictionary
             "total": total,
             "page": response_page,
             "per_page": response_per_page,
         }
     )
+
+
 @router.get("/{id}")
 def read_sys_attachment_category(id: int, db: Session = Depends(get_db)):
     """
@@ -82,11 +96,17 @@ def read_sys_attachment_category(id: int, db: Session = Depends(get_db)):
     db_obj = crud_sys_attachment_category.get(db, id=id)
     if db_obj is None:
         # Raise a 404 Not Found error if the record does not exist
-        raise HTTPException(status_code=ErrorCode.NOT_FOUND.value, detail=_("SysAttachmentCategory not found."))
+        raise HTTPException(
+            status_code=ErrorCode.NOT_FOUND.value, detail=_("SysAttachmentCategory not found.")
+        )
     # Return the record's data as a dictionary
     return success_response(db_obj.to_dict())
+
+
 @router.post("/create")
-def create_sys_attachment_category(obj_in: SysAttachmentCategoryCreate, db: Session = Depends(get_db)):
+def create_sys_attachment_category(
+    obj_in: SysAttachmentCategoryCreate, db: Session = Depends(get_db)
+):
     """
     Create a new SysAttachmentCategory record.
 
@@ -100,8 +120,12 @@ def create_sys_attachment_category(obj_in: SysAttachmentCategoryCreate, db: Sess
     ret = crud_sys_attachment_category.create(db, obj_in=obj_in)
     # Return the ID of the inserted record
     return success_response({"insert_id": ret.id})
+
+
 @router.put("/update/{id}")
-def update_sys_attachment_category(id: int, obj_in: SysAttachmentCategoryUpdate, db: Session = Depends(get_db)):
+def update_sys_attachment_category(
+    id: int, obj_in: SysAttachmentCategoryUpdate, db: Session = Depends(get_db)
+):
     """
     Update an existing SysAttachmentCategory record.
 
@@ -119,13 +143,17 @@ def update_sys_attachment_category(id: int, obj_in: SysAttachmentCategoryUpdate,
     db_obj = crud_sys_attachment_category.get(db, id=id)
     if not db_obj:
         # Raise a 404 Not Found error if the record does not exist
-        raise HTTPException(status_code=ErrorCode.NOT_FOUND.value, detail=_("SysAttachmentCategory not found."))
+        raise HTTPException(
+            status_code=ErrorCode.NOT_FOUND.value, detail=_("SysAttachmentCategory not found.")
+        )
     # Update the record with the provided data
     updated_obj = crud_sys_attachment_category.update(
         db, db_obj=db_obj, obj_in=obj_in.model_dump(exclude_unset=True)
     )
     # Return the updated record's data as a dictionary
     return success_response(updated_obj.to_dict())
+
+
 @router.delete("/delete/{id}")
 def delete_sys_attachment_category(id: int, db: Session = Depends(get_db)):
     """
@@ -144,7 +172,9 @@ def delete_sys_attachment_category(id: int, db: Session = Depends(get_db)):
     db_obj = crud_sys_attachment_category.get(db, id=id)
     if db_obj is None:
         # Raise a 404 Not Found error if the record does not exist
-        raise HTTPException(status_code=ErrorCode.NOT_FOUND.value, detail=_("SysAttachmentCategory not found."))
+        raise HTTPException(
+            status_code=ErrorCode.NOT_FOUND.value, detail=_("SysAttachmentCategory not found.")
+        )
     # Remove the record from the database
     crud_sys_attachment_category.remove(db, id=id)
     # Return an empty success response

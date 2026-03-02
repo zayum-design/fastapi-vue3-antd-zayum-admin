@@ -1,19 +1,16 @@
-
-from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_babel import _
 from sqlalchemy.orm import Session
+
+from app.core.security import get_current_admin
 from app.dependencies.database import get_db
 from app.modules.admin.sys_plugin.crud.sys_plugin import crud_sys_plugin
 from app.modules.admin.sys_plugin.schemas.sys_plugin import SysPluginCreate, SysPluginUpdate
-from app.utils.responses import success_response
 from app.utils.response_handlers import ErrorCode
-from app.core.security import get_current_admin
+from app.utils.responses import success_response
 
 # Initialize the API router for sys_plugin endpoints
-router = APIRouter(
-    prefix="/plugin", tags=["plugin"], dependencies=[Depends(get_current_admin)] 
-)
+router = APIRouter(prefix="/plugin", tags=["plugin"], dependencies=[Depends(get_current_admin)])
 
 # Set the maximum per_page limit
 MAX_PER_PAGE = 200
@@ -23,8 +20,8 @@ MAX_PER_PAGE = 200
 def read_sys_plugin_list(
     page: int = 1,
     per_page: int = 10,
-    search: Optional[str] = None,
-    orderby: Optional[str] = None,  # Sorting field and direction, e.g., "name_asc"
+    search: str | None = None,
+    orderby: str | None = None,  # Sorting field and direction, e.g., "name_asc"
     db: Session = Depends(get_db),
 ):
     """
@@ -90,9 +87,7 @@ def read_sys_plugin(id: int, db: Session = Depends(get_db)):
     db_obj = crud_sys_plugin.get(db, id=id)
     if db_obj is None:
         # Raise a 404 Not Found error if the record does not exist
-        raise HTTPException(
-            status_code=ErrorCode.NOT_FOUND.value, detail=_("SysPlugin not found.")
-        )
+        raise HTTPException(status_code=ErrorCode.NOT_FOUND.value, detail=_("SysPlugin not found."))
     # Return the record's data as a dictionary
     return success_response(db_obj.to_dict())
 
@@ -133,9 +128,7 @@ def update_sys_plugin(id: int, obj_in: SysPluginUpdate, db: Session = Depends(ge
     db_obj = crud_sys_plugin.get(db, id=id)
     if not db_obj:
         # Raise a 404 Not Found error if the record does not exist
-        raise HTTPException(
-            status_code=ErrorCode.NOT_FOUND.value, detail=_("SysPlugin not found.")
-        )
+        raise HTTPException(status_code=ErrorCode.NOT_FOUND.value, detail=_("SysPlugin not found."))
     # Update the record with the provided data
     updated_obj = crud_sys_plugin.update(
         db, db_obj=db_obj, obj_in=obj_in.model_dump(exclude_unset=True)
@@ -162,9 +155,7 @@ def delete_sys_plugin(id: int, db: Session = Depends(get_db)):
     db_obj = crud_sys_plugin.get(db, id=id)
     if db_obj is None:
         # Raise a 404 Not Found error if the record does not exist
-        raise HTTPException(
-            status_code=ErrorCode.NOT_FOUND.value, detail=_("SysPlugin not found.")
-        )
+        raise HTTPException(status_code=ErrorCode.NOT_FOUND.value, detail=_("SysPlugin not found."))
     # Remove the record from the database
     crud_sys_plugin.remove(db, id=id)
     # Return an empty success response

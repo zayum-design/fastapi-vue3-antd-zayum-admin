@@ -1,47 +1,49 @@
-from datetime import datetime, date, timezone
-from decimal import Decimal
-from typing import Optional, Literal
-from pydantic import BaseModel, Field, EmailStr, field_validator
+from datetime import UTC, datetime
+from typing import Literal
+
 from fastapi_babel import _
-import re
+from pydantic import BaseModel, Field, field_validator
 
 
 class SysUserGroupBase(BaseModel):
-    id: Optional[int] = Field(None)
+    id: int | None = Field(None)
     pid: int = Field(...)
     name: str = Field(..., max_length=100)
     rules: dict = Field(...)
     access: dict = Field(...)
-    status: Literal['normal', 'hidden'] = Field(..., max_length=6)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    status: Literal["normal", "hidden"] = Field(..., max_length=6)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
-    @field_validator('status')
+    @field_validator("status")
     def validate_status(cls, v):
-        if v not in ['normal', 'hidden']:
-            raise ValueError(_('STATUS should be either normal or hidden'))
+        if v not in ["normal", "hidden"]:
+            raise ValueError(_("STATUS should be either normal or hidden"))
         return v
 
     class Config:
-        orm_mode = True
+        from_attributes = True
         arbitrary_types_allowed = True
 
 
 class SysUserGroupCreate(SysUserGroupBase):
     pass
 
+
 class SysUserGroupUpdate(BaseModel):
-    pid: Optional[int] = None
-    name: Optional[str] = Field(None, max_length=100)
-    rules: Optional[dict] = None
-    access: Optional[dict] = None
-    status: Optional[Literal['normal', 'hidden']] = Field(None, max_length=6)
+    pid: int | None = None
+    name: str | None = Field(None, max_length=100)
+    rules: dict | None = None
+    access: dict | None = None
+    status: Literal["normal", "hidden"] | None = Field(None, max_length=6)
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 class SysUserGroupInDBBase(SysUserGroupBase):
     pass
+
 
 class SysUserGroup(SysUserGroupInDBBase):
     pass

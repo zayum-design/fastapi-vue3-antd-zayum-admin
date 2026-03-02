@@ -3,11 +3,7 @@ CRUD代码生成器
 生成数据库操作代码
 """
 
-from typing import List, Optional, Dict, Any, Union, TYPE_CHECKING
-from sqlalchemy import inspect, Table
-from sqlalchemy.orm import Session, Query
-from sqlalchemy import and_, or_
-from fastapi_babel import _
+from sqlalchemy import Table
 
 
 class CrudGenerator:
@@ -70,20 +66,20 @@ class CRUD{class_name}:
         try:
             field, direction = orderby.rsplit("_", 1)
             if not hasattr({class_name}, field):
-                logger.error(_(f"Invalid sort field: {{field}} for model {class_name}"))
+                logger.error(_("Invalid sort field: {{field}} for model {class_name}"))
                 return query
             order_column = getattr({class_name}, field)
             if direction.lower() == "asc":
                 return query.order_by(order_column.asc())
             elif direction.lower() == "desc":
                 return query.order_by(order_column.desc())
-            logger.warning(_(f"Invalid sort direction: {{direction}} for field {{field}}"))
+            logger.warning(_("Invalid sort direction: {{direction}} for field {{field}}"))
             return query
         except ValueError:
             logger.error(_("Invalid orderby format. Expected format: field_direction"))
             return query
         except AttributeError:
-            logger.error(_(f"Sort field does not exist on model {class_name}"))
+            logger.error(_("Sort field does not exist on model {class_name}"))
             return query
 
     def filter(self, db: Session, *criterion) -> 'QueryBuilder{class_name}':
@@ -143,7 +139,7 @@ class CRUD{class_name}:
             return db_obj
         except Exception:
             db.rollback()
-            logger.error(f"Failed to create {class_name}", exc_info=True)
+            logger.error("Failed to create {class_name}", exc_info=True)
             raise
 
     def update(
@@ -164,7 +160,7 @@ class CRUD{class_name}:
             return db_obj
         except Exception:
             db.rollback()
-            logger.error(f"Failed to update {class_name} ({{db_obj.{primary_key}}})", exc_info=True)
+            logger.error("Failed to update {class_name} ({{db_obj.{primary_key}}})", exc_info=True)
             raise
 
     def remove(self, db: Session, {primary_key}: int) -> Optional[{class_name}]:
@@ -177,7 +173,7 @@ class CRUD{class_name}:
             return obj
         except Exception:
             db.rollback()
-            logger.error(f"Failed to delete {class_name} (ID: {{{primary_key}}})", exc_info=True)
+            logger.error("Failed to delete {class_name} (ID: {{{primary_key}}})", exc_info=True)
             raise
 
 

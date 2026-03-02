@@ -63,7 +63,7 @@ def get_tables(db: Session = Depends(get_db)):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"获取表列表失败: {str(e)}")
+        logger.error("获取表列表失败: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"获取表列表失败: {str(e)}",
@@ -96,7 +96,7 @@ def generate_code(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"为表 {table_name} 生成代码失败: {str(e)}")
+        logger.error("为表 {table_name} 生成代码失败: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"为表 {table_name} 生成代码失败: {str(e)}",
@@ -142,7 +142,7 @@ def create_table(
             )
         
         # 执行SQL创建表
-        logger.info(f"创建表SQL: {sql}")
+        logger.info("创建表SQL: {sql}")
         
         try:
             # 执行SQL语句
@@ -152,18 +152,19 @@ def create_table(
             
             # 验证表是否创建成功
             from sqlalchemy import inspect
-            from app.dependencies.database import engine
+            from app.dependencies.database import get_engine
             
             # 使用全局的engine而不是db.bind
+            engine = get_engine()
             inspector = inspect(engine)
             created_tables = inspector.get_table_names()
             
             if request.table_name in created_tables:
-                logger.info(f"表 '{request.table_name}' 创建成功")
+                logger.info("表 '{request.table_name}' 创建成功")
                 response = success_response(f"表 '{request.table_name}' 创建成功")
                 return TableCreateResponse(**response)
             else:
-                logger.error(f"表 '{request.table_name}' 创建失败，表未出现在数据库列表中")
+                logger.error("表 '{request.table_name}' 创建失败，表未出现在数据库列表中")
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail=f"表 '{request.table_name}' 创建失败，请检查数据库权限和SQL语法"
@@ -171,7 +172,7 @@ def create_table(
                 
         except Exception as sql_error:
             db.rollback()
-            logger.error(f"执行SQL失败: {str(sql_error)}")
+            logger.error("执行SQL失败: {str(sql_error)}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"执行SQL失败: {str(sql_error)}"
@@ -180,7 +181,7 @@ def create_table(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"创建表失败: {str(e)}")
+        logger.error("创建表失败: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"创建表失败: {str(e)}",

@@ -5,10 +5,6 @@ from sqlalchemy import pool
 
 from alembic import context
 
-import os
-import importlib
-import sys
-from pathlib import Path
 
 # 导入 Base，这会触发 _load_all_models() 自动加载所有模型
 from app.core.models import Base

@@ -1,6 +1,7 @@
 """
 Swagger UI 配置和模板模块
 """
+
 from app.core.config import settings
 
 

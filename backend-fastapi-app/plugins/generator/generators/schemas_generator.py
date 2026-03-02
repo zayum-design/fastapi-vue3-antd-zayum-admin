@@ -3,7 +3,6 @@ Schema代码生成器
 生成Pydantic Schema代码
 """
 
-from typing import Optional
 from sqlalchemy import Table
 from sqlalchemy.types import BOOLEAN, INTEGER, SMALLINT, VARCHAR, DATE, DATETIME, DECIMAL, JSON, TEXT
 from sqlalchemy import Enum as SqlEnum

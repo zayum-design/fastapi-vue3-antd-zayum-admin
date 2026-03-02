@@ -1,53 +1,53 @@
-from datetime import datetime, date, timezone
-from decimal import Decimal
-from typing import Optional, Literal
-from pydantic import BaseModel, Field, EmailStr, field_validator
-from fastapi_babel import _
-import re
+from datetime import UTC, datetime
+
+from pydantic import BaseModel, Field
 
 
 class SysGeneralConfigBase(BaseModel):
-    id: Optional[int] = Field(None)
+    id: int | None = Field(None)
     name: str = Field(..., max_length=30)
     group: str = Field(..., max_length=30)
     title: str = Field(..., max_length=100)
-    tip: Optional[str] = None
-    type: Optional[str] = None
-    visible: Optional[str] = None
-    value: Optional[str] = None
-    content: Optional[str] = None
-    rule: Optional[str] = None
-    extend: Optional[str] = None
-    setting: Optional[str] = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    tip: str | None = None
+    type: str | None = None
+    visible: str | None = None
+    value: str | None = None
+    content: str | None = None
+    rule: str | None = None
+    extend: str | None = None
+    setting: str | None = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     class Config:
-        orm_mode = True
+        from_attributes = True
         arbitrary_types_allowed = True
 
 
 class SysGeneralConfigCreate(SysGeneralConfigBase):
     pass
 
+
 class SysGeneralConfigUpdate(BaseModel):
-    name: Optional[str] = Field(None, max_length=30)
-    group: Optional[str] = Field(None, max_length=30)
-    title: Optional[str] = Field(None, max_length=100)
-    tip: Optional[str] = Field(None, max_length=100)
-    type: Optional[str] = Field(None, max_length=30)
-    visible: Optional[str] = Field(None, max_length=255)
-    value: Optional[str] = Field(None)
-    content: Optional[str] = Field(None)
-    rule: Optional[str] = Field(None, max_length=100)
-    extend: Optional[str] = Field(None, max_length=255)
-    setting: Optional[str] = Field(None, max_length=255)
+    name: str | None = Field(None, max_length=30)
+    group: str | None = Field(None, max_length=30)
+    title: str | None = Field(None, max_length=100)
+    tip: str | None = Field(None, max_length=100)
+    type: str | None = Field(None, max_length=30)
+    visible: str | None = Field(None, max_length=255)
+    value: str | None = Field(None)
+    content: str | None = Field(None)
+    rule: str | None = Field(None, max_length=100)
+    extend: str | None = Field(None, max_length=255)
+    setting: str | None = Field(None, max_length=255)
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 class SysGeneralConfigInDBBase(SysGeneralConfigBase):
     pass
+
 
 class SysGeneralConfig(SysGeneralConfigInDBBase):
     pass

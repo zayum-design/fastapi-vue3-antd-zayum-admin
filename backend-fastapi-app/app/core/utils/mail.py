@@ -1,6 +1,8 @@
-from app.core.utils.logger import logger
 import smtplib
 from email.mime.text import MIMEText
+
+from app.utils.log_utils import logger
+
 
 class MailService:
     """
@@ -35,9 +37,9 @@ class MailService:
         """
         # 创建邮件正文
         msg = MIMEText(body)
-        msg['Subject'] = subject
-        msg['From'] = sender
-        msg['To'] = ', '.join(recipients)  # 收件人列表
+        msg["Subject"] = subject
+        msg["From"] = sender
+        msg["To"] = ", ".join(recipients)  # 收件人列表
 
         try:
             # 使用SMTP服务器发送邮件
@@ -49,13 +51,13 @@ class MailService:
 
                 # 登录SMTP服务器
                 server.login(self.smtp_username, self.smtp_password)
-                
+
                 # 发送邮件
                 server.sendmail(sender, recipients, msg.as_string())
-            
+
             logger.info("邮件发送成功")  # 成功日志记录
             return True
-        except smtplib.SMTPException as e:
+        except smtplib.SMTPException:
             # 记录错误日志
-            logger.error(f"Error: 无法发送邮件 {e}")
+            logger.error("Error: 无法发送邮件 {e}")
             return False

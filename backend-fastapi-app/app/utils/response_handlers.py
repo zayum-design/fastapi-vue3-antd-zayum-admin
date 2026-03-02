@@ -1,24 +1,23 @@
 from enum import Enum
-from fastapi import HTTPException
-from starlette.status import (
-    HTTP_400_BAD_REQUEST,
-    HTTP_404_NOT_FOUND,
-    HTTP_500_INTERNAL_SERVER_ERROR,
-    HTTP_401_UNAUTHORIZED,
-    HTTP_403_FORBIDDEN,
-    HTTP_409_CONFLICT,
-    HTTP_422_UNPROCESSABLE_ENTITY
-)
 
+from fastapi import HTTPException
 from starlette.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
     HTTP_202_ACCEPTED,
-    HTTP_204_NO_CONTENT,
     HTTP_203_NON_AUTHORITATIVE_INFORMATION,
+    HTTP_204_NO_CONTENT,
     HTTP_205_RESET_CONTENT,
-    HTTP_206_PARTIAL_CONTENT
+    HTTP_206_PARTIAL_CONTENT,
+    HTTP_400_BAD_REQUEST,
+    HTTP_401_UNAUTHORIZED,
+    HTTP_403_FORBIDDEN,
+    HTTP_404_NOT_FOUND,
+    HTTP_409_CONFLICT,
+    HTTP_422_UNPROCESSABLE_ENTITY,
+    HTTP_500_INTERNAL_SERVER_ERROR,
 )
+
 
 # 错误码枚举类，使用数字状态码与错误类型
 class ErrorCode(Enum):
@@ -32,6 +31,7 @@ class ErrorCode(Enum):
     UNPROCESSABLE_ENTITY = HTTP_422_UNPROCESSABLE_ENTITY
     DATABASE_ERROR = HTTP_500_INTERNAL_SERVER_ERROR
 
+
 # 错误信息类，描述每个状态码的含义
 class ErrorMessage(Enum):
     OK = "Request successful."
@@ -41,8 +41,11 @@ class ErrorMessage(Enum):
     UNAUTHORIZED = "Unauthorized access."
     FORBIDDEN = "Forbidden request."
     CONFLICT = "Request conflicts with the current state of the server."
-    UNPROCESSABLE_ENTITY = "The request is well-formed but could not be followed due to semantic errors."
+    UNPROCESSABLE_ENTITY = (
+        "The request is well-formed but could not be followed due to semantic errors."
+    )
     DATABASE_ERROR = "Database operation failed."  # 新增数据库错误描述
+
 
 # 统一的异常处理函数
 def raise_error(error_code: ErrorCode):
@@ -50,9 +53,11 @@ def raise_error(error_code: ErrorCode):
     Helper function to raise HTTPException with specific error code and message.
     """
     message = ErrorMessage[error_code.name].value
-    raise HTTPException(status_code=error_code.value, detail={"error_code": error_code.name, "message": message})
+    raise HTTPException(
+        status_code=error_code.value, detail={"error_code": error_code.name, "message": message}
+    )
 
- 
+
 # 成功状态码枚举类
 class SuccessCode(Enum):
     OK = HTTP_200_OK
@@ -63,6 +68,7 @@ class SuccessCode(Enum):
     RESET_CONTENT = HTTP_205_RESET_CONTENT
     PARTIAL_CONTENT = HTTP_206_PARTIAL_CONTENT
 
+
 # 成功信息类，描述每个成功状态码的含义
 class SuccessMessage(Enum):
     OK = "Request successful."
@@ -72,6 +78,7 @@ class SuccessMessage(Enum):
     NON_AUTHORITATIVE_INFORMATION = "Request successful, but information is from a third party."
     RESET_CONTENT = "Request successful, reset document view."
     PARTIAL_CONTENT = "Partial content returned."
+
 
 # 统一的成功响应处理函数
 def respond_with_success(status_code: SuccessCode, additional_data=None):

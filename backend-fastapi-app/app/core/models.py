@@ -1,7 +1,6 @@
 # app/core/models.py
-import os
 import importlib
-import sys
+import os
 from pathlib import Path
 
 from sqlalchemy.orm import declarative_base
@@ -10,7 +9,6 @@ from sqlalchemy.orm import declarative_base
 Base = declarative_base()
 
 from app.core.config import settings
-
 
 # 缓存已导入的模型类和模块
 _model_cache = {}
@@ -21,22 +19,22 @@ def _discover_model_modules():
     """发现并返回所有模型模块路径（扫描 app/modules 下所有模块）"""
     modules_dir = Path(__file__).parent.parent / "modules"
     model_modules = []
-    
+
     # 遍历所有模块（admin, common, user 等）
     for module_dir in modules_dir.iterdir():
         if not module_dir.is_dir() or module_dir.name.startswith("."):
             continue
-        
+
         # 在每个模块下查找 models/*.py
         for model_file in module_dir.glob("**/models/*.py"):
             if model_file.name == "__init__.py":
                 continue
-            
+
             # 构建模块路径
             rel_path = model_file.relative_to(Path(__file__).parent.parent)
             module_path = str(rel_path).replace("/", ".").replace("\\", ".").replace(".py", "")
             model_modules.append((model_file.name.replace(".py", ""), f"app.{module_path}"))
-    
+
     return model_modules
 
 
@@ -44,7 +42,7 @@ def _import_model_class(name):
     """动态导入模型类"""
     if name in _model_cache:
         return _model_cache[name]
-    
+
     # 查找模型类
     for model_name, module_path in _discover_model_modules():
         try:
@@ -54,7 +52,7 @@ def _import_model_class(name):
                 return _model_cache[name]
         except Exception:
             continue
-    
+
     raise AttributeError(f"Module 'app.core.models' has no attribute '{name}'")
 
 
@@ -63,13 +61,13 @@ def _load_all_models():
     global _modules_loaded
     if _modules_loaded:
         return
-    
+
     for model_name, module_path in _discover_model_modules():
         try:
             importlib.import_module(module_path)
         except Exception as e:
             print(f"Failed to load model module {module_path}: {e}")
-    
+
     _modules_loaded = True
 
 
@@ -81,7 +79,7 @@ def __getattr__(name):
 def __dir__():
     """返回所有可用的模型类名"""
     class_names = []
-    
+
     for model_name, module_path in _discover_model_modules():
         try:
             module = importlib.import_module(module_path)
@@ -91,7 +89,7 @@ def __dir__():
                     class_names.append(attr_name)
         except Exception:
             continue
-    
+
     return sorted(set(class_names))
 
 
@@ -105,7 +103,9 @@ PLUGIN_DIR = settings.PLUGINS_DIR
 if os.path.exists(PLUGIN_DIR):
     for plugin_name in os.listdir(PLUGIN_DIR):
         plugin_path = os.path.join(PLUGIN_DIR, plugin_name)
-        if os.path.isdir(plugin_path) and os.path.exists(os.path.join(plugin_path, "models", "__init__.py")):
+        if os.path.isdir(plugin_path) and os.path.exists(
+            os.path.join(plugin_path, "models", "__init__.py")
+        ):
             try:
                 importlib.import_module(f"plugins.{plugin_name}.models")
                 print(f"Loaded models from plugin: {plugin_name}")

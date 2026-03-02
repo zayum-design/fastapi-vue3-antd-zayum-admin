@@ -1,21 +1,29 @@
-from typing import List, Optional
 from fastapi_babel import _
-from sqlalchemy.orm import Session
 from sqlalchemy import or_
+from sqlalchemy.orm import Session
+
 from app.modules.admin.sys_plugin.models.sys_plugin import SysPlugin
 from app.modules.admin.sys_plugin.schemas.sys_plugin import SysPluginCreate
 from app.utils.log_utils import logger
 
+
 class CRUDSysPlugin:
-    def get(self, db: Session, id: int) -> Optional[SysPlugin]:
+    def get(self, db: Session, id: int) -> SysPlugin | None:
         """根据唯一ID获取SysPlugin。"""
         return db.query(SysPlugin).filter(SysPlugin.id == id).first()
-    
-    def get_by_uuid(self, db: Session, uuid: str) -> Optional[SysPlugin]:
+
+    def get_by_uuid(self, db: Session, uuid: str) -> SysPlugin | None:
         """根据唯一ID获取SysPlugin。"""
         return db.query(SysPlugin).filter(SysPlugin.uuid == uuid).first()
 
-    def get_multi(self, db: Session, page: int = 1, per_page: int = 10, search: Optional[str] = None, orderby: Optional[str] = None) -> List[SysPlugin]:
+    def get_multi(
+        self,
+        db: Session,
+        page: int = 1,
+        per_page: int = 10,
+        search: str | None = None,
+        orderby: str | None = None,
+    ) -> list[SysPlugin]:
         """
         分页获取多个SysPlugin记录，可选模糊搜索和排序。
 
@@ -67,7 +75,9 @@ class CRUDSysPlugin:
         # 应用分页
         return query.offset(skip).limit(per_page).all()
 
-    def get_all(self, db: Session, search: Optional[str] = None, orderby: Optional[str] = None) -> List[SysPlugin]:
+    def get_all(
+        self, db: Session, search: str | None = None, orderby: str | None = None
+    ) -> list[SysPlugin]:
         """获取所有SysPlugin记录，可选模糊搜索和排序。"""
         query = db.query(SysPlugin)
 
@@ -99,7 +109,7 @@ class CRUDSysPlugin:
 
         return query.all()
 
-    def get_total(self, db: Session, search: Optional[str] = None) -> int:
+    def get_total(self, db: Session, search: str | None = None) -> int:
         """获取SysPlugin记录的总数，可选模糊搜索。"""
         query = db.query(SysPlugin)
 
@@ -170,5 +180,6 @@ class CRUDSysPlugin:
             db.delete(obj)
             db.commit()
         return obj
+
 
 crud_sys_plugin = CRUDSysPlugin()

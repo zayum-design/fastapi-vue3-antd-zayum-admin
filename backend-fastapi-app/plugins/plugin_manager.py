@@ -36,7 +36,7 @@ class Plugin:
                     entry_point = entry_point[:-3]
                 return entry_point
         except Exception as e:
-            logger.error(f"Failed to read plugin.json for '{self.uuid}': {e}")
+            logger.error("Failed to read plugin.json for '{self.uuid}': {e}")
         
         # 默认入口点
         return "plugin"
@@ -54,7 +54,7 @@ class Plugin:
             # 检查是否有 register 函数
             if hasattr(self.module, "register"):
                 self.module.register(router)
-                logger.info(f"Plugin '{self.uuid}' loaded successfully.")
+                logger.info("Plugin '{self.uuid}' loaded successfully.")
             else:
                 # 如果没有 register 函数，尝试直接包含路由
                 if hasattr(self.module, "router"):
@@ -63,19 +63,19 @@ class Plugin:
                         prefix=f"/api/plugins/{self.uuid}",
                         tags=[self.uuid]
                     )
-                    logger.info(f"Plugin '{self.uuid}' loaded via router attribute.")
+                    logger.info("Plugin '{self.uuid}' loaded via router attribute.")
                 else:
                     logger.warning(
                         f"Plugin '{self.uuid}' does not have a 'register' method or 'router' attribute."
                     )
         except Exception as e:
-            logger.error(f"Failed to load plugin '{self.uuid}': {e}")
+            logger.error("Failed to load plugin '{self.uuid}': {e}")
 
     def unload(self, router: APIRouter):
         try:
             if self.module and hasattr(self.module, "unregister"):
                 self.module.unregister(router)
-                logger.info(f"Plugin '{self.uuid}' unloaded successfully.")
+                logger.info("Plugin '{self.uuid}' unloaded successfully.")
             # 从 sys.modules 中移除插件模块
             if self.entry_point:
                 module_name = f"plugins.{self.uuid}.{self.entry_point}"
@@ -84,9 +84,9 @@ class Plugin:
                 
             if module_name in sys.modules:
                 del sys.modules[module_name]
-                logger.info(f"Module '{module_name}' removed from sys.modules.")
+                logger.info("Module '{module_name}' removed from sys.modules.")
         except Exception as e:
-            logger.error(f"Failed to unload plugin '{self.uuid}': {e}")
+            logger.error("Failed to unload plugin '{self.uuid}': {e}")
 
 
 class PluginManager:
@@ -131,7 +131,7 @@ class PluginManager:
         
         plugins_dir = Path(self.plugin_dir)
         if not plugins_dir.exists():
-            logger.warning(f"插件目录不存在: {plugins_dir}")
+            logger.warning("插件目录不存在: {plugins_dir}")
             return
         
         for plugin_path in plugins_dir.iterdir():
@@ -151,35 +151,35 @@ class PluginManager:
                             # 检查插件是否已经加载
                             if not any(p.uuid == plugin_uuid for p in self.plugins):
                                 self.load_plugin(plugin_uuid)
-                                logger.info(f"从本地插件目录加载插件: {plugin_uuid} (installed={installed}, enabled={enabled})")
+                                logger.info("从本地插件目录加载插件: {plugin_uuid} (installed={installed}, enabled={enabled})")
                             else:
-                                logger.info(f"插件 {plugin_uuid} 已加载，跳过")
+                                logger.info("插件 {plugin_uuid} 已加载，跳过")
                     except Exception as e:
-                        logger.error(f"读取插件配置文件失败 {plugin_json_path}: {str(e)}")
+                        logger.error("读取插件配置文件失败 {plugin_json_path}: {str(e)}")
 
     def load_plugin(self, plugin_uuid: str):
         if any(p.uuid == plugin_uuid for p in self.plugins):
-            logger.info(f"Plugin '{plugin_uuid}' is already loaded.")
+            logger.info("Plugin '{plugin_uuid}' is already loaded.")
             return
         plugin = Plugin(uuid=plugin_uuid)
         if self.router:
             plugin.load(self.router)
             self.plugins.append(plugin)
-            logger.info(f"Plugin '{plugin_uuid}' loaded and added to plugins list.")
+            logger.info("Plugin '{plugin_uuid}' loaded and added to plugins list.")
         else:
-            logger.warning(f"Cannot load plugin '{plugin_uuid}': router is not set.")
+            logger.warning("Cannot load plugin '{plugin_uuid}': router is not set.")
 
     def unload_plugin(self, plugin_uuid: str):
         plugin = next((p for p in self.plugins if p.uuid == plugin_uuid), None)
         if not plugin:
-            logger.info(f"Plugin '{plugin_uuid}' is not loaded.")
+            logger.info("Plugin '{plugin_uuid}' is not loaded.")
             return
         if self.router:
             plugin.unload(self.router)
             self.plugins.remove(plugin)
-            logger.info(f"Plugin '{plugin_uuid}' unloaded and removed from plugins list.")
+            logger.info("Plugin '{plugin_uuid}' unloaded and removed from plugins list.")
         else:
-            logger.warning(f"Cannot unload plugin '{plugin_uuid}': router is not set.")
+            logger.warning("Cannot unload plugin '{plugin_uuid}': router is not set.")
 
     def enable_plugin(self, plugin_uuid: str):
         crud_plugin = CRUDSysPlugin()
@@ -192,7 +192,7 @@ class PluginManager:
             raise ValueError(f"Plugin '{plugin_uuid}' is not installed. Cannot enable.")
             
         if plugin_record.enabled == 1:
-            logger.info(f"Plugin '{plugin_uuid}' is already enabled.")
+            logger.info("Plugin '{plugin_uuid}' is already enabled.")
             return
         plugin_record.enabled = 1
         self.db.commit()
@@ -209,7 +209,7 @@ class PluginManager:
             raise ValueError(f"Plugin '{plugin_uuid}' is not installed. Cannot disable.")
             
         if plugin_record.enabled == 0:
-            logger.info(f"Plugin '{plugin_uuid}' is already disabled.")
+            logger.info("Plugin '{plugin_uuid}' is already disabled.")
             return
         plugin_record.enabled = 0
         self.db.commit()
