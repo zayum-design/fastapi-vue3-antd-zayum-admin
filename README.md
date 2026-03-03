@@ -54,8 +54,15 @@
 
 ### 一键部署（推荐）
 
-我们提供了强大的自动化部署脚本 `deploy.sh`，支持多种部署模式，简化部署流程：
+我们提供了强大的模块化部署脚本 `deploy.sh v3.0`，支持交互式和命令行两种模式：
 
+#### 交互式模式（适合新手）
+```bash
+# 直接运行，跟随向导完成部署
+./deploy.sh
+```
+
+#### 命令行模式（适合熟练用户）
 ```bash
 # 显示帮助信息
 ./deploy.sh --help
@@ -69,33 +76,36 @@
 # 仅部署前端
 ./deploy.sh --frontend
 
-# 交互式选择部署模式（适合新手）
-./deploy.sh
+# 仅配置环境（不部署）
+./deploy.sh --config
 
 # 显示版本信息
 ./deploy.sh --version
-
-# 使用模块化部署系统（默认）
-./deploy.sh --modular
-
-# 使用原始部署脚本
-./deploy.sh --original
 ```
 
-#### 部署脚本特性：
-- **自动化环境检查**：自动检测系统环境并安装必要的依赖
-- **多种部署模式**：支持完整部署、单独部署后端或前端
-- **交互式操作**：提供友好的交互界面，适合新手使用
-- **模块化设计**：脚本已重构为模块化系统，便于维护和扩展
-- **详细日志输出**：提供详细的部署日志，便于排查问题
-- **错误处理**：完善的错误处理机制，确保部署过程稳定可靠
+#### 部署脚本特性 v3.0
+- **🎯 智能环境检测**：自动检查 Python、Node.js 等必要依赖
+- **🗄️ 数据库向导**：交互式配置 MySQL / PostgreSQL / SQLite
+- **🌐 域名配置助手**：引导式配置前后端域名和 API 地址
+- **🔒 安全部署模式**：支持安全模式（保留数据）和强制模式（全新安装）
+- **📝 完整日志记录**：详细的部署过程记录到 `logs/deploy.log`
+- **🎨 新手友好界面**：可视化的菜单、智能默认值、详细提示
+
+#### 数据库支持
+| 数据库 | 适用场景 | 特点 |
+|--------|----------|------|
+| **MySQL** | 生产环境 | 高性能、高可用、支持复杂查询 |
+| **PostgreSQL** | 生产/开发 | 功能丰富、严格的数据完整性 |
+| **SQLite** | 开发测试 | 零配置、单文件、轻量快速 |
 
 #### 部署说明：
 1. 确保脚本有执行权限：`chmod +x deploy.sh`
-2. 脚本会自动检查系统环境并安装必要的依赖
-3. 支持交互式选择部署模式，适合新手使用
-4. 模块化设计，便于维护和扩展
-5. 提供详细的日志输出，便于排查问题
+2. 首次部署建议使用交互式模式：`./deploy.sh`
+3. 脚本会引导完成数据库选择、域名配置等步骤
+4. 部署完成后会显示访问地址和登录信息
+5. 详细文档请参考 [deploy.md](deploy.md)
+
+---
 
 ### 手动部署
 
@@ -109,12 +119,19 @@ cd backend-fastapi-app
 pip install -r requirements.txt
 ```
 
-2. 运行安装脚本
+2. 配置环境变量
+```bash
+# 复制示例配置文件
+cp .env.example .env
+# 编辑 .env 文件，配置数据库等信息
+```
+
+3. 运行安装脚本
 ```bash
 ./install.sh
 ```
 
-3. 启动服务
+4. 启动服务
 ```bash
 ./start.sh
 ```
@@ -127,10 +144,20 @@ cd frontend-vue-app
 npm install
 ```
 
-2. 启动开发服务器
+2. 配置环境变量
+```bash
+# 开发环境
+cp .env.example .env.development
+# 生产环境
+cp .env.example .env.production
+```
+
+3. 启动开发服务器
 ```bash
 ./start.sh
 ```
+
+---
 
 ### Docker 部署（生产环境推荐）
 
@@ -147,11 +174,78 @@ docker-compose ps
 docker-compose down
 ```
 
+---
+
 ## 访问地址
+
+部署完成后，可以通过以下地址访问：
 
 - 前端应用：http://localhost:5173
 - 后端API：http://localhost:8000
 - Swagger文档：http://localhost:8000/docs
+- 后台登录：http://localhost:5173/admin/login
+
+## 默认管理员账号
+
+- 用户名：admin
+- 密码：Admin@888
+
+## 项目结构
+
+```
+fastapi-vue3-antd-zayum-admin/
+├── backend-fastapi-app/        # 后端代码
+│   ├── app/                    # 应用核心
+│   ├── alembic/                # 数据库迁移
+│   ├── install.sh              # 后端安装脚本
+│   ├── start.sh                # 后端启动脚本
+│   └── .env                    # 环境配置文件
+├── frontend-vue-app/           # 前端代码
+│   ├── src/                    # 源代码
+│   ├── start.sh                # 前端启动脚本
+│   ├── package.json            # 依赖配置
+│   ├── .env.development        # 开发环境配置
+│   └── .env.production         # 生产环境配置
+├── deploy/                     # 部署脚本模块（v3.0）
+│   ├── main.sh                 # 主脚本入口
+│   ├── config.sh               # 配置模块
+│   ├── utils.sh                # 工具模块
+│   ├── database_utils.sh       # 数据库模块
+│   ├── backend_utils.sh        # 后端模块
+│   └── frontend_utils.sh       # 前端模块
+├── deploy.sh                   # 一键部署脚本（入口）
+├── deploy.md                   # 部署脚本使用文档
+└── README.md                   # 项目说明
+```
+
+## 脚本说明
+
+### deploy.sh
+一键部署脚本（v3.0 模块化版本），功能包括：
+- **多种部署模式**：完整部署、单独部署后端或前端、仅配置环境
+- **数据库向导**：交互式配置 MySQL / PostgreSQL / SQLite
+- **域名配置**：引导式配置前后端域名
+- **安全模式**：保护现有数据或全新安装
+- **环境检查**：自动检测系统依赖
+- **详细日志**：完整的部署过程记录
+
+📖 **详细文档**：[deploy.md](deploy.md)
+
+### backend-fastapi-app/install.sh
+后端安装脚本，功能包括：
+- 环境检查
+- Python依赖安装
+- 数据库配置（MySQL/PostgreSQL/SQLite）
+- 管理员设置
+- 数据库迁移和初始数据恢复
+- 可选的服务启动
+
+### frontend-vue-app/start.sh
+前端启动脚本，支持多种模式：
+- 开发者模式（Development）
+- 生产模式（Production）
+- 构建模式（Build）
+- 交互式配置域名
 
 ## 服务管理
 
@@ -209,52 +303,18 @@ supervisorctl status fastapi
 #### 查看前端服务状态
 前端服务状态可以通过访问 http://localhost:5173 来检查，或者查看终端输出。
 
-## 默认管理员账号
+## 故障排查
 
-- 用户名：admin
-- 密码：Admin@888
+### 部署脚本问题
 
-## 项目结构
+请参考 [deploy.md](deploy.md) 中的故障排查章节。
 
-```
-fastapi-vue3-antd-zayum-admin/
-├── backend-fastapi-app/        # 后端代码
-│   ├── app/                    # 应用核心
-│   ├── alembic/                # 数据库迁移
-│   ├── install.sh              # 后端安装脚本
-│   └── start.sh                # 后端启动脚本
-├── frontend-vue-app/           # 前端代码
-│   ├── src/                    # 源代码
-│   ├── start.sh                # 前端启动脚本
-│   └── package.json            # 依赖配置
-├── deploy.sh                   # 一键部署脚本
-└── README.md                   # 项目说明
-```
+### 常见问题
 
-## 脚本说明
-
-### deploy.sh
-一键部署脚本，支持多种部署模式：
-- 完整部署：后端安装 + 前端启动
-- 单独部署：仅后端或仅前端
-- 环境检查：自动检测系统环境
-- 配置管理：数据库、管理员等配置
-
-### backend-fastapi-app/install.sh
-后端安装脚本，功能包括：
-- 环境检查
-- Python依赖安装
-- 数据库配置（MySQL/PostgreSQL/SQLite）
-- 管理员设置
-- 数据库迁移和初始数据恢复
-- 可选的服务启动
-
-### frontend-vue-app/start.sh
-前端启动脚本，支持多种模式：
-- 开发者模式（Development）
-- 生产模式（Production）
-- 构建模式（Build）
-- 交互式配置域名
+1. **环境检查失败**：确保已安装 Python 3.8+ 和 Node.js 16+
+2. **数据库连接失败**：检查数据库服务是否运行，用户名密码是否正确
+3. **前端依赖安装失败**：尝试清除 npm 缓存后重新安装
+4. **端口被占用**：修改 `.env` 文件中的端口号或停止占用端口的进程
 
 ## 贡献指南
 

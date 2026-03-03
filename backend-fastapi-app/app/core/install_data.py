@@ -6,13 +6,13 @@ from datetime import datetime
 from decimal import Decimal
 from sqlalchemy import inspect, create_engine, select
 from sqlalchemy.orm import Session
-from app.dependencies.database import SessionLocal
+from app.core.db_session import SessionLocal
 from app.core.config import settings
 
 
 def _load_models():
     """动态加载所有模型类到全局命名空间（扫描 app/modules 下所有模块）"""
-    modules_dir = Path(__file__).parent.parent / "app" / "modules"
+    modules_dir = Path(__file__).parent.parent.parent / "app" / "modules"
     
     # 遍历所有模块（admin, common, user 等）
     for module_dir in modules_dir.iterdir():
@@ -22,7 +22,7 @@ def _load_models():
         for model_file in module_dir.glob("**/models/*.py"):
             if model_file.name == "__init__.py":
                 continue
-            rel_path = model_file.relative_to(Path(__file__).parent.parent / "app")
+            rel_path = model_file.relative_to(Path(__file__).parent.parent.parent / "app")
             module_path = str(rel_path).replace("/", ".").replace("\\", ".").replace(".py", "")
             try:
                 module = importlib.import_module(f"app.{module_path}")

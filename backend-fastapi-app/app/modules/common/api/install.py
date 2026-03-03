@@ -1,8 +1,9 @@
 """
-安装模块主文件
+安装模块 API 路由
 负责处理系统安装过程中的数据库连接测试、数据导入和安装完成等操作
 """
 
+import os
 from datetime import datetime, timezone
 from sqlalchemy import text
 from fastapi import APIRouter, HTTPException, Request
@@ -11,13 +12,17 @@ from app.utils.responses import error_response, success_response
 from app.utils.utils import modify_env_value
 from app.modules.admin.sys_admin.crud.sys_admin import crud_sys_admin
 
-# 创建安装路由
-router = APIRouter(tags=["installation"])
+# 创建安装检查路由（用于安装前检查系统是否已安装）
+install_check_router = APIRouter()
+
+# 创建安装路由（用于安装流程）
+install_router = APIRouter(tags=["installation"])
 
 # 数据库连接测试模块
 from pydantic import BaseModel
 
 import xmlrpc.client
+
 
 class DatabaseConfig(BaseModel):
     """数据库连接配置模型"""
@@ -29,7 +34,7 @@ class DatabaseConfig(BaseModel):
     database: str  # 数据库名称
 
 
-@router.post("/test-db")
+@install_router.post("/test-db")
 async def test_database_connection(config: DatabaseConfig):
     """
     测试数据库连接接口
@@ -134,7 +139,7 @@ class ImportRequest(BaseModel):
     import_options: list[str] | None = None  # 导入选项列表
 
 
-@router.post("/import-db")
+@install_router.post("/import-db")
 async def import_database(request: ImportRequest):
     """
     数据库数据导入接口
@@ -154,7 +159,7 @@ async def import_database(request: ImportRequest):
 
     db = next(get_db())
 
-    from install.generated.install_data import (
+    from app.core.install_data import (
         import_SysAdmin,
         import_SysUserBalanceLog,
         import_SysAttachment,
@@ -312,7 +317,7 @@ class AdminCreate(BaseModel):
     nickname: str  # 管理员昵称
 
  
-@router.post("/complete")
+@install_router.post("/complete")
 async def complete_installation(_request: Request, admin_data: AdminCreate):
     """
     完成系统安装接口
@@ -365,7 +370,7 @@ async def complete_installation(_request: Request, admin_data: AdminCreate):
         # 创建安装锁定文件
         from pathlib import Path
 
-        lock_file = Path(__file__).parent.parent.parent / "install.lock"
+        lock_file = Path(__file__).parent.parent.parent.parent.parent / "install.lock"
         with open(lock_file, "w") as f:
             f.write(f"Installation completed at: {datetime.now(timezone.utc)}")
  
@@ -375,7 +380,7 @@ async def complete_installation(_request: Request, admin_data: AdminCreate):
         raise HTTPException(status_code=500, detail=f"完成安装失败: {str(e)}")
     
     
-@router.post("/restart")
+@install_router.post("/restart")
 async def restart():
     import importlib
     from app import main
@@ -389,3 +394,37 @@ async def restart():
         print("FastAPI 服务已重启")
     except Exception as e:
         print("重启失败：", e)
+
+
+# ============== 安装检查路由 ==============
+
+
+@install_check_router.post("/install_check")
+def check_install_lock():
+    """
+    安装检查接口
+    安装模式下不使用任何数据库表
+    """
+    try:
+        # 获取项目根目录
+        # install_check.py 在 app/modules/common/api/install_check.py
+        # install.lock 在 backend-fastapi-app/install.lock
+        base_dir = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
+        )
+        install_lock_path = os.path.join(base_dir, "install.lock")
+
+        # 仅检查文件是否存在，不涉及数据库操作
+        return success_response(
+            data={"installed": os.path.exists(install_lock_path)},
+        )
+    except Exception as e:
+        # 简单错误处理，不依赖 gettext
+        return {
+            "code": 500,
+            "message": "Install check failed",
+            "data": {
+                "installed": False,
+                "error": str(e)
+            }
+        }

@@ -45,8 +45,8 @@ async def lifespan(app: FastAPI):
                 logger.error("数据库引擎未初始化")
                 app.state.db_available = False
 
-        except Exception:
-            logger.error("启动过程中发生错误: {str(e)}")
+        except Exception as e:
+            logger.error(f"启动过程中发生错误: {e}")
             app.state.db_available = False
 
     yield  # 应用运行阶段

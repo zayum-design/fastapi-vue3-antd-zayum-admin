@@ -261,9 +261,8 @@ logs/*
 backend-fastapi-app/alembic-README.md
 backend-fastapi-app/tests
 backend-fastapi-app/uploads
-backend-fastapi-app/install
-backend-fastapi-app/install.sh
-backend-fastapi-app/README_INSTALL.md
+# 私有工具文件夹（包含敏感数据和生成工具）
+backend-fastapi-app/private/
 
 # 前端
 frontend-vue-app/tests
@@ -277,6 +276,7 @@ SSH_KEY_SETUP.md
 README_PRIVATE_DEPLOY.md
 deploy-private
 push-private.sh
+zayum-deploy-private.sh
 # 忽略所有以 test_ 开头的文件（包括子目录中的）
 **/test_*
 **/test_*.*
