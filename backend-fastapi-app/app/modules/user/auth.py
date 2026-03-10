@@ -127,7 +127,7 @@ async def login(
     user.login_ip = client_ip
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires)
+    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires, token_type="user")
     user.token = access_token
     db.commit()
 
@@ -186,7 +186,7 @@ async def login_form(
     user.login_ip = client_ip
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires)
+    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires, token_type="user")
     user.token = access_token
     db.commit()
 
@@ -208,7 +208,7 @@ async def sms_login(login_data: SmsLoginInput, request: Request, db: Session = D
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="用户不存在")
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires)
+    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires, token_type="user")
 
     return success_response(
         {
@@ -242,7 +242,7 @@ async def qr_login(login_data: QrLoginInput, request: Request, db: Session = Dep
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="用户不存在")
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires)
+    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires, token_type="user")
 
     return success_response(
         {
@@ -286,7 +286,7 @@ async def register(register_data: RegisterInput, db: Session = Depends(get_db)):
     user = crud_sys_auth_user.create(db, user_data)
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires)
+    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires, token_type="user")
 
     return success_response(
         {
@@ -342,7 +342,7 @@ async def social_login(
         user = crud_sys_auth_user.create(db, user_data)
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires)
+    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires, token_type="user")
 
     return success_response(
         {

@@ -82,6 +82,7 @@ const userRoutes: RouteRecordRaw[] = [
           title: $t("user_rule.user_rule"),
         },
       },
+
     ],
   },
 ];

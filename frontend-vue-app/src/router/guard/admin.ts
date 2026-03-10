@@ -1,5 +1,5 @@
 import type { Router } from "vue-router";
-import { DEFAULT_ADMIN_PATH, ADMIN_LOGIN_PATH } from "@/constants";
+import { DEFAULT_ADMIN_PATH, ADMIN_LOGIN_PATH, ADMIN_ROUTE_PREFIX } from "@/constants";
 import { useAdminAccessStore, useAdminStore } from "@/stores";
 import { useAuthStore } from "@/store/admin";
 import { generateAccess } from "../access";
@@ -18,6 +18,11 @@ export function setupAdminGuard(router: Router) {
     // 初始化登录过期检查
     if (!accessStore.expiryTimer && accessStore.adminAccessToken && accessStore.loginTime) {
       accessStore.initExpiryCheck();
+    }
+
+    // 非管理员路由直接放行（用户路由由用户守卫处理）
+    if (!to.path.startsWith(`/${ADMIN_ROUTE_PREFIX}`)) {
+      return true;
     }
 
     // 基本路由，这些路由不需要进入权限拦截

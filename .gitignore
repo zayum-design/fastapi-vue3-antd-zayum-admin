@@ -284,3 +284,85 @@ tests/
 
 # 版本修改记录文件夹
 changelog/
+
+# ============================================
+# 安全敏感文件 - 禁止 Push 到 GitHub
+# ============================================
+
+# 环境配置文件
+.env
+.env.*
+!.env.example
+!.env.template
+
+# 密钥和证书
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.cer
+*.der
+id_rsa
+id_rsa.pub
+id_dsa
+id_dsa.pub
+id_ecdsa
+id_ecdsa.pub
+id_ed25519
+id_ed25519.pub
+known_hosts
+.ssh/
+
+# 密码文件
+*.password
+*.secret
+secrets/
+secret/
+
+# 数据库文件
+*.sqlite
+*.sqlite3
+*.db
+
+# 备份文件
+*.backup
+*.bak
+*~
+*.swp
+*.swo
+
+# 日志文件（可能包含敏感信息）
+*.log
+logs/
+
+# Docker 配置（可能包含敏感信息）
+docker-compose.override.yml
+
+# 本地开发配置
+.vscode/settings.json
+.idea/
+*.iml
+
+# 临时文件
+tmp/
+temp/
+.tmp/
+
+# 私有部署和工具
+private/
+*-private/
+*-private.*
+PRIVATE_*
+private_*
+
+# 证书和密钥目录
+certs/
+certificates/
+ssl/
+
+# 配置文件（可能包含敏感信息）
+config.local.*
+config.private.*
+*.config.local
+*.config.private

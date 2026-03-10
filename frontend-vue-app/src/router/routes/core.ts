@@ -1,10 +1,17 @@
 import type { RouteRecordRaw } from "vue-router";
 
-import { DEFAULT_ADMIN_PATH, ADMIN_LOGIN_PATH, DEFAULT_HOME_PATH, ADMIN_ROUTE_PREFIX, USER_ROUTE_PREFIX, WEB_ROUTE_PREFIX } from "@/constants";
+import {
+  DEFAULT_ADMIN_PATH,
+  ADMIN_LOGIN_PATH,
+  DEFAULT_HOME_PATH,
+  ADMIN_ROUTE_PREFIX,
+  USER_ROUTE_PREFIX,
+  WEB_ROUTE_PREFIX,
+} from "@/constants";
 
 import { AuthPageLayout, BasicLayout, FullLayout } from "@/layouts";
 
-import { UserPageLayout} from "@/views/user/layouts/auth";
+import { UserPageLayout } from "@/views/user/layouts/auth";
 
 import { UserBasicLayout } from "@/views/user/layouts";
 
@@ -76,7 +83,7 @@ const coreRoutes: RouteRecordRaw[] = [
       {
         name: "Home",
         path: "home",
-        component:Home,
+        component: Home,
         meta: {
           title: "Home",
         },
@@ -95,8 +102,7 @@ const coreRoutes: RouteRecordRaw[] = [
       {
         name: "UserLogin",
         path: "login",
-        component: () =>
-          import("@/views/user/authentication/login.vue"),
+        component: () => import("@/views/user/authentication/login.vue"),
         meta: {
           title: $t("page.auth.login"),
         },
@@ -112,8 +118,7 @@ const coreRoutes: RouteRecordRaw[] = [
       {
         name: "UserQrCodeLogin",
         path: "qrcode-login",
-        component: () =>
-          import("@/views/user/authentication/qrcode-login.vue"),
+        component: () => import("@/views/user/authentication/qrcode-login.vue"),
         meta: {
           title: $t("page.auth.qrcodeLogin"),
         },
@@ -138,33 +143,10 @@ const coreRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    meta: {
-      icon: "ic:baseline-view-in-ar",
-      title: $t("user.center"),
-    },
     name: "UserCenter",
-    path: `/${USER_ROUTE_PREFIX}`,
+    path: `/${USER_ROUTE_PREFIX}/home`,
     component: UserBasicLayout,
-    children: [
-      {
-        name: "UserHome",
-        path: "home",
-        component: () => import("@/views/user/home.vue"),
-        meta: {
-          icon: "lucide:area-chart",
-          title: $t("user_center.home"),
-        },
-      },
-      {
-        name: "UserProfile",
-        path: "profile",
-        component: () => import("@/views/user/profile.vue"),
-        meta: {
-          icon: "lucide:area-chart",
-          title: $t("user_center.profile"),
-        },
-      },
-    ],
+    children: [],
   },
   {
     component: BasicLayout,

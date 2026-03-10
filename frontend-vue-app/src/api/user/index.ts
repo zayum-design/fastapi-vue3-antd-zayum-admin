@@ -1,2 +1,2 @@
 export * from './auth';
-export { saveProfileApi, uploadApi } from './profile';
+export { uploadApi } from './profile';

@@ -29,11 +29,12 @@ class AdminLoggingMiddleware(BaseHTTPMiddleware):
         admin = None
         auth_header = request.headers.get("authorization")
 
-        if auth_header and auth_header.startswith("Bearer "):
+        # 只对 admin 路由验证 admin token
+        if auth_header and auth_header.startswith("Bearer ") and request.url.path.startswith("/api/admin/"):
             token = auth_header[len("Bearer ") :]
             db = next(get_db())
             try:
-                admin = get_current_admin(token=token, db=db)
+                admin = await get_current_admin(token=token, db=db)
                 if not admin:
                     raise HTTPException(status_code=401, detail="Invalid credentials")
                 request.state.admin = admin  # 存入 request 状态

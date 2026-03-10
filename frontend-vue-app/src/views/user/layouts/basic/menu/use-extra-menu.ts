@@ -5,17 +5,20 @@ import type { MenuRecordRaw } from '@/_core/types';
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
-import { preferences } from '@/_core/preferences';
-import { useAdminAccessStore } from '@/stores';
+import { layoutConfig } from '../../layout-config';
+import { useUserAccessStore } from '@/stores/user/access';
 import { findRootMenuByPath } from '@/_core/utils';
 
 import { useNavigation } from './use-navigation';
 
 function useExtraMenu(useRootMenus?: ComputedRef<MenuRecordRaw[]>) {
-  const accessStore = useAdminAccessStore();
+  const accessStore = useUserAccessStore();
   const { navigation } = useNavigation();
 
-  const menus = computed(() => useRootMenus?.value ?? accessStore.accessMenus);
+  // 从 user access store 获取菜单数据
+  const storeMenus = computed<MenuRecordRaw[]>(() => accessStore.accessMenus || []);
+
+  const menus = computed(() => useRootMenus?.value ?? storeMenus.value);
 
   /** 记录当前顶级菜单下哪个子菜单最后激活 */
   const defaultSubMap = new Map<string, string>();
@@ -25,7 +28,7 @@ function useExtraMenu(useRootMenus?: ComputedRef<MenuRecordRaw[]>) {
   const sidebarExtraVisible = ref<boolean>(false);
   const extraActiveMenu = ref('');
   const parentLevel = computed(() =>
-    preferences.app.layout === 'header-mixed-nav' ? 1 : 0,
+    layoutConfig.app.layout === 'header-mixed-nav' ? 1 : 0,
   );
 
   /**
@@ -40,7 +43,7 @@ function useExtraMenu(useRootMenus?: ComputedRef<MenuRecordRaw[]>) {
     sidebarExtraVisible.value = hasChildren;
     if (!hasChildren) {
       await navigation(menu.path);
-    } else if (preferences.sidebar.autoActivateChild) {
+    } else if (layoutConfig.sidebar.autoActivateChild) {
       await navigation(
         defaultSubMap.has(menu.path)
           ? (defaultSubMap.get(menu.path) as string)
@@ -61,7 +64,7 @@ function useExtraMenu(useRootMenus?: ComputedRef<MenuRecordRaw[]>) {
     extraMenus.value = rootMenu?.children ?? extraRootMenus.value ?? [];
     extraActiveMenu.value = menu.parents?.[parentLevel.value] ?? menu.path;
 
-    if (preferences.sidebar.expandOnHover) {
+    if (layoutConfig.sidebar.expandOnHover) {
       sidebarExtraVisible.value = extraMenus.value.length > 0;
     }
   };
@@ -70,7 +73,7 @@ function useExtraMenu(useRootMenus?: ComputedRef<MenuRecordRaw[]>) {
    * 侧边菜单鼠标移出事件
    */
   const handleSideMouseLeave = () => {
-    if (preferences.sidebar.expandOnHover) {
+    if (layoutConfig.sidebar.expandOnHover) {
       return;
     }
 
@@ -83,7 +86,7 @@ function useExtraMenu(useRootMenus?: ComputedRef<MenuRecordRaw[]>) {
   };
 
   const handleMenuMouseEnter = (menu: MenuRecordRaw) => {
-    if (!preferences.sidebar.expandOnHover) {
+    if (!layoutConfig.sidebar.expandOnHover) {
       const { findMenu } = findRootMenuByPath(menus.value, menu.path);
       extraMenus.value = findMenu?.children ?? [];
       extraActiveMenu.value = menu.parents?.[parentLevel.value] ?? menu.path;
@@ -92,7 +95,21 @@ function useExtraMenu(useRootMenus?: ComputedRef<MenuRecordRaw[]>) {
   };
 
   function calcExtraMenus(path: string) {
-    const currentPath = route.meta?.activePath || path;
+    const currentPath = (route.meta?.activePath as string) || path;
+    
+    // 先找到当前菜单项（支持扁平菜单结构）
+    const currentMenu = menus.value.find((item) => item.path === currentPath);
+    if (currentMenu) {
+      extraActiveMenu.value = currentMenu.path ?? '';
+      extraMenus.value = currentMenu.children ?? [];
+      extraRootMenus.value = currentMenu.children ?? menus.value;
+      if (layoutConfig.sidebar.expandOnHover) {
+        sidebarExtraVisible.value = extraMenus.value.length > 0;
+      }
+      return;
+    }
+    
+    // 原有逻辑（用于支持层级菜单）
     const { findMenu, rootMenu, rootMenuPath } = findRootMenuByPath(
       menus.value,
       currentPath,
@@ -102,15 +119,15 @@ function useExtraMenu(useRootMenus?: ComputedRef<MenuRecordRaw[]>) {
     if (rootMenuPath) defaultSubMap.set(rootMenuPath, currentPath);
     extraActiveMenu.value = rootMenuPath ?? findMenu?.path ?? '';
     extraMenus.value = rootMenu?.children ?? [];
-    if (preferences.sidebar.expandOnHover) {
+    if (layoutConfig.sidebar.expandOnHover) {
       sidebarExtraVisible.value = extraMenus.value.length > 0;
     }
   }
 
   watch(
-    () => [route.path, preferences.app.layout],
+    () => [route.path, layoutConfig.app.layout],
     ([path]) => {
-      calcExtraMenus(path || '');
+      calcExtraMenus(path as string || '');
     },
     { immediate: true },
   );

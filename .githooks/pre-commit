@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# =============================================================================
+# Git Pre-commit Hook
+# 在提交前自动检查敏感信息
+# =============================================================================
+
+# 颜色定义
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
+echo -e "${CYAN}  正在运行 Pre-commit 安全检查...${NC}"
+echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
+echo ""
+
+# 获取脚本所在目录
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/scripts"
+
+# 运行敏感信息检查脚本
+if [ -f "$SCRIPT_DIR/check-sensitive-files.sh" ]; then
+    bash "$SCRIPT_DIR/check-sensitive-files.sh"
+    exit_code=$?
+else
+    echo -e "${YELLOW}⚠️  未找到检查脚本，跳过安全检查${NC}"
+    exit_code=0
+fi
+
+if [ $exit_code -ne 0 ]; then
+    echo ""
+    echo -e "${RED}══════════════════════════════════════════════════════════════${NC}"
+    echo -e "${RED}  提交被阻止：发现安全问题${NC}"
+    echo -e "${RED}══════════════════════════════════════════════════════════════${NC}"
+    echo ""
+    echo -e "${YELLOW}如需强制提交（不推荐），请使用:${NC}"
+    echo "  git commit --no-verify"
+    echo ""
+fi
+
+exit $exit_code

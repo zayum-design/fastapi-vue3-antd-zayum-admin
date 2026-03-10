@@ -370,7 +370,7 @@ async def complete_installation(_request: Request, admin_data: AdminCreate):
         # 创建安装锁定文件
         from pathlib import Path
 
-        lock_file = Path(__file__).parent.parent.parent.parent.parent / "install.lock"
+        lock_file = Path(__file__).parent.parent.parent.parent / "install.lock"
         with open(lock_file, "w") as f:
             f.write(f"Installation completed at: {datetime.now(timezone.utc)}")
  
@@ -410,7 +410,7 @@ def check_install_lock():
         # install_check.py 在 app/modules/common/api/install_check.py
         # install.lock 在 backend-fastapi-app/install.lock
         base_dir = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
+            os.path.join(os.path.dirname(__file__), "..", "..", "..")
         )
         install_lock_path = os.path.join(base_dir, "install.lock")
 

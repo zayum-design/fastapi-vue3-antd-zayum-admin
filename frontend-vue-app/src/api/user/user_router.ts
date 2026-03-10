@@ -1,10 +1,10 @@
 import type { RouteRecordStringComponent } from '@/_core/types';
 
-import { requestClient } from '@/api/request';
+import { userRequestClient } from './request';
 
 /**
  * 获取用户所有菜单
  */
 export async function getAllUserRouterApi() {
-  return requestClient.get<RouteRecordStringComponent[]>('/user/auth/all_router');
+  return userRequestClient.get<RouteRecordStringComponent[]>('/user/auth/all_router');
 }

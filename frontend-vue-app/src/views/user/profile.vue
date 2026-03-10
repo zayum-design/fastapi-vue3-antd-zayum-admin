@@ -94,8 +94,8 @@
 import { ref, onMounted } from "vue";
 import { message } from "ant-design-vue";
 import { useAppConfig } from "@/_core/hooks";
-import { getProfileApi } from "@/api/user/auth";
-import { saveProfileApi, uploadApi } from "@/api/user/profile";
+import { getProfileApi, saveProfileApi } from "@/api/user/auth";
+import { uploadApi } from "@/api/user/profile";
 
 const { attachmentURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
 

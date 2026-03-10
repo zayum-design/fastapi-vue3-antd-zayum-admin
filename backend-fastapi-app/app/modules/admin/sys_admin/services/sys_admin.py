@@ -80,7 +80,7 @@ class SysAdminService(BaseService[SysAdmin, SysAdminCreate, SysAdminUpdate]):
 
     def create_access_token_for_admin(self, admin: SysAdmin) -> str:
         """为管理员创建访问令牌"""
-        return create_access_token(data={"sub": str(admin.id)})
+        return create_access_token(data={"sub": str(admin.id)}, token_type="admin")
 
     def create_admin(
         self, db: Session, obj_in: SysAdminCreate, created_by: int | None = None

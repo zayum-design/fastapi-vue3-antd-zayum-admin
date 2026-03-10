@@ -646,7 +646,7 @@ def import_SysUserRule(db: Session):
       sysuserrule_item.name = 'userHome'
       sysuserrule_item.path = '/home'
       sysuserrule_item.component = '/user/home'
-      sysuserrule_item.redirect = '/dashboard'
+      sysuserrule_item.redirect = ''
       sysuserrule_item.meta = {'icon': 'mdi:home', 'title': 'home.home'}
       sysuserrule_item.permission = {}
       sysuserrule_item.menu_display_type = 'addtabs'

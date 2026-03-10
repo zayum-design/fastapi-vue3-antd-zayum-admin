@@ -45,31 +45,31 @@ const theme = computed(() => {
   return isDark.value ? 'dark' : 'light';
 });
 
-const layout = computed(() => 
+const layout = computed(() =>
   isMobile.value ? 'sidebar-nav' : layoutConfig.app.layout
 );
 
-const isHeaderNav = computed(() => 
+const isHeaderNav = computed(() =>
   layout.value === 'header-nav'
 );
 
-const isMixedNav = computed(() => 
+const isMixedNav = computed(() =>
   layout.value === 'mixed-nav'
 );
 
-const isSideMixedNav = computed(() => 
+const isSideMixedNav = computed(() =>
   layout.value === 'sidebar-mixed-nav'
 );
 
-const isHeaderMixedNav = computed(() => 
+const isHeaderMixedNav = computed(() =>
   layout.value === 'header-mixed-nav'
 );
 
-const isHeaderSidebarNav = computed(() => 
+const isHeaderSidebarNav = computed(() =>
   layout.value === 'header-sidebar-nav'
 );
 
-const sidebarCollapsed = computed(() => 
+const sidebarCollapsed = computed(() =>
   layoutConfig.sidebar.collapsed
 );
 
@@ -190,11 +190,11 @@ const {
 function wrapperMenus(menus: MenuRecordRaw[], deep: boolean = true) {
   return deep
     ? mapTree(menus, (item) => {
-        return { ...cloneDeep(item), name: $t(item.name) };
-      })
+      return { ...cloneDeep(item), name: $t(item.name) };
+    })
     : menus.map((item) => {
-        return { ...cloneDeep(item), name: $t(item.name) };
-      });
+      return { ...cloneDeep(item), name: $t(item.name) };
+    });
 }
 
 function toggleSidebar() {
@@ -226,81 +226,41 @@ const headerSlots = computed(() => {
 </script>
 
 <template>
-  <ZayumLayout
-    v-model:sidebar-extra-visible="sidebarExtraVisible"
-    :content-compact="layoutConfig.contentCompact as any"
-    :footer-enable="layoutConfig.footer.enable"
-    :footer-fixed="layoutConfig.footer.fixed"
-    :header-hidden="layoutConfig.header.hidden"
-    :header-mode="layoutConfig.header.mode as any"
-    :header-theme="headerTheme"
-    :header-toggle-sidebar-button="layoutConfig.widget.sidebarToggle"
-    :header-visible="layoutConfig.header.enable"
-    :is-mobile="isMobile"
-    :layout="layout"
+  <ZayumLayout v-model:sidebar-extra-visible="sidebarExtraVisible" :content-compact="layoutConfig.contentCompact as any"
+    :footer-enable="layoutConfig.footer.enable" :footer-fixed="layoutConfig.footer.fixed"
+    :header-hidden="layoutConfig.header.hidden" :header-mode="layoutConfig.header.mode as any"
+    :header-theme="headerTheme" :header-toggle-sidebar-button="layoutConfig.widget.sidebarToggle"
+    :header-visible="layoutConfig.header.enable" :is-mobile="isMobile" :layout="layout"
     :sidebar-collapse="layoutConfig.sidebar.collapsed"
-    :sidebar-collapse-show-title="layoutConfig.sidebar.collapsedShowTitle"
-    :sidebar-enable="sidebarVisible"
+    :sidebar-collapse-show-title="layoutConfig.sidebar.collapsedShowTitle" :sidebar-enable="sidebarVisible"
     :sidebar-expand-on-hover="layoutConfig.sidebar.expandOnHover"
-    :sidebar-extra-collapse="layoutConfig.sidebar.extraCollapse"
-    :sidebar-hidden="layoutConfig.sidebar.hidden"
-    :sidebar-theme="sidebarTheme"
-    :sidebar-width="layoutConfig.sidebar.width"
-    :tabbar-enable="layoutConfig.tabbar.enable"
-    :tabbar-height="layoutConfig.tabbar.height"
-    @side-mouse-leave="handleSideMouseLeave"
-    @toggle-sidebar="toggleSidebar"
-    @update:sidebar-collapse="
+    :sidebar-extra-collapse="layoutConfig.sidebar.extraCollapse" :sidebar-hidden="layoutConfig.sidebar.hidden"
+    :sidebar-theme="sidebarTheme" :sidebar-width="layoutConfig.sidebar.width"
+    :tabbar-enable="layoutConfig.tabbar.enable" :tabbar-height="layoutConfig.tabbar.height"
+    @side-mouse-leave="handleSideMouseLeave" @toggle-sidebar="toggleSidebar" @update:sidebar-collapse="
       (value: boolean | undefined) => layoutConfig.sidebar.collapsed = value ?? false
-    "
-    @update:sidebar-enable="
+    " @update:sidebar-enable="
       (value: boolean | undefined) => layoutConfig.sidebar.enable = value ?? false
-    "
-    @update:sidebar-expand-on-hover="
+    " @update:sidebar-expand-on-hover="
       (value: boolean | undefined) => layoutConfig.sidebar.expandOnHover = value ?? false
-    "
-    @update:sidebar-extra-collapse="
+    " @update:sidebar-extra-collapse="
       (value: boolean | undefined) => layoutConfig.sidebar.extraCollapse = value ?? false
-    "
-  >
+    ">
     <!-- logo -->
     <template #logo>
-      <ZayumLogo
-        v-if="layoutConfig.logo.enable"
-        :class="logoClass"
-        :collapsed="logoCollapsed"
-        :src="layoutConfig.logo.source"
-        :text="layoutConfig.appName"
-        :theme="showHeaderNav ? headerTheme : theme"
-      />
+      <ZayumLogo v-if="layoutConfig.logo.enable" :class="logoClass" :collapsed="logoCollapsed"
+        :src="layoutConfig.logo.source" :text="layoutConfig.appName" :theme="showHeaderNav ? headerTheme : theme" />
     </template>
     <!-- 头部区域 -->
     <template #header>
-      <LayoutHeader
-        :theme="theme"
-        @clear-preferences-and-logout="clearPreferencesAndLogout"
-      >
-        <template
-          v-if="!showHeaderNav && layoutConfig.breadcrumb.enable"
-          #breadcrumb
-        >
-            <Breadcrumb
-              :hide-when-only-one="layoutConfig.breadcrumb.hideOnlyOne"
-              :show-home="layoutConfig.breadcrumb.showHome"
-              :show-icon="layoutConfig.breadcrumb.showIcon"
-              :type="layoutConfig.breadcrumb.styleType"
-            />
+      <LayoutHeader :theme="theme" @clear-preferences-and-logout="clearPreferencesAndLogout">
+        <template v-if="!showHeaderNav && layoutConfig.breadcrumb.enable" #breadcrumb>
+          <Breadcrumb :hide-when-only-one="layoutConfig.breadcrumb.hideOnlyOne"
+            :type="layoutConfig.breadcrumb.styleType" />
         </template>
         <template v-if="showHeaderNav" #menu>
-          <LayoutMenu
-            :default-active="headerActive"
-            :menus="wrapperMenus(headerMenus)"
-            :rounded="isMenuRounded"
-            :theme="headerTheme"
-            class="w-full"
-            mode="horizontal"
-            @select="handleMenuSelect"
-          />
+          <LayoutMenu :default-active="headerActive" :menus="wrapperMenus(headerMenus)" :rounded="isMenuRounded"
+            :theme="headerTheme" class="w-full" mode="horizontal" @select="handleMenuSelect" />
         </template>
         <template #user-dropdown>
           <slot name="user-dropdown"></slot>
@@ -315,54 +275,27 @@ const headerSlots = computed(() => {
     </template>
     <!-- 侧边菜单区域 -->
     <template #menu>
-      <LayoutMenu
-        :accordion="layoutConfig.navigation.accordion"
-        :collapse="layoutConfig.sidebar.collapsed"
-        :collapse-show-title="layoutConfig.sidebar.collapsedShowTitle"
-        :default-active="sidebarActive"
-        :menus="wrapperMenus(sidebarMenus)"
-        :rounded="isMenuRounded"
-        :theme="sidebarTheme"
-        mode="vertical"
-        @open="handleMenuOpen"
-        @select="handleMenuSelect"
-      />
+      <LayoutMenu :accordion="layoutConfig.navigation.accordion" :collapse="layoutConfig.sidebar.collapsed"
+        :collapse-show-title="layoutConfig.sidebar.collapsedShowTitle" :default-active="sidebarActive"
+        :menus="wrapperMenus(sidebarMenus)" :rounded="isMenuRounded" :theme="sidebarTheme" mode="vertical"
+        @open="handleMenuOpen" @select="handleMenuSelect" />
     </template>
     <template #mixed-menu>
-      <LayoutMixedMenu
-        :active-path="extraActiveMenu"
-        :menus="wrapperMenus(mixHeaderMenus, false)"
-        :rounded="isMenuRounded"
-        :theme="sidebarTheme"
-        @default-select="handleDefaultSelect"
-        @enter="handleMenuMouseEnter"
-        @select="handleMixedMenuSelect"
-      />
+      <LayoutMixedMenu :active-path="extraActiveMenu" :menus="wrapperMenus(mixHeaderMenus, false)"
+        :rounded="isMenuRounded" :theme="sidebarTheme" @default-select="handleDefaultSelect"
+        @enter="handleMenuMouseEnter" @select="handleMixedMenuSelect" />
     </template>
     <!-- 侧边额外区域 -->
     <template #side-extra>
-      <LayoutExtraMenu
-        :accordion="layoutConfig.navigation.accordion"
-        :collapse="layoutConfig.sidebar.extraCollapse"
-        :menus="wrapperMenus(extraMenus)"
-        :rounded="isMenuRounded"
-        :theme="sidebarTheme"
-      />
+      <LayoutExtraMenu :accordion="layoutConfig.navigation.accordion" :collapse="layoutConfig.sidebar.extraCollapse"
+        :menus="wrapperMenus(extraMenus)" :rounded="isMenuRounded" :theme="sidebarTheme" />
     </template>
     <template #side-extra-title>
-      <ZayumLogo
-        v-if="layoutConfig.logo.enable"
-        :text="layoutConfig.appName"
-        :theme="theme"
-      />
+      <ZayumLogo v-if="layoutConfig.logo.enable" :text="layoutConfig.appName" :theme="theme" />
     </template>
 
     <template #tabbar>
-      <LayoutTabbar
-        v-if="layoutConfig.tabbar.enable"
-        :show-icon="layoutConfig.tabbar.showIcon"
-        :theme="theme"
-      />
+      <LayoutTabbar v-if="layoutConfig.tabbar.enable" :show-icon="layoutConfig.tabbar.showIcon" :theme="theme" />
     </template>
 
     <!-- 主体内容 -->
@@ -377,29 +310,20 @@ const headerSlots = computed(() => {
     <!-- 页脚 -->
     <template v-if="layoutConfig.footer.enable" #footer>
       <LayoutFooter>
-        <Copyright
-          v-if="layoutConfig.copyright.enable"
-          v-bind="layoutConfig.copyright"
-        />
+        <Copyright v-if="layoutConfig.copyright.enable" v-bind="layoutConfig.copyright" />
       </LayoutFooter>
     </template>
 
     <template #extra>
       <slot name="extra"></slot>
-      <CheckUpdates
-        v-if="false"
-        :check-updates-interval="0"
-      />
+      <CheckUpdates v-if="false" :check-updates-interval="0" />
 
       <Transition v-if="false" name="slide-up">
         <slot v-if="lockStore.isLockScreen" name="lock-screen"></slot>
       </Transition>
 
       <template v-if="preferencesButtonPosition.fixed">
-        <Preferences
-          class="z-100 fixed bottom-20 right-0"
-          @clear-preferences-and-logout="clearPreferencesAndLogout"
-        />
+        <Preferences class="z-100 fixed bottom-20 right-0" @clear-preferences-and-logout="clearPreferencesAndLogout" />
       </template>
       <ZayumBackTop />
     </template>

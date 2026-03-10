@@ -2,9 +2,8 @@ import type { Router } from "vue-router";
 import { USER_LOGIN_PATH, DEFAULT_USER_PATH, USER_ROUTE_PREFIX } from "@/constants";
 import { useUserAccessStore } from "@/stores/user/access";
 import { useUserAuthStore } from "@/stores/user/auth";
-import { generateAccess } from "../access";
+import { generateUserAccess } from "../access-user";
 import { accessRoutes } from "@/router/routes";
-import { getAllUserRouterApi } from "@/api/user/user_router";
 
 
 /**
@@ -61,26 +60,48 @@ export function setupUserGuard(router: Router) {
     }
 
     // 检查是否已生成动态路由
-    if (accessStore.isAccessChecked) {
+    // 检查缓存的菜单路径是否正确（以 /user 开头）
+    console.log('[User Guard] accessMenus:', accessStore.accessMenus.map(m => m.path));
+    console.log('[User Guard] isAccessChecked:', accessStore.isAccessChecked);
+    
+    const hasValidMenus = accessStore.accessMenus.length > 0 && 
+      accessStore.accessMenus.every(menu => menu.path?.startsWith('/user'));
+    
+    console.log('[User Guard] hasValidMenus:', hasValidMenus);
+    
+    if (accessStore.isAccessChecked && hasValidMenus) {
+      console.log('[User Guard] using cached menus');
       return true;
     }
+    
+    // 如果菜单路径不正确，清除缓存重新获取
+    if (!hasValidMenus) {
+      console.log('[User Guard] 菜单路径不正确，清除缓存重新获取...');
+      accessStore.setAccessMenus([]);
+      accessStore.setIsAccessChecked(false);
+    }
 
-    // 生成动态路由
-    const userMenus = await getAllUserRouterApi();
-    const { accessibleRoutes } = await generateAccess({
+    // 生成动态路由和菜单
+    const { accessibleMenus, accessibleRoutes } = await generateUserAccess({
       roles: ['user'], // 普通用户角色
       router,
       routes: accessRoutes,
     });
 
-    // 转换菜单格式并保存
-    const accessibleMenus = userMenus.map((menu) => ({
-      label: menu.meta?.title || '',
-      value: String(menu.name),
-      icon: menu.meta?.icon || '',
-      path: menu.path
-    }));
-    
+    // 调试输出
+    console.log('[User Guard] Generated routes:', accessibleRoutes.map(r => ({
+      path: r.path,
+      name: r.name,
+      component: r.component ? 'defined' : 'undefined',
+      children: r.children?.map(c => ({ path: c.path, name: c.name, component: c.component ? 'defined' : 'undefined' }))
+    })));
+    console.log('[User Guard] Generated menus:', accessibleMenus.map(m => ({ 
+      path: m.path, 
+      name: m.name,
+      show: m.show,
+      hasChildren: !!m.children && m.children.length > 0
+    })));
+
     // 保存路由信息
     accessStore.setMenus(accessibleMenus);
     accessStore.setRoutes(accessibleRoutes);

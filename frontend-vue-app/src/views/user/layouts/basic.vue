@@ -80,22 +80,22 @@ const menus = computed(() => [
 // 处理头像URL
 const displayAvatar = (avatarUrl: string | null | undefined): string => {
   const defaultAvatar = preferences.app.defaultAvatar;
-  
+
   // 如果头像为空或无效，使用默认头像
   if (!avatarUrl || avatarUrl.trim() === "") {
     return defaultAvatar;
   }
-  
+
   // 如果头像已经是完整 URL（http/https）或本地 assets 路径，直接返回
   if (avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://") || avatarUrl.startsWith("/src/assets/")) {
     return avatarUrl;
   }
-  
+
   // 如果头像路径以 /uploads/ 开头，使用附件域名配置
   if (avatarUrl.startsWith("/uploads/")) {
     return attachmentURL + avatarUrl;
   }
-  
+
   // 否则，添加附件域名前缀
   return attachmentURL + (avatarUrl.startsWith("/") ? avatarUrl : "/" + avatarUrl);
 };
@@ -108,23 +108,23 @@ const avatar = computed(() => {
 async function handleLogout() {
   try {
     console.log('开始退出登录...');
-    
+
     // 调用用户认证store的logout方法
     const authStore = useUserAuthStore();
     await authStore.logout();
-    
+
     // 清除用户store中的用户信息 - 使用更可靠的方式
     userStore.userInfo = null;
     userStore.userRoles = [];
-    
+
     // 清除水印
     destroyWatermark();
-    
+
     // 清除通知
     notifications.value = [];
-    
+
     console.log('退出登录完成，准备跳转到登录页面');
-    
+
     // 跳转到登录页面
     window.location.href = '/user/login';
   } catch (error) {
@@ -167,30 +167,16 @@ watch(
 
 <template>
   <UserBasicLayout @clear-preferences-and-logout="handleLogout">
-    <div>dsafd</div>
     <template #user-dropdown>
-      <UserDropdown
-        :avatar
-        :menus
-        :text="userStore.userInfo?.nickname"
-        :description="userStore.userInfo?.email"
-        tag-text="Pro"
-        @logout="handleLogout"
-      />
+      <UserDropdown :avatar :menus :text="userStore.userInfo?.nickname" :description="userStore.userInfo?.email"
+        tag-text="Pro" @logout="handleLogout" />
     </template>
     <template #notification>
-      <Notification
-        :dot="showDot"
-        :notifications="notifications"
-        @clear="handleNoticeClear"
-        @make-all="handleMakeAll"
-      />
+      <Notification :dot="showDot" :notifications="notifications" @clear="handleNoticeClear"
+        @make-all="handleMakeAll" />
     </template>
     <template #extra>
-      <AuthenticationLoginExpiredModal
-        v-model:open="accessStore.loginExpired"
-        :avatar
-      >
+      <AuthenticationLoginExpiredModal v-model:open="accessStore.loginExpired" :avatar>
         <LoginForm />
       </AuthenticationLoginExpiredModal>
     </template>

@@ -1,21 +1,13 @@
+import type { MenuRecordRaw } from '@/_core/types';
 import { defineStore } from 'pinia';
-
-interface MenuItem {
-  label: string;
-  value: string;
-  name?: string; // 兼容路由name
-  icon?: any; // 使用any类型兼容Component和string
-  path?: string;
-  meta?: Record<string, any>; // 兼容路由meta
-  children?: MenuItem[]; // 支持子菜单
-}
 
 interface UserAccessState {
   userAccessToken: string | null;
   tokenExpireTime: number | null; // 存储token过期时间戳
   isAccessChecked: boolean;
   loginExpired: boolean;
-  menus: MenuItem[];
+  /** 可访问的菜单列表 (MenuRecordRaw 格式) */
+  accessMenus: MenuRecordRaw[];
   routes: any[];
 }
 
@@ -25,7 +17,7 @@ export const useUserAccessStore = defineStore('userAccess', {
     tokenExpireTime: null,
     isAccessChecked: false,
     loginExpired: false,
-    menus: [],
+    accessMenus: [],
     routes: [],
   }),
 
@@ -55,6 +47,12 @@ export const useUserAccessStore = defineStore('userAccess', {
       });
       return isValid;
     },
+    /**
+     * 获取菜单（兼容旧代码的 menus 别名）
+     */
+    menus(): MenuRecordRaw[] {
+      return this.accessMenus;
+    },
   },
   actions: {
     setUserAccessToken(token: string | null) {
@@ -68,6 +66,7 @@ export const useUserAccessStore = defineStore('userAccess', {
       } else {
         localStorage.removeItem('userAccessToken');
         localStorage.removeItem('tokenExpireTime');
+        localStorage.removeItem('userMenus');
       }
     },
     initFromStorage() {
@@ -78,10 +77,14 @@ export const useUserAccessStore = defineStore('userAccess', {
       
       if (menus) {
         try {
-          this.menus = JSON.parse(menus);
+          const parsedMenus = JSON.parse(menus);
+          console.log('[initFromStorage] parsed menus:', parsedMenus.map((m: any) => ({ path: m.path, name: m.name })));
+          this.accessMenus = parsedMenus;
         } catch (e) {
           console.error('解析menus失败:', e);
         }
+      } else {
+        console.log('[initFromStorage] no menus in localStorage');
       }
       console.log('从localStorage获取的token:', token);
       console.log('从localStorage获取的expireTime:', expireTime);
@@ -101,6 +104,7 @@ export const useUserAccessStore = defineStore('userAccess', {
           console.log('token已过期，清除存储');
           localStorage.removeItem('userAccessToken');
           localStorage.removeItem('tokenExpireTime');
+          localStorage.removeItem('userMenus');
         }
       } else {
         console.log('localStorage中没有找到token或expireTime');
@@ -117,14 +121,42 @@ export const useUserAccessStore = defineStore('userAccess', {
     setLoginExpired(expired: boolean) {
       this.loginExpired = expired;
     },
-    setMenus(menus: MenuItem[]) {
-      this.menus = menus;
+    /**
+     * 设置可访问菜单列表 (MenuRecordRaw 格式)
+     */
+    setAccessMenus(menus: MenuRecordRaw[]) {
+      this.accessMenus = menus;
       // 持久化存储到localStorage
       localStorage.setItem('userMenus', JSON.stringify(menus));
+    },
+    /**
+     * 兼容旧代码的 setMenus 方法
+     */
+    setMenus(menus: MenuRecordRaw[]) {
+      this.setAccessMenus(menus);
     },
     setRoutes(routes: any[]) {
       // 用户路由暂不需要持久化存储
       this.routes = routes;
+    },
+    /**
+     * 根据路径查找菜单
+     */
+    getMenuByPath(path: string): MenuRecordRaw | undefined {
+      function findMenu(menus: MenuRecordRaw[], targetPath: string): MenuRecordRaw | undefined {
+        for (const menu of menus) {
+          if (menu.path === targetPath) {
+            return menu;
+          }
+          if (menu.children) {
+            const matched = findMenu(menu.children, targetPath);
+            if (matched) {
+              return matched;
+            }
+          }
+        }
+      }
+      return findMenu(this.accessMenus, path);
     },
   },
 });

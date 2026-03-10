@@ -58,10 +58,11 @@ type BreadcrumbStyleType = 'background' | 'normal';
 
 /**
  * 权限模式
- * backend 后端权限模式
+ * backend 后端权限模式（admin端）
+ * backend-user 后端权限模式（user端）
  * frontend 前端权限模式
  */
-type AccessModeType = 'backend' | 'frontend';
+type AccessModeType = 'backend' | 'backend-user' | 'frontend';
 
 /**
  * 导航风格

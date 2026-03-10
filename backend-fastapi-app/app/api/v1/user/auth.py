@@ -127,7 +127,7 @@ async def login(
     user.login_ip = client_ip
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires)
+    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires, token_type="user")
     user.token = access_token
     db.commit()
 
@@ -186,7 +186,7 @@ async def login_form(
     user.login_ip = client_ip
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires)
+    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires, token_type="user")
     user.token = access_token
     db.commit()
 
@@ -208,7 +208,7 @@ async def sms_login(login_data: SmsLoginInput, request: Request, db: Session = D
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="用户不存在")
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires)
+    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires, token_type="user")
 
     return success_response(
         {
@@ -242,7 +242,7 @@ async def qr_login(login_data: QrLoginInput, request: Request, db: Session = Dep
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="用户不存在")
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires)
+    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires, token_type="user")
 
     return success_response(
         {
@@ -286,7 +286,7 @@ async def register(register_data: RegisterInput, db: Session = Depends(get_db)):
     user = crud_sys_auth_user.create(db, user_data)
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires)
+    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires, token_type="user")
 
     return success_response(
         {
@@ -342,7 +342,7 @@ async def social_login(
         user = crud_sys_auth_user.create(db, user_data)
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires)
+    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires, token_type="user")
 
     return success_response(
         {
@@ -359,6 +359,13 @@ class ProfileInput(BaseModel):
     avatar: str | None = None
 
 
+def format_datetime(dt: datetime | None) -> str | None:
+    """格式化 datetime 为 ISO 格式字符串"""
+    if dt is None:
+        return None
+    return dt.isoformat()
+
+
 @router.get("/profile")
 async def get_profile(
     request: Request,
@@ -368,11 +375,29 @@ async def get_profile(
     """获取当前用户信息接口"""
     return success_response(
         {
+            "id": current_user.id,
+            "userGroupId": current_user.user_group_id,
             "username": current_user.username,
             "nickname": current_user.nickname,
             "email": current_user.email,
-            "phone": current_user.mobile,
+            "mobile": current_user.mobile,
             "avatar": current_user.avatar,
+            "level": current_user.level,
+            "gender": current_user.gender,
+            "birthday": current_user.birthday,
+            "bio": current_user.bio,
+            "balance": float(current_user.balance) if current_user.balance else 0,
+            "score": current_user.score,
+            "successions": current_user.successions or 0,
+            "maxSuccessions": current_user.max_successions or 0,
+            "prevTime": format_datetime(current_user.prev_time),
+            "loginTime": format_datetime(current_user.login_time),
+            "loginIp": current_user.login_ip,
+            "loginFailure": current_user.login_failure or 0,
+            "joinIp": current_user.join_ip,
+            "status": current_user.status,
+            "createdAt": format_datetime(current_user.created_at),
+            "updatedAt": format_datetime(current_user.updated_at),
         }
     )
 
@@ -400,6 +425,17 @@ async def get_all_router(
 
 
 def transform_items(items: list[SysUserRule]) -> list[dict]:
+    def get_component(item: SysUserRule) -> str | None:
+        """获取组件路径，如果为空则根据 path 自动生成"""
+        if item.component:
+            return item.component
+        # 根据 path 自动生成 component 路径
+        if item.path:
+            # 移除开头的 /，添加 /user 前缀
+            path = item.path.lstrip('/')
+            return f"/user/{path}"
+        return None
+    
     def build_tree(parent_id: int) -> list[dict]:
         children = []
         for item in items:
@@ -407,8 +443,8 @@ def transform_items(items: list[SysUserRule]) -> list[dict]:
                 child = {
                     "id": item.id,
                     "name": item.name,
-                    "path": f"/admin{item.path}",
-                    "component": item.component,
+                    "path": f"/user{item.path}",
+                    "component": get_component(item),
                     "meta": item.meta,
                 }
                 child_children = build_tree(item.id)
@@ -423,7 +459,8 @@ def transform_items(items: list[SysUserRule]) -> list[dict]:
             "id": item.id,
             "meta": item.meta,
             "name": item.name,
-            "path": f"/{item.path}",
+            "path": f"/user{item.path}",
+            "component": get_component(item),
             "redirect": item.redirect if item.redirect else None,
             "children": build_tree(item.id),
         }
