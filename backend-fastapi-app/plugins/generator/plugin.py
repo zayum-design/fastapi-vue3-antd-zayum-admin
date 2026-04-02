@@ -336,7 +336,7 @@ def register(api_router: APIRouter):
     """
     api_router.include_router(
         router,
-        prefix="/api/plugins/generator",
+        prefix="/api/v1/plugins/generator",
         tags=["generator"],
         dependencies=[Depends(get_current_admin)],
     )

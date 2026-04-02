@@ -3,7 +3,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from app.core.config import settings
-from app.modules.admin.sys_plugin.schemas.sys_plugin import SysPlugin
+from app.modules.admin.sys_plugin.models.sys_plugin import SysPlugin
 
 
 class PluginMiddleware(BaseHTTPMiddleware):
@@ -27,10 +27,13 @@ class PluginMiddleware(BaseHTTPMiddleware):
             if len(parts) >= 4:
                 plugin_uuid = parts[2]
                 # 检查插件是否启用
-                async with self.get_db() as db:
+                db = next(self.get_db())
+                try:
                     plugin = db.query(SysPlugin).filter(SysPlugin.uuid == plugin_uuid).first()
                     if not plugin or not plugin.enabled:
                         return JSONResponse(
                             status_code=404, content={"detail": "Plugin not found or not enabled."}
                         )
+                finally:
+                    db.close()
         return await call_next(request)
